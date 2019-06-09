@@ -47,7 +47,7 @@ class cssmin {
 		} elseif (($css = self::compile($ast, $config)) === false) {
 			trigger_error('Could not compile CSS', E_USER_WARNING);
 		} else {
-			exit($css);
+			return $css;
 		}
 
 
