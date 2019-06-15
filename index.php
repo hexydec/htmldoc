@@ -1,6 +1,6 @@
 <?php
 
-require(__DIR__.'/htmldoc.php');
+require(__DIR__.'/htmldoctoken.php');
 require(__DIR__.'/cssmin.php');
 require(__DIR__.'/tokenise.php');
 
@@ -56,11 +56,15 @@ $html = '
 		<!-- this is a comment -->
 		<!--[if IE 8]><span>IE8</span><![endif]-->
 		<!--[if gt IE 8]><!--><span>Greater than IE8</span><!--<![endif]-->
-		<form action="something/" method="get">
+		<form action="something/" method="get" class="form form--state">
 			<h1 class="test__heading">Test</h1>
-			<p style=" font-weight: bold; color : blue; ">Lorem ipsum blah blah blah</p>
-			<a href="/minify/test/"><img src="test.png" alt="" /></a>
-			<a href="http://test.com/"><img src="test.png" alt="" /></a>
+			<p style=" font-weight: bold; color : blue; " class="paragraph">Lorem ipsum blah blah blah</p>
+			<a href="/minify/test/"><img src="test.png" alt="" class="image" /></a>
+			<a href="http://test.com/"><img src="test.png" class="image" alt="" /></a>
+			<div>
+				<h2>Heading tthat isn\'t closed
+				<p>Paragraph that isn\'t closed
+			</div>
 			<select name="select">
 				<option value="test">test</option>
 				<option value="test2">This is also a test</option>
@@ -71,8 +75,21 @@ $html = '
 		</script>
 	</body>
 </html>';
-$doc = new \hexydec\minify\htmldoc();
+// $html = '<div>
+// 	<h2>Heading tthat isn\'t closed
+// 	<p>Paragraph that isn\'t closed
+// </div>
+// <select name="select"></select>';
+$time = microtime(true);
+$doc = new \hexydec\html\htmldoc();
 $doc->load($html);
+// $doc->open('https://www.php.net/manual/en/function.strcspn.php');
 $doc->minify();
 echo $doc->save();
+// echo "\n\n".number_format(microtime(true) - $time, 8)."\n\n";
+
+
+// require(__DIR__.'/workspace/htmlmin.class.php');
+// $time = microtime(true);
 // echo \hexydec\minify\htmlmin::minify($html);
+// echo "\n\n".number_format(microtime(true) - $time, 8)."\n\n";

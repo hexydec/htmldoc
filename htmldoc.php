@@ -1,18 +1,12 @@
 <?php
-namespace hexydec\minify;
+namespace hexydec\html;
 class htmldoc {
 
-	protected $minify = Array(
-		'whitespace' => true, // strip whitespace from text nodes'
-		'comments' => true, // remove comments
-		'urls' => true, // update internal URL's to be shorter
-		'attributes' => true, // remove values from boolean attributes
-		'lowercase' => true // lowercase tag and attribute names
-	);
 	protected $config = Array(
 		'tokens' => Array(
 			'doctype' => '<!DOCTYPE',
 			'comment' => '<!--[\d\D]*?-->',
+			'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
 			'tagopenstart' => '<[^ >\/]++',
 			'tagselfclose' => '\/>',
 			'tagopenend' => '>',
@@ -22,47 +16,17 @@ class htmldoc {
 			'attribute' => '[^<>"=\s]++',
 			'whitespace' => '\s++'
 		),
-		'preservewhitespace' => Array('script', 'style', 'textarea', 'pre', 'code'), // which elements not to strip whitespace from
-		'cssmin' => '\\hexydec\\minify\\cssmin::minify', // minify CSS
-		'jsmin' => false, // minify javascript
-		'lowercase' => true, // lowercase tag and attribute names
-		'whitespace' => Array(
-			'inlineelements' => Array(
-				'b',
-				'big',
-				'i',
-				'small',
-				'ttspan',
-				'em',
-				'a',
-				'strong',
-				'sub',
-				'sup',
-				'abbr',
-				'acronym',
-				'cite',
-				'code',
-				'dfn',
-				'em',
-				'kbd',
-				'strong',
-				'samp',
-				'var'
-			)
-		),
-		'comments' => Array(
-			'ie' => true
-		),
-		'urls' => Array(
-			'attributes' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
-			'absolute' => true, // process absolute URLs to make them relative to the current document
-			'scheme' => true // remove the scheme from URLs that have the same scheme as the current document
-		),
-		'attributes' => Array(
-			'option' => true, // remove value attribute from option where the text node has the same value
-			'type' => true, // remove the type attribute from script and style tags
-			'method' => true, // remove method from form tags where it is set to GET
-			'style' => true, // minify the style tag
+		'elements' => Array(
+			'inline' => Array(
+				'b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var'
+			),
+			'singleton' => Array(
+				'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+			),
+			'unnestable' => Array(
+				'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+			),
+			'preserve' => Array('script', 'style', 'textarea', 'pre', 'code'), // which elements not to strip whitespace from
 			'booleanattributes' => Array(
 				'allowfullscreen',
 				'allowpaymentrequest',
@@ -93,9 +57,41 @@ class htmldoc {
 				'selected',
 				'typemustmatch'
 			)
+		),
+		'minify' => Array(
+			'cssmin' => '\\hexydec\\minify\\cssmin::minify', // minify CSS
+			'jsmin' => false, // minify javascript
+			'lowercase' => true, // lowercase tag and attribute names
+			'whitespace' => true, // strip whitespace from text nodes
+			'comments' => Array( // remove comments
+				'ie' => true
+			),
+			'urls' => Array( // update internal URL's to be shorter
+				'attributes' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
+				'absolute' => true, // process absolute URLs to make them relative to the current document
+				'scheme' => true // remove the scheme from URLs that have the same scheme as the current document
+			),
+			'attributes' => Array( // remove values from boolean attributes
+				'option' => true, // remove value attribute from option where the text node has the same value
+				'type' => true, // remove the type attribute from script and style tags
+				'method' => true, // remove method from form tags where it is set to GET
+				'style' => true, // minify the style tag
+				'removequotes' => true, // remove quotes from attributes where possible
+				'sort' => true, // sort attributes for better gzip
+				'boolean' => true // minify boolean attributes
+			),
+			'singleton' => true, // minify singleton element by removing slash
+			'quotes' => true, // minify attribute quotes
+		),
+		'output' => Array(
+			'charset' => 'utf-8',
+			'quotestyle' => 'double', // double, single, minimal
+			'singletonclose' => ' />',
+
 		)
 	);
 	protected $document = false;
+	protected $attributes = Array();
 
 	public function __construct(Array $config = Array()) {
 		$this->config = array_replace_recursive($this->config, $config);
@@ -109,23 +105,58 @@ class htmldoc {
 	}
 
 	public function load(String $html) {
-		if (($tokens = tokenise::tokenise($html, $this->config)) === false) {
+		$this->attributes = Array();
+		if (($tokens = $this->tokenise($html, $this->config)) === false) {
 			trigger_error('Could not tokenise input', E_USER_WARNING);
 		} elseif (($this->document = $this->parse($tokens)) === false) {
 			trigger_error('Input is not invalid', E_USER_WARNING);
 		} else {
+			// print_r($this->document);
 			return true;
 		}
 		return false;
 	}
 
-	protected function parse(Array $tokens, int $count = null, int &$i = 0) : Array {
-		// var_dump($tokens);
+	protected function tokenise($code, $config) {
+
+		// prepare regexp and extract strings
+		$re = '/('.implode(')|(', $config['tokens']).')/';
+		if (preg_match_all($re, $code, $match)) {
+
+			// build tokens into types
+			$tokens = Array();
+			$keys = array_keys($config['tokens']);
+			foreach ($match[0] AS $i => $item) {
+
+				// go through tokens and find which one matched
+				foreach ($keys AS $token => $type) {
+					if ($match[$token+1][$i] !== '') {
+						$tokens[] = Array(
+							'type' => $type,
+							'value' => $item
+						);
+						break;
+					}
+				}
+			}
+			return $tokens;
+		}
+		return false;
+	}
+
+	protected function parse(Array $tokens, int $count = null, int &$i = 0, string $parenttag = null, array &$attach = null) : Array {
+		static $level = 0;
+		$level++;
+
+		// if no count supplied, count the tokens
 		if ($count === null) {
 			$count = count($tokens);
 		}
-		$tag = false;
+
+		// build AST
+		$tag = null;
 		$ast = Array();
+		$start = false;
 		while ($i < $count) {
 			switch ($tokens[$i]['type']) {
 				case 'doctype':
@@ -136,12 +167,25 @@ class htmldoc {
 					break;
 
 				case 'tagopenstart':
-					$tag = trim($tokens[$i]['value'], '<');
-					$ast[] = $this->parseTag($tokens, $count, $i);
+					$tag = strtolower(trim($tokens[$i]['value'], '<'));
+
+					// parse the tag
+					$ast[] = $this->parseTag($tag, $tokens, $count, $i, $attach);
+					if ($attach) {
+						$ast[] = $attach;
+						$attach = null;
+					}
 					break;
 
 				case 'tagclose':
-					if (strtolower(trim($tokens[$i]['value'], '</>')) != strtolower($tag)) {
+					$close = strtolower(trim($tokens[$i]['value'], '</>'));
+					if ($close != $tag) { // if tags not the same, go back to previous level
+
+						// if a tag isn't closed and we are closing a tag that isn't the parent, send the last child tag to the parent level
+						if ($tag && $parenttag != $close && end($ast)['type'] == 'tag') {
+							$attach = array_pop($ast);
+						}
+						$i--; // close the tag on each level below until we find itself
 						break 2;
 					}
 					break;
@@ -153,15 +197,23 @@ class htmldoc {
 					);
 					break;
 
+				case 'cdata':
+					$ast[] = Array(
+						'type' => 'cdata',
+						'value' => substr($tokens[$i]['value'], 9, -3)
+					);
+					break;
+
 				case 'comment':
 					$ast[] = Array(
 						'type' => 'comment',
-						'value' => $tokens[$i]['value']
+						'value' => substr($tokens[$i]['value'], 4, -3)
 					);
 					break;
 			}
 			$i++;
 		}
+		$level--;
 		return $ast;
 	}
 
@@ -178,66 +230,81 @@ class htmldoc {
 		);
 	}
 
-	protected function parseTag(Array $tokens, int $count, int &$i) : Array {
-		if ($tokens[$i]['type'] == 'tagopenstart') {
-			$item = Array(
-				'type' => 'tag',
-				'tag' => trim($tokens[$i]['value'], '<'),
-				'attributes' => Array(),
-				'selfclose' => false
-			);
-			$attr = false;
-			while (++$i < $count) {
-				switch ($tokens[$i]['type']) {
+	protected function parseTag(string $tag, Array $tokens, int $count, int &$i, array &$attach = null) : Array {
+		$item = Array(
+			'type' => 'tag',
+			'tag' => $tag,
+			'attributes' => Array()
+		);
+		$attr = false;
+		while (++$i < $count) {
+			switch ($tokens[$i]['type']) {
 
-					// remember attribute
-					case 'attribute':
-						if ($attr) {
-							$item['attributes'][$attr] = null;
-							$attr = false;
+				// remember attribute
+				case 'attribute':
+					if ($attr) {
+						$item['attributes'][$attr] = null;
+						$attr = false;
+					}
+					$attr = $tokens[$i]['value'];
+
+					// cache attribute for minifier
+					$this->attributes[$attr] = isset($this->attributes[$attr]) ? $this->attributes[$attr] + 1 : 1;
+					break;
+
+				// record attribute and value
+				case 'attributevalue':
+					if ($attr) {
+						$item['attributes'][$attr] = html_entity_decode(trim($tokens[$i]['value'], '= "'), ENT_QUOTES); // set charset?
+						$attr = false;
+					}
+					break;
+
+				case 'tagopenend':
+
+					// don't process certain tags
+					if (in_array($tag, $this->config['elements']['preserve'])) {
+						$item['content'] = '';
+						while (++$i < $count && ($tokens[$i]['type'] != 'tagclose' || $tokens[$i]['value'] != '</'.$tag.'>')) {
+							$item['content'] .= $tokens[$i]['value'];
 						}
-						$attr = $tokens[$i]['value'];
-						break;
 
-					// record attribute and value
-					case 'attributevalue':
-						if ($attr) {
-							$item['attributes'][$attr] = html_entity_decode(trim($tokens[$i]['value'], '= "'), ENT_QUOTES); // set charset?
-							$attr = false;
-						}
-						break;
+					// parse children
+					} elseif (!in_array($tag, $this->config['elements']['singleton'])) {
+						$i++;
+						$item['children'] = $this->parse($tokens, $count, $i, $tag, $attach);
+					}
+					break 2;
 
-					case 'tagopenend':
-
-						// don't process certain tags
-						if (in_array($item['tag'], $this->config['preservewhitespace'])) {
-							$item['content'] = '';
-							while (++$i < $count && ($tokens[$i]['type'] != 'tagclose' || $tokens[$i]['value'] != '</'.$item['tag'].'>')) {
-								$item['content'] .= $tokens[$i]['value'];
-							}
-
-						// parse children
-						} else {
-							$i++;
-							$item['children'] = $this->parse($tokens, $count, $i);
-						}
-						break 2;
-
-					case 'tagselfclose':
-						$item['selfclose'] = true;
-						break 2;
-				}
+				case 'tagselfclose':
+					break 2;
 			}
-			if ($attr) {
-				$item['attributes'][$attr] = null;
-				$attr = false;
-			}
-			return $item;
 		}
+		if ($attr) {
+			$item['attributes'][$attr] = null;
+			$attr = false;
+		}
+		return $item;
 	}
 
 	public function minify(Array $config = Array()) {
-		$config = array_replace_recursive($this->config, $config);
+
+		// merge config
+		$config = array_replace_recursive($this->config['minify'], $config);
+
+		// set minify output parameters
+		if ($config['singleton']) {
+			$this->config['output']['singletonclose'] = '>';
+		}
+		if ($config['quotes']) {
+			$this->config['output']['quotestyle'] = 'minimal';
+		}
+
+		// sort attributes
+		if ($config['attributes']['sort']) {
+			arsort($this->attributes, SORT_NUMERIC);
+			$config['attributes']['sort'] = \array_keys($this->attributes);
+		}
 		$this->document = $this->minifyAst($this->document, $config);
 	}
 
@@ -254,7 +321,6 @@ class htmldoc {
 					$lasttag = $ast[$i]['tag'];
 
 					// minify attributes
-					$attributes = Array();
 					foreach ($ast[$i]['attributes'] AS $key => $value) {
 
 						// lowercase attribute key
@@ -268,8 +334,10 @@ class htmldoc {
 						if ($config['attributes']) {
 
 							// boolean attributes
-							if (in_array($key, $config['attributes']['booleanattributes'])) {
-								$ast[$i]['attributes'][$key] = null;
+							if ($config['attributes']['boolean']) {
+								if (in_array($key, $this->config['elements']['booleanattributes'])) {
+									$ast[$i]['attributes'][$key] = null;
+								}
 							}
 
 							// minify style tag
@@ -328,6 +396,17 @@ class htmldoc {
 						}
 					}
 
+					// sort attributes
+					if ($config['attributes']['sort']) {
+						$attr = $ast[$i]['attributes'];
+						$ast[$i]['attributes'] = Array();
+						foreach ($config['attributes']['sort'] AS $key) {
+							if (isset($attr[$key])) {
+								$ast[$i]['attributes'][$key] = $attr[$key];
+							}
+						}
+					}
+
 					// minify children
 					if (!empty($ast[$i]['children'])) {
 						$ast[$i]['children'] = $this->minifyAst($ast[$i]['children'], $config, $lasttag);
@@ -353,13 +432,13 @@ class htmldoc {
 						$ast[$i]['value'] = preg_replace('/\s++/', ' ', $ast[$i]['value']);
 
 						// if last tag is a block element, ltrim the textnode
-						if (!in_array($lasttag ? $lasttag : $parentTag, $config['whitespace']['inlineelements'])) {
+						if (!in_array($lasttag ? $lasttag : $parentTag, $this->config['elements']['inline'])) {
 							$ast[$i]['value'] = ltrim($ast[$i]['value']);
 						}
 
 						// if next tag is a block element, rtrim the textnode
 						$tag = isset($ast[$i + 1]['tag']) ? $ast[$i + 1]['tag'] : $parentTag; // if last element use parent
-						if (!in_array($tag, $config['whitespace']['inlineelements'])) {
+						if (!in_array($tag, $this->config['elements']['inline'])) {
 							$ast[$i]['value'] = rtrim($ast[$i]['value']);
 						}
 
@@ -371,7 +450,7 @@ class htmldoc {
 					break;
 
 				case 'comment':
-					if ($config['comments'] && (empty($config['comments']['ie']) || (strpos($ast[$i]['value'], '<!--[if ') !== 0 && $ast[$i]['value'] != '<!--<![endif]-->'))) {
+					if ($config['comments'] && (empty($config['comments']['ie']) || (strpos($ast[$i]['value'], '[if ') !== 0 && $ast[$i]['value'] != '<![endif]'))) {
 						unset($ast[$i]);
 					}
 					break;
@@ -393,6 +472,8 @@ class htmldoc {
 	}
 
 	protected function compile(Array $ast) {
+		$output = $this->config['output'];
+		$singleton = $this->config['elements']['singleton'];
 		$html = '';
 		foreach ($ast AS $item) {
 			switch ($item['type']) {
@@ -401,16 +482,29 @@ class htmldoc {
 					$html .= '<!DOCTYPE '.$item['value'].'>';
 					break;
 
+				// build tag
 				case 'tag':
 					$html .= '<'.$item['tag'];
+
+					// compile attributes
 					foreach ($item['attributes'] AS $key => $value) {
 						$html .= ' '.$key;
 						if ($value !== null) {
-							$html .= '="'.htmlspecialchars($value).'"';
+							$quote = '"';
+							if ($output['quotestyle'] == 'single') {
+								$quote = "'";
+							} elseif ($value && $output['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t") == strlen($value)) {
+								$quote = '';
+							}
+							$html .= '='.$quote.htmlspecialchars($value).$quote;
 						}
 					}
-					if ($item['selfclose']) {
-						$html .= '/>';
+
+					// close singleton tags
+					if (in_array($item['tag'], $singleton)) {
+						$html .= $output['singletonclose'];
+
+					// close opening tag and compile contents
 					} else {
 						$html .= '>';
 						if (!empty($item['children'])) {
@@ -427,7 +521,11 @@ class htmldoc {
 					break;
 
 				case 'comment':
-					$html .= $item['value'];
+					$html .= '<!--'.$item['value'].'-->';
+					break;
+
+				case 'cdata':
+					$html .= '<[CDATA['.$item['value'].']]>';
 					break;
 			}
 		}
