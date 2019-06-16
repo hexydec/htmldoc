@@ -1,8 +1,8 @@
 <?php
 
 require(__DIR__.'/htmldoc.php');
-// require(__DIR__.'/cssmin.php');
-// require(__DIR__.'/tokenise.php');
+require(__DIR__.'/cssmin.php');
+require(__DIR__.'/tokenise.php');
 
 $css = '
 h1:not(.cls) {

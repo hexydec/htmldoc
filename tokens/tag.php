@@ -4,14 +4,14 @@ namespace hexydec\html;
 class tag {
 
 	protected $config = Array();
-	protected $tag;
+	protected $tagName;
 	protected $attributes = Array();
 	protected $children = Array();
 	protected $singleton = false;
 	protected $quotes = 'double';
 
 	public function __construct($tag, $config) {
-		$this->tag = $tag;
+		$this->tagName = $tag;
 		$this->config = $config;
 	}
 
@@ -42,18 +42,24 @@ class tag {
 
 				case 'tagopenend':
 
-					// don't process certain tags
-					if (in_array($this->tag, $this->config['elements']['preserve'])) {
-						$item['content'] = '';
-						while (($token = next($tokens)) !== false && ($token['type'] != 'tagclose' || $token['value'] != '</'.$this->tag.'>')) {
-							$item['content'] .= $token['value'];
-						}
+					// keep whitespace for certain tags
+					if (in_array($this->tagName, $this->config['elements']['pre'])) {
+						$item = new pre();
+						$item->parse($tokens);
+						$this->children[] = $item;
+
+					// certain tags have thier own plugins
+					} elseif (in_array($this->tagName, $this->config['elements']['custom'])) {
+						$class = '\\hexydec\\html\\'.$this->tagName;
+						$item = new $class($this->config);
+						$item->parse($tokens);
+						$this->children[] = $item;
 
 					// parse children
-					} elseif (!in_array($this->tag, $this->config['elements']['singleton'])) {
+					} elseif (!in_array($this->tagName, $this->config['elements']['singleton'])) {
 						next($tokens);
 						$ast = new ast($this->config);
-						$this->children = $ast->parse($tokens, $this->tag, $attach);
+						$this->children = $ast->parse($tokens, $this->tagName, $attach);
 					}
 					break 2;
 
@@ -67,9 +73,9 @@ class tag {
 		}
 	}
 
-	public function minify(Array $config, String &$parentTag = null) {
+	public function minify(Array $config, object $parent = null) {
 		if ($config['lowercase']) {
-			$this->tag = strtolower($this->tag);
+			$this->tagName = strtolower($this->tagName);
 		}
 
 		// minify attributes
@@ -134,17 +140,17 @@ class tag {
 		if ($config['attributes']) {
 
 			// minify option tag
-			if ($this->tag == 'option' && $config['attributes']['option'] && isset($this->attributes['value'], $this->children[0]) && $this->children[0]->value == $this->attributes['value']) {
+			if ($this->tagName == 'option' && $config['attributes']['option'] && isset($this->attributes['value'], $this->children[0]) && $this->children[0]->value == $this->attributes['value']) {
 				unset($this->attributes['value']);
 			}
 
 			// minify type tag
-			if (in_array($this->tag, Array('style', 'script')) && $config['attributes']['type']) {
+			if (in_array($this->tagName, Array('style', 'script')) && $config['attributes']['type']) {
 				unset($this->attributes['type']);
 			}
 
 			// minify method tag
-			if ($this->tag == 'form' && $config['attributes']['method'] && isset($this->attributes['method']) && $this->attributes['method'] == 'get') {
+			if ($this->tagName == 'form' && $config['attributes']['method'] && isset($this->attributes['method']) && $this->attributes['method'] == 'get') {
 				unset($this->attributes['method']);
 			}
 		}
@@ -163,25 +169,13 @@ class tag {
 		// minify children
 		if (!empty($this->children)) {
 			foreach ($this->children AS $item) {
-				$item->minify($config, $tag);
+				$item->minify($config, $this);
 			}
-
-		// minify content
-		// } elseif (!empty($ast[$i]['content'])) {
-		//
-		// 	// minify CSS
-		// 	if ($config['cssmin'] && $this->tag == 'style') {
-		// 		$ast[$i]['content'] = call_user_func($config['cssmin'], $ast[$i]['content']);
-		//
-		// 	// minify CSS
-		// 	} elseif ($config['jsmin'] && $this->tag == 'script') {
-		// 		$ast[$i]['content'] = call_user_func($config['jsmin'], $ast[$i]['content']);
-		// 	}
 		}
 	}
 
 	public function compile() {
-		$html = '<'.$this->tag;
+		$html = '<'.$this->tagName;
 
 		// compile attributes
 		foreach ($this->attributes AS $key => $value) {
@@ -198,7 +192,7 @@ class tag {
 		}
 
 		// close singleton tags
-		if (in_array($this->tag, $this->config['elements']['singleton'])) {
+		if (in_array($this->tagName, $this->config['elements']['singleton'])) {
 			$html .= $this->config['output']['singletonclose'];
 
 		// close opening tag and compile contents
@@ -208,11 +202,17 @@ class tag {
 				foreach ($this->children AS $item) {
 					$html .= $item->compile();
 				}
-			} elseif (!empty($item['content'])) {
-				$html .= $item['content'];
 			}
-			$html .= '</'.$this->tag.'>';
+			$html .= '</'.$this->tagName.'>';
 		}
 		return $html;
+	}
+
+	public function children() {
+		return $this->children;
+	}
+
+	public function __get($var) {
+		return $this->$var;
 	}
 }

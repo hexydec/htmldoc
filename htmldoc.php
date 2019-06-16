@@ -7,6 +7,8 @@ require(__DIR__.'/tokens/tag.php');
 require(__DIR__.'/tokens/text.php');
 require(__DIR__.'/tokens/comment.php');
 require(__DIR__.'/tokens/cdata.php');
+require(__DIR__.'/tokens/style.php');
+require(__DIR__.'/tokens/script.php');
 
 class htmldoc {
 
@@ -26,7 +28,7 @@ class htmldoc {
 		),
 		'elements' => Array(
 			'inline' => Array(
-				'b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var'
+				'b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span'
 			),
 			'singleton' => Array(
 				'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
@@ -34,7 +36,8 @@ class htmldoc {
 			'unnestable' => Array(
 				'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
 			),
-			'preserve' => Array('script', 'style', 'textarea', 'pre', 'code'), // which elements not to strip whitespace from
+			'pre' => Array('textarea', 'pre', 'code'), // which elements not to strip whitespace from
+			'custom' => Array('script', 'style'), // which elements have their own plugins
 			'booleanattributes' => Array(
 				'allowfullscreen',
 				'allowpaymentrequest',
@@ -67,7 +70,7 @@ class htmldoc {
 			)
 		),
 		'minify' => Array(
-			'cssmin' => '\\hexydec\\minify\\cssmin::minify', // minify CSS
+			'cssmin' => 'hexydec\\minify\\cssmin::minify', // minify CSS
 			'jsmin' => false, // minify javascript
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes

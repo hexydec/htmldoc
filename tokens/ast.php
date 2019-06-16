@@ -88,7 +88,7 @@ class ast {
 					break;
 
 				case 'textnode':
-					$item = new text();
+					$item = new text($this->config);
 					$item->parse($tokens);
 					$ast[] = $item;
 					break;
