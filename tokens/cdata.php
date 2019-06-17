@@ -12,7 +12,7 @@ class cdata {
 	public function minify(Array $config) {
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		return $this->content === null ? '' : '<[CDATA['.$this->content.']]>';
 	}
 }

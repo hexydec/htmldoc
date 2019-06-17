@@ -79,7 +79,7 @@ class text {
 		return false;
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		return $this->value ? htmlspecialchars($this->value) : '';
 	}
 }

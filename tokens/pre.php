@@ -18,7 +18,7 @@ class pre {
 	public function minify(Array $config) {
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		return htmlspecialchars($this->value);
 	}
 }

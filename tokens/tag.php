@@ -92,11 +92,12 @@ class tag {
 			// minify attributes
 			if ($config['attributes']) {
 
+				// trim attribute
+				$this->attributes[$key] = trim($value);
+
 				// boolean attributes
-				if ($config['attributes']['boolean']) {
-					if (in_array($key, $this->config['elements']['booleanattributes'])) {
-						$this->attributes[$key] = null;
-					}
+				if ($config['attributes']['boolean'] && in_array($key, $this->config['elements']['booleanattributes'])) {
+					$this->attributes[$key] = null;
 				}
 
 				// minify style tag
@@ -106,6 +107,28 @@ class tag {
 						Array(' ', ':', ':', ':', ';', ';', ';'),
 						$value
 					), '; ');
+				}
+
+				// sort classes
+				if ($key == 'class' && $config['attributes']['class'] && strpos($value, ' ') !== false) {
+					$class = array_filter(explode(' ', $value));
+					sort($class);
+					$this->attributes[$key] = implode(' ', $class);
+				}
+
+				// minify option tag
+				if ($key == 'value' && $config['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->value == $value) {
+					unset($this->attributes[$key]);
+				}
+
+				// remove tag specific default attribute
+				if (isset($config['attributes']['default'][$this->tagName][$key]) && ($config['attributes']['default'][$this->tagName][$key] === true || $config['attributes']['default'][$this->tagName][$key] == $value)) {
+					unset($this->attributes[$key]);
+				}
+
+				// remove other attributes
+				if (isset($config['attributes']['default'][''][$key]) && ($config['attributes']['default'][''][$key] === true || $config['attributes']['default'][''][$key] == $value)) {
+					unset($this->attributes[$key]);
 				}
 			}
 
@@ -137,24 +160,6 @@ class tag {
 			}
 		}
 
-		if ($config['attributes']) {
-
-			// minify option tag
-			if ($this->tagName == 'option' && $config['attributes']['option'] && isset($this->attributes['value'], $this->children[0]) && $this->children[0]->value == $this->attributes['value']) {
-				unset($this->attributes['value']);
-			}
-
-			// minify type tag
-			if (in_array($this->tagName, Array('style', 'script')) && $config['attributes']['type']) {
-				unset($this->attributes['type']);
-			}
-
-			// minify method tag
-			if ($this->tagName == 'form' && $config['attributes']['method'] && isset($this->attributes['method']) && $this->attributes['method'] == 'get') {
-				unset($this->attributes['method']);
-			}
-		}
-
 		// sort attributes
 		// if ($config['attributes']['sort']) {
 		// 	$attr = $this->attributes;
@@ -174,7 +179,7 @@ class tag {
 		}
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		$html = '<'.$this->tagName;
 
 		// compile attributes
@@ -182,9 +187,9 @@ class tag {
 			$html .= ' '.$key;
 			if ($value !== null) {
 				$quote = '"';
-				if ($this->config['output']['quotestyle'] == 'single') {
+				if ($config['quotestyle'] == 'single') {
 					$quote = "'";
-				} elseif ($value && $this->config['output']['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t") == strlen($value)) {
+				} elseif ($value && $config['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$quote = '';
 				}
 				$html .= '='.$quote.htmlspecialchars($value).$quote;
@@ -193,15 +198,13 @@ class tag {
 
 		// close singleton tags
 		if (in_array($this->tagName, $this->config['elements']['singleton'])) {
-			$html .= $this->config['output']['singletonclose'];
+			$html .= $config['singletonclose'];
 
 		// close opening tag and compile contents
 		} else {
 			$html .= '>';
-			if (!empty($this->children)) {
-				foreach ($this->children AS $item) {
-					$html .= $item->compile();
-				}
+			foreach ($this->children AS $item) {
+				$html .= $item->compile($config);
 			}
 			$html .= '</'.$this->tagName.'>';
 		}

@@ -83,13 +83,33 @@ class htmldoc {
 				'scheme' => true // remove the scheme from URLs that have the same scheme as the current document
 			),
 			'attributes' => Array( // remove values from boolean attributes
+				'default' => Array(
+					'style' => Array(
+						'type' => 'text/css'
+					),
+					'script' => Array(
+						'type' => 'text/javascript',
+						'language' => true
+					),
+					'form' => Array(
+						'method' => 'get'
+					),
+					'input' => Array(
+						'type' => 'text'
+					),
+					'' => Array(
+						'id' => '',
+						'class' => '',
+						'style' => '',
+						'title' => ''
+					)
+				),
 				'option' => true, // remove value attribute from option where the text node has the same value
-				'type' => true, // remove the type attribute from script and style tags
-				'method' => true, // remove method from form tags where it is set to GET
 				'style' => true, // minify the style tag
-				'removequotes' => true, // remove quotes from attributes where possible
+				'class' => true, // sort classes
+				'quotes' => true, // remove quotes from attributes where possible
 				'sort' => true, // sort attributes for better gzip
-				'boolean' => true // minify boolean attributes
+				'boolean' => true, // minify boolean attributes
 			),
 			'singleton' => true, // minify singleton element by removing slash
 			'quotes' => true, // minify attribute quotes
@@ -166,7 +186,7 @@ class htmldoc {
 		$singleton = $this->config['elements']['singleton'];
 		$html = '';
 		foreach ($ast AS $item) {
-			$html .= $item->compile();
+			$html .= $item->compile($output);
 		}
 		return $html;
 	}

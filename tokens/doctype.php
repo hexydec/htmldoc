@@ -18,7 +18,7 @@ class doctype {
 
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		return '<!DOCTYPE '.implode(' ', $this->type).'>';
 	}
 }

@@ -69,6 +69,7 @@ $html = '
 				<option value="test">test</option>
 				<option value="test2">This is also a test</option>
 			</select>
+			<input type="text" class=" " value="" />
 		</form>
 		<script type="text/javascript" nomodule="nomodule">
 			alert("hi");

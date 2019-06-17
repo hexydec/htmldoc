@@ -16,7 +16,7 @@ class comment {
 		}
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		return $this->comment === null ? '' : '<!--'.$this->comment.'-->';
 	}
 }

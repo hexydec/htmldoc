@@ -28,7 +28,7 @@ class script {
 		}
 	}
 
-	public function compile() {
+	public function compile(Array $config) {
 		return $this->value;
 	}
 }
