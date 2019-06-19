@@ -1,7 +1,7 @@
 {
   "name": "minify",
   "version": "0.2.2",
-  "description": "A token based PHP HTML and CSS minifier",
+  "description": "A token based HTML Document parser and minifier written in PHP",
   "main": "index.js",
   "directories": {
     "test": "tests"

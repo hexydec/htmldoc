@@ -20,7 +20,7 @@ Also because documents are read into a structured format, performing operations 
 To minify an HTML document:
 
 ```php
-use hexydec\minify\htmldoc;
+use hexydec\html\htmldoc;
 
 $doc = new htmldoc();
 
