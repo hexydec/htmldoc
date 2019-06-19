@@ -44,3 +44,7 @@ use hexydec\minify\cssmin;
 
 echo cssmin::minify($css);
 ```
+
+## Configuration
+
+To follow.

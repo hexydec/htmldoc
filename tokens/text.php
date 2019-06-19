@@ -22,7 +22,7 @@ class text {
 			$this->value = preg_replace('/\s++/', ' ', $this->value);
 
 			if ($parent) {
-				$children = $parent->children();
+				$children = $parent->children()->toArray();
 				if (($index = $this->getIndex($children)) !== false) {
 					$keys = array_keys($children);
 					$i = array_search($index, $keys, true);

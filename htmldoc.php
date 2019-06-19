@@ -1,7 +1,7 @@
 <?php
 namespace hexydec\html;
 
-require(__DIR__.'/tokens/ast.php');
+require(__DIR__.'/tokens/collection.php');
 require(__DIR__.'/tokens/doctype.php');
 require(__DIR__.'/tokens/tag.php');
 require(__DIR__.'/tokens/text.php');
@@ -137,10 +137,8 @@ class htmldoc {
 
 	public function load(String $html) {
 		// $this->attributes = Array();
-		$ast = new ast($this->config);
-		if (($this->document = $ast->load($html))) {
-			// print_r($this->document);
-			// exit();
+		$this->document = new collection($this->config);
+		if ($this->document->load($html)) {
 			return true;
 		}
 		return false;
@@ -164,13 +162,11 @@ class htmldoc {
 		// 	arsort($this->attributes, SORT_NUMERIC);
 		// 	$config['attributes']['sort'] = \array_keys($this->attributes);
 		// }
-		foreach ($this->document AS $item) {
-			$item->minify($config);
-		}
+		$this->document->minify($config, $this->document);
 	}
 
 	public function save(string $file = null) {
-		$html = $this->compile($this->document);
+		$html = $this->document->compile($this->config['output']);
 		if (!$file) {
 			return $html;
 		} elseif (file_put_contents($file, $html) === false) {
@@ -179,15 +175,5 @@ class htmldoc {
 			return true;
 		}
 		return false;
-	}
-
-	protected function compile(Array $ast) {
-		$output = $this->config['output'];
-		$singleton = $this->config['elements']['singleton'];
-		$html = '';
-		foreach ($ast AS $item) {
-			$html .= $item->compile($output);
-		}
-		return $html;
 	}
 }

@@ -6,7 +6,7 @@ class tag {
 	protected $config = Array();
 	protected $tagName;
 	protected $attributes = Array();
-	protected $children = Array();
+	protected $children;
 	protected $singleton = false;
 	protected $quotes = 'double';
 
@@ -41,26 +41,9 @@ class tag {
 					break;
 
 				case 'tagopenend':
-
-					// keep whitespace for certain tags
-					if (in_array($this->tagName, $this->config['elements']['pre'])) {
-						$item = new pre();
-						$item->parse($tokens);
-						$this->children[] = $item;
-
-					// certain tags have thier own plugins
-					} elseif (in_array($this->tagName, $this->config['elements']['custom'])) {
-						$class = '\\hexydec\\html\\'.$this->tagName;
-						$item = new $class($this->config);
-						$item->parse($tokens);
-						$this->children[] = $item;
-
-					// parse children
-					} elseif (!in_array($this->tagName, $this->config['elements']['singleton'])) {
-						next($tokens);
-						$ast = new ast($this->config);
-						$this->children = $ast->parse($tokens, $this->tagName, $attach);
-					}
+					next($tokens);
+					$this->children = new collection($this->config);
+					$this->children->parse($tokens, $this->tagName, $attach);
 					break 2;
 
 				case 'tagselfclose':
@@ -172,10 +155,8 @@ class tag {
 		// }
 
 		// minify children
-		if (!empty($this->children)) {
-			foreach ($this->children AS $item) {
-				$item->minify($config, $this);
-			}
+		if ($this->children) {
+			$this->children->minify($config, $this);
 		}
 	}
 
@@ -203,9 +184,7 @@ class tag {
 		// close opening tag and compile contents
 		} else {
 			$html .= '>';
-			foreach ($this->children AS $item) {
-				$html .= $item->compile($config);
-			}
+			$html .= $this->children->compile($config);
 			$html .= '</'.$this->tagName.'>';
 		}
 		return $html;
