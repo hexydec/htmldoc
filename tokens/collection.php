@@ -130,7 +130,7 @@ class collection implements \ArrayAccess {
 						break;
 
 					case 'tagopenstart':
-						$tag = strtolower(trim($token['value'], '<'));
+						$tag = trim($token['value'], '<');
 
 						// parse the tag
 						$item = new tag($tag, $this->config);
@@ -143,8 +143,8 @@ class collection implements \ArrayAccess {
 						break;
 
 					case 'tagclose':
-						$close = strtolower(trim($token['value'], '</>'));
-						if ($close != $tag) { // if tags not the same, go back to previous level
+						$close = trim($token['value'], '</>');
+						if (strtolower($close) != strtolower($tag)) { // if tags not the same, go back to previous level
 
 							// if a tag isn't closed and we are closing a tag that isn't the parent, send the last child tag to the parent level
 							if ($tag && $parenttag != $close && get_class(end($this->collection)) == 'hexydec\\html\\tag') {

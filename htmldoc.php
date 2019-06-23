@@ -34,80 +34,52 @@ class htmldoc {
 				'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
 			),
 			'unnestable' => Array(
-				'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+				'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
 			),
 			'pre' => Array('textarea', 'pre', 'code'), // which elements not to strip whitespace from
 			'custom' => Array('script', 'style'), // which elements have their own plugins
-			'booleanattributes' => Array(
-				'allowfullscreen',
-				'allowpaymentrequest',
-				'async',
-				'autofocus',
-				'autoplay',
-				'checked',
-				'contenteditable',
-				'controls',
-				'default',
-				'defer',
-				'disabled',
-				'formnovalidate',
-				'hidden',
-				'indeterminate',
-				'ismap',
-				'itemscope',
-				'loop',
-				'multiple',
-				'muted',
-				'nomodule',
-				'novalidate',
-				'open',
-				'readonly',
-				'required',
-				'reversed',
-				'scoped',
-				'selected',
-				'typemustmatch'
-			)
+		),
+		'attributes' => Array(
+			'boolean' => Array(
+				'allowfullscreen', 'allowpaymentrequest', 'async', 'autofocus', 'autoplay', 'checked', 'contenteditable', 'controls', 'default', 'defer', 'disabled', 'formnovalidate', 'hidden', 'indeterminate', 'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nomodule', 'novalidate', 'open', 'readonly', 'required', 'reversed', 'scoped', 'selected', 'typemustmatch'
+			),
+			'default' => Array( // default attributes that can be removed
+				'style' => Array(
+					'type' => 'text/css'
+				),
+				'script' => Array(
+					'type' => 'text/javascript',
+					'language' => true
+				),
+				'form' => Array(
+					'method' => 'get'
+				),
+				'input' => Array(
+					'type' => 'text'
+				)
+			),
+			'empty' => Array('id', 'class', 'style', 'title'), // attributes to remove if empty
+			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 		),
 		'minify' => Array(
-			'cssmin' => 'hexydec\\minify\\cssmin::minify', // minify CSS
-			'jsmin' => false, // minify javascript
+			'css' => 'hexydec\\minify\\cssmin::minify', // minify CSS
+			'js' => false, // minify javascript
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes
 			'comments' => Array( // remove comments
 				'ie' => true
 			),
 			'urls' => Array( // update internal URL's to be shorter
-				'attributes' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 				'absolute' => true, // process absolute URLs to make them relative to the current document
+				'host' => true, // remove the host for own domain
 				'scheme' => true // remove the scheme from URLs that have the same scheme as the current document
 			),
 			'attributes' => Array( // remove values from boolean attributes
-				'default' => Array(
-					'style' => Array(
-						'type' => 'text/css'
-					),
-					'script' => Array(
-						'type' => 'text/javascript',
-						'language' => true
-					),
-					'form' => Array(
-						'method' => 'get'
-					),
-					'input' => Array(
-						'type' => 'text'
-					),
-					'' => Array(
-						'id' => '',
-						'class' => '',
-						'style' => '',
-						'title' => ''
-					)
-				),
+				'default' => true,
+				'empty' => true, // remove these attributes if empty
 				'option' => true, // remove value attribute from option where the text node has the same value
 				'style' => true, // minify the style tag
 				'class' => true, // sort classes
-				'quotes' => true, // remove quotes from attributes where possible
 				'sort' => true, // sort attributes for better gzip
 				'boolean' => true, // minify boolean attributes
 			),
@@ -117,8 +89,7 @@ class htmldoc {
 		'output' => Array(
 			'charset' => 'utf-8',
 			'quotestyle' => 'double', // double, single, minimal
-			'singletonclose' => ' />',
-
+			'singletonclose' => ' />'
 		)
 	);
 	protected $document = false;

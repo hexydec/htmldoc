@@ -12,8 +12,10 @@ class script {
 
 	public function parse(Array &$tokens) {
 		$value = '';
-		while (($token = next($tokens)) !== false && ($token['type'] != 'tagclose' || $token['value'] != '</script>')) {
+		$token = current($tokens);
+		while ($token !== false && ($token['type'] != 'tagclose' || $token['value'] != '</script>')) {
 			$value .= $token['value'];
+			$token = next($tokens);
 		}
 		if ($value) {
 			$this->value = $value;
@@ -21,8 +23,8 @@ class script {
 	}
 
 	public function minify(Array $config) {
-		if ($config['jsmin'] && $this->value) {
-			$this->value = call_user_func($config['jsmin'], $this->value);
+		if ($config['js'] && $this->value) {
+			$this->value = call_user_func($config['js'], $this->value);
 		} else {
 			$this->value = trim($this->value);
 		}

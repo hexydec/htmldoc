@@ -35,7 +35,7 @@ class tag {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$this->attributes[$attr] = html_entity_decode(trim($token['value'], '= "'), ENT_QUOTES); // set charset?
+						$this->attributes[$attr] = html_entity_decode(trim(trim($token['value'], '= '), '"'), ENT_QUOTES); // set charset?
 						$attr = false;
 					}
 					break;
@@ -57,6 +57,7 @@ class tag {
 	}
 
 	public function minify(Array $config, object $parent = null) {
+		$attr = $this->config['attributes'];
 		if ($config['lowercase']) {
 			$this->tagName = strtolower($this->tagName);
 		}
@@ -76,47 +77,66 @@ class tag {
 			if ($config['attributes']) {
 
 				// trim attribute
-				$this->attributes[$key] = trim($value);
+				$value = $this->attributes[$key] = trim($value);
 
 				// boolean attributes
-				if ($config['attributes']['boolean'] && in_array($key, $this->config['elements']['booleanattributes'])) {
+				if ($config['attributes']['boolean'] && in_array($key, $attr['boolean'])) {
 					$this->attributes[$key] = null;
-				}
 
 				// minify style tag
-				if ($key == 'style' && $config['attributes']['style']) {
+				} elseif ($key == 'style' && $config['attributes']['style']) {
 					$this->attributes[$key] = trim(str_replace(
 						Array('  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '),
 						Array(' ', ':', ':', ':', ';', ';', ';'),
 						$value
 					), '; ');
-				}
 
 				// sort classes
-				if ($key == 'class' && $config['attributes']['class'] && strpos($value, ' ') !== false) {
+				} elseif ($key == 'class' && $config['attributes']['class'] && strpos($value, ' ') !== false) {
 					$class = array_filter(explode(' ', $value));
 					sort($class);
 					$this->attributes[$key] = implode(' ', $class);
-				}
 
 				// minify option tag
-				if ($key == 'value' && $config['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->value == $value) {
+				} elseif ($key == 'value' && $config['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->value == $value) {
 					unset($this->attributes[$key]);
-				}
 
 				// remove tag specific default attribute
-				if (isset($config['attributes']['default'][$this->tagName][$key]) && ($config['attributes']['default'][$this->tagName][$key] === true || $config['attributes']['default'][$this->tagName][$key] == $value)) {
+				} elseif ($config['attributes']['default'] && isset($attr['default'][$this->tagName][$key]) && ($attr['default'][$this->tagName][$key] === true || $attr['default'][$this->tagName][$key] == $value)) {
 					unset($this->attributes[$key]);
 				}
 
 				// remove other attributes
-				if (isset($config['attributes']['default'][''][$key]) && ($config['attributes']['default'][''][$key] === true || $config['attributes']['default'][''][$key] == $value)) {
+				if ($value === '' && $config['attributes']['empty'] && in_array($key, $attr['empty'])) {
 					unset($this->attributes[$key]);
 				}
 			}
 
 			// minify urls
-			if ($config['urls'] && in_array($key, $config['urls']['attributes'])) {
+			if ($config['urls'] && in_array($key, $attr['urls'])) {
+
+				// strip scheme from absolute URL's if the same as current scheme
+				if ($config['urls']['scheme']) {
+					if (!isset($scheme)) {
+						$scheme = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
+					}
+					if (strpos($this->attributes[$key], $scheme) === 0) {
+						$this->attributes[$key] = substr($this->attributes[$key], strlen($scheme)-2);
+					}
+				}
+
+				// remove host for own domain
+				if ($config['urls']['host']) {
+					if (!isset($host)) {
+						$host = '//'.$_SERVER['HTTP_HOST'];
+						$hostlen = strlen($host);
+					}
+					if (strpos($this->attributes[$key], $host) === 0 && (strlen($this->attributes[$key]) == $hostlen || strpos($this->attributes[$key], '/', 2)) == $hostlen + 1) {
+						$this->attributes[$key] = substr($this->attributes[$key], $hostlen);
+					}
+				}
+
+				// make absolute URLs relative
 				if ($config['urls']['absolute']) {
 
 					// set folder variable
@@ -130,14 +150,6 @@ class tag {
 					// minify
 					if (strpos($this->attributes[$key], $folder) === 0) {
 						$this->attributes[$key] = substr($this->attributes[$key], strlen($folder));
-					}
-				}
-
-				// strip scheme from absolute URL's if the same as current scheme
-				if ($config['urls']['scheme']) {
-					$prefix = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
-					if (strpos($this->attributes[$key], $prefix) === 0) {
-						$this->attributes[$key] = substr($this->attributes[$key], strlen($prefix)-2);
 					}
 				}
 			}

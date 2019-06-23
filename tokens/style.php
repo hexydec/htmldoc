@@ -12,8 +12,10 @@ class style {
 
 	public function parse(Array &$tokens) {
 		$value = '';
-		while (($token = next($tokens)) !== false && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
+		$token = current($tokens);
+		while ($token !== false && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
 			$value .= $token['value'];
+			$token = next($tokens);
 		}
 		if ($value) {
 			$this->value = $value;
@@ -21,8 +23,8 @@ class style {
 	}
 
 	public function minify(Array $config) {
-		if ($config['cssmin'] && $this->value) {
-			$this->value = call_user_func($config['cssmin'], $this->value);
+		if ($config['css'] && $this->value) {
+			$this->value = call_user_func($config['css'], $this->value);
 		} else {
 			$this->value = trim($this->value);
 		}
