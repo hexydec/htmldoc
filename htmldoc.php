@@ -1,7 +1,6 @@
 <?php
 namespace hexydec\html;
 
-require(__DIR__.'/tokens/collection.php');
 require(__DIR__.'/tokens/doctype.php');
 require(__DIR__.'/tokens/tag.php');
 require(__DIR__.'/tokens/text.php');
@@ -10,7 +9,7 @@ require(__DIR__.'/tokens/cdata.php');
 require(__DIR__.'/tokens/style.php');
 require(__DIR__.'/tokens/script.php');
 
-class htmldoc {
+class htmldoc implements \ArrayAccess {
 
 	protected $config = Array(
 		'tokens' => Array(
@@ -92,33 +91,235 @@ class htmldoc {
 			'singletonclose' => ' />'
 		)
 	);
-	protected $document = false;
+	protected $document = Array();
 	protected $attributes = Array();
 
 	public function __construct(Array $config = Array()) {
 		$this->config = array_replace_recursive($this->config, $config);
 	}
 
-	public function open(String $url) {
-		if (($html = file_get_contents($url)) !== false) {
+	/**
+	 * Retrieves the configuration of the object as an array
+	 */
+	public function toArray() {
+		return $this->document;
+	}
+
+	/**
+	 * Array access method allows you to set the object's configuration as properties
+	 *
+	 * @param mixed $i The key to be updated, can be a string or integer
+	 * @param mixed $value The value of the array key in the configuration array to be updated
+	 */
+	public function offsetSet($i, $value) {
+		if (is_null($i)) $this->document[] = $value;
+		else $this->document[$i] = $value;
+	}
+
+	/**
+	 * Array access method allows you to check that a key exists in the configuration array
+	 *
+	 * @param mixed $i The key to be checked, can be a string or integer
+	 * @return bool Whether the key exists in the config array
+	 */
+	public function offsetExists($i) {
+		return isset($this->document[$i]);
+	}
+
+	/**
+	 * Removes a key from the configuration array
+	 *
+	 * @param mixed $i The key to be removed, can be a string or integer
+	 */
+	public function offsetUnset($i) {
+		unset($this->document[$i]);
+	}
+
+	/**
+	 * Retrieves a value from the configuration array with the specified key
+	 *
+	 * @param mixed $i The key to be accessed, can be a string or integer
+	 * @return mixed The requested value or null if the key doesn't exist
+	 */
+	public function &offsetGet($i) { // return reference so you can set it like an array
+		if (!isset($this->document[$i])) {
+			$null = null;
+			return $null;
+		} else {
+			return $this->document[$i];
+		}
+	}
+
+	public function open(String $url, String &$error = null) {
+		if (($handle = fopen($url, 'rb')) === false) {
+			$error = 'Could not open file';
+		} elseif (($html = stream_get_contents($handle)) === false) {
+			$error = 'Could not read file';
+		} else {
+
+			// find charset in headers
+			$charset = null;
+			$meta = stream_get_meta_data($handle);
+			if (!empty($meta['wrapper_data'])) {
+				foreach ($meta['wrapper_data'] AS $item) {
+					if (stripos($item, 'Content-Type:') === 0 && ($charset = stristr($item, 'charset=')) !== false) {
+						$charset = substr($charset, 8);
+						break;
+					}
+				}
+			}
+
+			// load htmk
 			return $this->load($html);
 		}
 		return false;
 	}
 
-	public function load(String $html) {
-		// $this->attributes = Array();
-		$this->document = new collection($this->config);
-		if ($this->document->load($html)) {
+	public function load(string $html) {
+		$this->document = Array();
+		if (($tokens = $this->tokenise($html, $this->config['tokens'])) === false) {
+			trigger_error('Could not tokenise input', E_USER_WARNING);
+		} elseif (!$this->parse($tokens)) {
+			trigger_error('Input is not invalid', E_USER_WARNING);
+		} else {
 			return true;
 		}
 		return false;
 	}
 
-	public function minify(Array $config = Array()) {
+	protected function getCharsetFromHtml(string $html) {
+		if (preg_match_all('/<meta([^>]++)>/i', $html, $match)) {
+			foreach ($match AS $item) {
+				$item = preg_replace('', $item);
+				if (stripos($item, 'http-equiv="Content-Type"') !== false && stripos($item, "http-equiv='Content-Type'") !== false && stripos($item, 'http-equiv=Content-Type') !== false) {
+
+				}
+			}
+		}
+	}
+
+	protected function tokenise($code, $patterns) {
+
+		// prepare regexp and extract strings
+		$re = '/('.implode(')|(', $patterns).')/u';
+		if (preg_match_all($re, $code, $match)) {
+
+			// build tokens into types
+			$tokens = Array();
+			$keys = array_keys($patterns);
+			foreach ($match[0] AS $i => $item) {
+
+				// go through tokens and find which one matched
+				foreach ($keys AS $token => $type) {
+					if ($match[$token+1][$i] !== '') {
+						$tokens[] = Array(
+							'type' => $type,
+							'value' => $item
+						);
+						break;
+					}
+				}
+			}
+			return $tokens;
+		}
+		return false;
+	}
+
+	public function parse(Array &$tokens, string $parenttag = null, array &$attach = null) : bool {
+
+		// keep whitespace for certain tags
+		if (in_array($parenttag, $this->config['elements']['pre'])) {
+			$item = new pre();
+			$item->parse($tokens);
+			$this->document[] = $item;
+
+		// certain tags have thier own plugins
+		} elseif (in_array($parenttag, $this->config['elements']['custom'])) {
+			$class = '\\hexydec\\html\\'.$parenttag;
+			$item = new $class($this->config);
+			$item->parse($tokens);
+			$this->document[] = $item;
+
+		// parse children
+		} elseif (!in_array($parenttag, $this->config['elements']['singleton'])) {
+			$tag = null;
+			$token = current($tokens);
+			do {
+				switch ($token['type']) {
+					case 'doctype':
+						$item = new doctype();
+						$item->parse($tokens);
+						if (empty($this->document)) { // only add if found at the top of the document
+							$this->document[] = $item;
+						}
+						break;
+
+					case 'tagopenstart':
+						$tag = trim($token['value'], '<');
+
+						// parse the tag
+						$item = new tag($tag, $this->config);
+						$item->parse($tokens, $attach);
+						$this->document[] = $item;
+						if ($attach) {
+							$this->document[] = $attach;
+							$attach = null;
+						}
+						break;
+
+					case 'tagclose':
+						$close = trim($token['value'], '</>');
+						if (strtolower($close) != strtolower($tag)) { // if tags not the same, go back to previous level
+
+							// if a tag isn't closed and we are closing a tag that isn't the parent, send the last child tag to the parent level
+							if ($tag && $parenttag != $close && get_class(end($this->document)) == 'hexydec\\html\\tag') {
+								$attach = array_pop($this->document);
+							}
+							prev($tokens); // close the tag on each level below until we find itself
+							break 2;
+						}
+						break;
+
+					case 'textnode':
+						$item = new text($this->config);
+						$item->parse($tokens);
+						$this->document[] = $item;
+						break;
+
+					case 'cdata':
+						$item = new cdata();
+						$item->parse($tokens);
+						$this->document[] = $item;
+						break;
+
+					case 'comment':
+						$item = new comment();
+						$item->parse($tokens);
+						$this->document[] = $item;
+						break;
+				}
+			} while (($token = next($tokens)) !== false);
+		}
+		return !!$this->document;
+	}
+
+	// public function find($selector) {
+	//
+	// 	return $this->document->find($selector);
+	// }
+	//
+	public function children() : Array {
+		return $this->document;
+	}
+
+	public function minify(Array $config = Array(), tag $parent = null) {
 
 		// merge config
 		$config = array_replace_recursive($this->config['minify'], $config);
+
+		if (!$parent) {
+			$parent = $this;
+		}
 
 		// set minify output parameters
 		if ($config['singleton']) {
@@ -133,11 +334,25 @@ class htmldoc {
 		// 	arsort($this->attributes, SORT_NUMERIC);
 		// 	$config['attributes']['sort'] = \array_keys($this->attributes);
 		// }
-		$this->document->minify($config, $this->document);
+		foreach ($this->document AS $item) {
+			$item->minify($config, $parent);
+		}
+	}
+
+	public function compile(Array $config) : String {
+		$html = '';
+		foreach ($this->document AS $item) {
+			$html .= $item->compile($config);
+		}
+		return $html;
 	}
 
 	public function save(string $file = null) {
-		$html = $this->document->compile($this->config['output']);
+
+		// compile html
+		$html = $this->compile($this->config['output']);
+
+		// save file
 		if (!$file) {
 			return $html;
 		} elseif (file_put_contents($file, $html) === false) {

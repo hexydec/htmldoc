@@ -14,18 +14,6 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanLowercaseTagsAndAttributes() {
 		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/lowercase.html')) {
-			$doc->minify(Array(
-				'lowercase' => true, // locase attribute and tags names
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-minified.html'));
-			$this->assertEquals($minified, $doc->save());
-		}
 
 		if ($doc->open(__DIR__.'/templates/lowercase.html')) {
 			$doc->minify(Array(
@@ -37,6 +25,19 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-recycle.html'));
+			$this->assertEquals($minified, $doc->save());
+		}
+
+		if ($doc->open(__DIR__.'/templates/lowercase.html')) {
+			$doc->minify(Array(
+				'lowercase' => true, // locase attribute and tags names
+				'whitespace' => false, // remove whitespace
+				'comments' => false, // remove comments
+				'urls' => false, // update internal URL's to be shorter
+				'attributes' => false, // remove values from boolean attributes);
+	   			'quotes' => false, // minify attribute quotes
+			));
+			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-minified.html'));
 			$this->assertEquals($minified, $doc->save());
 		}
 	}

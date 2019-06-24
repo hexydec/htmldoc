@@ -42,7 +42,7 @@ class tag {
 
 				case 'tagopenend':
 					next($tokens);
-					$this->children = new collection($this->config);
+					$this->children = new htmldoc($this->config);
 					$this->children->parse($tokens, $this->tagName, $attach);
 					break 2;
 
@@ -203,7 +203,7 @@ class tag {
 	}
 
 	public function children() {
-		return $this->children;
+		return $this->children->toArray();
 	}
 
 	public function __get($var) {

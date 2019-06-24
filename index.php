@@ -1,8 +1,8 @@
 <?php
-
 require(__DIR__.'/htmldoc.php');
 require(__DIR__.'/cssmin.php');
 require(__DIR__.'/tokenise.php');
+
 
 $css = '
 h1:not(.cls) {
@@ -86,7 +86,7 @@ $doc = new \hexydec\html\htmldoc();
 $doc->load($html);
 // $doc->open('https://www.php.net/manual/en/function.strcspn.php');
 $doc->minify();
-echo $doc->save();
+exit($doc->save());
 // echo "\n\n".number_format(microtime(true) - $time, 8)."\n\n";
 
 
@@ -94,3 +94,20 @@ echo $doc->save();
 // $time = microtime(true);
 // echo \hexydec\minify\htmlmin::minify($html);
 // echo "\n\n".number_format(microtime(true) - $time, 8)."\n\n";
+
+
+$source = '';
+?>
+<!DOCTYPE html>
+<html>
+	<head>
+
+	</head>
+	<body>
+		<form action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" accept-charset="<?= mb_internal_encoding(); ?>">
+			<h1>HTML Minifier</h1>
+			<textarea name="source"><?= htmlspecialchars($source); ?></textarea>
+			<div></div>
+		</form>
+	</body>
+</html>
