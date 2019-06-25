@@ -172,6 +172,12 @@ class tag {
 		}
 	}
 
+	public function attr(string $key) : string {
+		if (isset($this->attributes[$key])) {
+			return $this->attributes[$key];
+		}
+	}
+
 	public function compile(Array $config) {
 		$html = '<'.$this->tagName;
 

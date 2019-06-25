@@ -46,6 +46,7 @@ $html = '
 <html>
 	<head>
 		<title>Test HTML Parser</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<style type="text/css">
 			h1 {
 				font-size: 2em;

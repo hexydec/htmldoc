@@ -25,6 +25,19 @@ class htmldoc implements \ArrayAccess {
 			'attribute' => '[^<>"=\s]++',
 			'whitespace' => '\s++'
 		),
+		'selectors' => Array(
+			'whitespace' => '\s++',
+			'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
+			'join' => '[>+~]',
+			'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
+			'squareopen' => '\[',
+			'squareclose' => '\]',
+			'bracketopen' => '\(',
+			'bracketclose' => '\)',
+			'comma' => ',',
+			'colon' => ':',
+			'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
+		),
 		'elements' => Array(
 			'inline' => Array(
 				'b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span'
@@ -170,31 +183,44 @@ class htmldoc implements \ArrayAccess {
 			}
 
 			// load htmk
-			return $this->load($html);
+			return $this->load($html, $charset);
 		}
 		return false;
 	}
 
-	public function load(string $html) {
+	public function load(string $html, string $charset = null) {
+
+		// detect the charset
+		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== null) {
+			$html = iconv($charset, mb_internal_encoding(), $html);
+		}
+
+		// reset the document
 		$this->document = Array();
+
+		// tokenise the input HTML
 		if (($tokens = $this->tokenise($html, $this->config['tokens'])) === false) {
 			trigger_error('Could not tokenise input', E_USER_WARNING);
+
+		// parse the document
 		} elseif (!$this->parse($tokens)) {
 			trigger_error('Input is not invalid', E_USER_WARNING);
+
+		// success
 		} else {
 			return true;
 		}
 		return false;
 	}
 
-	protected function getCharsetFromHtml(string $html) {
-		if (preg_match_all('/<meta([^>]++)>/i', $html, $match)) {
-			foreach ($match AS $item) {
-				$item = preg_replace('', $item);
-				if (stripos($item, 'http-equiv="Content-Type"') !== false && stripos($item, "http-equiv='Content-Type'") !== false && stripos($item, 'http-equiv=Content-Type') !== false) {
-
-				}
+	protected function getCharsetFromHtml(string $html) : string {
+		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
+			$obj = new htmldoc();
+			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj[0]->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
+				return substr($charset, 8);
 			}
+		} else {
+			return mb_detect_encoding($html);
 		}
 	}
 
@@ -304,10 +330,59 @@ class htmldoc implements \ArrayAccess {
 	}
 
 	// public function find($selector) {
+	// 	if (($parsed = $this->parseSelector($selector)) !== false) {
 	//
+	// 	}
 	// 	return $this->document->find($selector);
 	// }
-	//
+
+	protected function parseSelector(String $selector) {
+		if (($tokens = $this->tokenise($selector, $this->config['selectors'])) !== false) {
+			$selector = Array();
+			$join = false;
+			while ($i++ < $count) {
+				switch ($tokens[$i]['type']) {
+					case 'whitespace':
+						if (!$join) {
+							$join = ' ';
+						}
+						break;
+					case 'string':
+						$selector[] = Array(
+							'selector' => $tokens[$i]['value'],
+							'join' => $join
+						);
+						$join = false;
+						break;
+					case 'colon':
+						$parts = ':';
+						while ($i++ < $count) {
+							if (!in_array($tokens[$i]['type'], Array('whitespace', 'comma', 'curlyopen'))) {
+								$parts .= $tokens[$i]['value'];
+							} else {
+								$i--;
+								break;
+							}
+						}
+						$selector[] = Array(
+							'selector' => $parts,
+							'join' => $join
+						);
+						$join = false;
+						break;
+					case 'curlyopen':
+					case 'comma':
+						break 2;
+					case 'join':
+						$join = $tokens[$i]['value'];
+						break;
+				}
+			}
+			return $selector;
+		}
+		return false;
+	}
+
 	public function children() : Array {
 		return $this->document;
 	}
@@ -347,10 +422,15 @@ class htmldoc implements \ArrayAccess {
 		return $html;
 	}
 
-	public function save(string $file = null) {
+	public function save(string $file = null, string $charset = null) {
 
 		// compile html
 		$html = $this->compile($this->config['output']);
+
+		// convert charset
+		if ($charset) {
+			$html = iconv(mb_internal_encoding(), $charset, $html);
+		}
 
 		// save file
 		if (!$file) {
