@@ -1,4 +1,4 @@
-# Minify: PHP HTML and CSS Document Parser and Minifier
+# HTMLDoc: PHP HTML Document Parser and Minifier
 
 A tokeniser based HTML and CSS document parser and minifier, written in PHP.
 
@@ -37,14 +37,4 @@ $doc->minify();
 echo $doc->save();
 ```
 
-To minify a CSS document:
-
-```php
-use hexydec\minify\cssmin;
-
-echo cssmin::minify($css);
-```
-
-## Configuration
-
-To follow.
+Find out more details of [how to use HTMLDoc in the docs](docs/)

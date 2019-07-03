@@ -19,7 +19,7 @@ h1:not(.cls) {
 	}
 }
 
-h1, h2, h3 {
+h1, h2, h3[name=test] {
 	color: #FFF;
 }
 /* comment */
@@ -39,7 +39,8 @@ p {
 }
 ';
 
-//echo \hexydec\minify\cssmin::minify($css);
+// echo \hexydec\minify\cssmin::minify($css);
+// exit;
 
 $html = '
 <!DOCTYPE html>
@@ -72,6 +73,7 @@ $html = '
 			</select>
 			<input type="text" class=" " value="" />
 		</form>
+		<div id="test" class="test__div" name="test">Test</div>
 		<script type="text/javascript" nomodule="nomodule">
 			alert("hi");
 		</script>
@@ -85,6 +87,7 @@ $html = '
 $time = microtime(true);
 $doc = new \hexydec\html\htmldoc();
 $doc->load($html);
+var_dump($doc->find('div > h2'));
 // $doc->open('https://www.php.net/manual/en/function.strcspn.php');
 $doc->minify();
 exit($doc->save());

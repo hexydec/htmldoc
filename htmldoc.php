@@ -11,33 +11,35 @@ require(__DIR__.'/tokens/script.php');
 
 class htmldoc implements \ArrayAccess {
 
+	protected $tokens = Array(
+		'doctype' => '<!DOCTYPE',
+		'comment' => '<!--[\d\D]*?-->',
+		'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
+		'tagopenstart' => '<[^ >\/]++',
+		'tagselfclose' => '\/>',
+		'tagopenend' => '>',
+		'tagclose' => '<\/[^ >]++>',
+		'textnode' => '(?<=>)[^<]++(?=<)',
+		'attributevalue' => '=\s*+["\']?[^"\']*+["\']?',
+		'attribute' => '[^<>"=\s]++',
+		'whitespace' => '\s++'
+	);
+	protected $selectors = Array(
+		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
+		'join' => '\s*[>+~]\s*',
+		'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
+		'squareopen' => '\[',
+		'squareclose' => '\]',
+		'bracketopen' => '\(',
+		'bracketclose' => '\)',
+		'comma' => ',',
+		'colon' => ':',
+		'id' => '#[^ +>\.#{\[]++',
+		'class' => '\.[^ +>\.#{\[]++',
+		'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" #\.]++',
+		'whitespace' => '\s++',
+	);
 	protected $config = Array(
-		'tokens' => Array(
-			'doctype' => '<!DOCTYPE',
-			'comment' => '<!--[\d\D]*?-->',
-			'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
-			'tagopenstart' => '<[^ >\/]++',
-			'tagselfclose' => '\/>',
-			'tagopenend' => '>',
-			'tagclose' => '<\/[^ >]++>',
-			'textnode' => '(?<=>)[^<]++(?=<)',
-			'attributevalue' => '=\s*+["\']?[^"\']*+["\']?',
-			'attribute' => '[^<>"=\s]++',
-			'whitespace' => '\s++'
-		),
-		'selectors' => Array(
-			'whitespace' => '\s++',
-			'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
-			'join' => '[>+~]',
-			'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
-			'squareopen' => '\[',
-			'squareclose' => '\]',
-			'bracketopen' => '\(',
-			'bracketclose' => '\)',
-			'comma' => ',',
-			'colon' => ':',
-			'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
-		),
 		'elements' => Array(
 			'inline' => Array(
 				'b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span'
@@ -86,8 +88,8 @@ class htmldoc implements \ArrayAccess {
 				'host' => true, // remove the host for own domain
 				'scheme' => true // remove the scheme from URLs that have the same scheme as the current document
 			),
-			'attributes' => Array( // remove values from boolean attributes
-				'default' => true,
+			'attributes' => Array( // minify attributes
+				'default' => true, // remove default attributes
 				'empty' => true, // remove these attributes if empty
 				'option' => true, // remove value attribute from option where the text node has the same value
 				'style' => true, // minify the style tag
@@ -99,7 +101,7 @@ class htmldoc implements \ArrayAccess {
 			'quotes' => true, // minify attribute quotes
 		),
 		'output' => Array(
-			'charset' => 'utf-8',
+			'charset' => null,
 			'quotestyle' => 'double', // double, single, minimal
 			'singletonclose' => ' />'
 		)
@@ -199,7 +201,7 @@ class htmldoc implements \ArrayAccess {
 		$this->document = Array();
 
 		// tokenise the input HTML
-		if (($tokens = $this->tokenise($html, $this->config['tokens'])) === false) {
+		if (($tokens = $this->tokenise($html, $this->tokens)) === false) {
 			trigger_error('Could not tokenise input', E_USER_WARNING);
 
 		// parse the document
@@ -329,56 +331,104 @@ class htmldoc implements \ArrayAccess {
 		return !!$this->document;
 	}
 
-	// public function find($selector) {
-	// 	if (($parsed = $this->parseSelector($selector)) !== false) {
-	//
-	// 	}
-	// 	return $this->document->find($selector);
-	// }
+	public function find($selector) {
+		$found = Array();
+		if (is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
+			foreach ($this->document AS $item) {
+				if (get_class($item) == 'hexydec\\html\\tag') {
+					foreach ($selector AS $value) {
+						if (($items = $item->find($value)) !== false) {
+							$found = array_merge($found, $items);
+						}
+					}
+				}
+			}
+		}
+		return $found ? $found : false;
+		//return $this->document->find($selector);
+	}
 
 	protected function parseSelector(String $selector) {
-		if (($tokens = $this->tokenise($selector, $this->config['selectors'])) !== false) {
-			$selector = Array();
+		$selector = trim($selector);
+		if (($tokens = $this->tokenise($selector, $this->selectors)) !== false) {
+			$selectors = $parts = Array();
 			$join = false;
-			while ($i++ < $count) {
-				switch ($tokens[$i]['type']) {
+			$token = current($tokens);
+			do {
+				switch ($token['type']) {
+					case 'id':
+						$parts[] = Array(
+							'id' => substr($token['value'], 1),
+							'join' => $join
+						);
+						$join = false;
+						break;
+					case 'class':
+						$parts[] = Array(
+							'class' => substr($token['value'], 1),
+							'join' => $join
+						);
+						$join = false;
+						break;
+					case 'string':
+						$parts[] = Array(
+							'tag' => $token['value'],
+							'join' => $join
+						);
+						$join = false;
+						break;
+					case 'squareopen':
+						$item = Array('join' => $join);
+						while (($token = next($tokens)) !== false) {
+							if ($token['type'] == 'squareclose') {
+								break;
+							} elseif ($token['type'] == 'string') {
+								$item[isset($item['attribute']) ? 'value' : 'attribute'] = $token['value'];
+							} elseif ($token['type'] == 'comparison') {
+								$item['comparison'] = $token['value'];
+							}
+						}
+						$parts[] = $item;
+						$join = false;
+						break;
+					case 'join':
+						$join = trim($token['value']);
+						break;
 					case 'whitespace':
-						if (!$join) {
+						if ($parts) {
 							$join = ' ';
 						}
 						break;
-					case 'string':
-						$selector[] = Array(
-							'selector' => $tokens[$i]['value'],
-							'join' => $join
-						);
-						$join = false;
-						break;
-					case 'colon':
-						$parts = ':';
-						while ($i++ < $count) {
-							if (!in_array($tokens[$i]['type'], Array('whitespace', 'comma', 'curlyopen'))) {
-								$parts .= $tokens[$i]['value'];
-							} else {
-								$i--;
-								break;
-							}
-						}
-						$selector[] = Array(
-							'selector' => $parts,
-							'join' => $join
-						);
-						$join = false;
+					// case 'colon':
+					// 	$parts = ':';
+					// 	while (($token = next($tokens)) !== false) {
+					// 		if (!in_array($token['type'], Array('whitespace', 'comma', 'curlyopen'))) {
+					// 			$parts .= $token['value'];
+					// 		} else {
+					// 			prev($tokens);
+					// 			break;
+					// 		}
+					// 	}
+					// 	$selector[] = Array(
+					// 		'selector' => $parts,
+					// 		'join' => $join
+					// 	);
+					// 	$join = false;
+					// 	break;
+					case 'comma':
+						$selectors[] = $parts;
+						$parts = Array();
 						break;
 					case 'curlyopen':
-					case 'comma':
+						$selectors[] = $parts;
+						$parts = Array();
 						break 2;
-					case 'join':
-						$join = $tokens[$i]['value'];
-						break;
 				}
+			} while (($token = next($tokens)) !== false);
+			if ($parts) {
+				$selectors[] = $parts;
 			}
-			return $selector;
+			return $selectors;
 		}
 		return false;
 	}
@@ -414,22 +464,23 @@ class htmldoc implements \ArrayAccess {
 		}
 	}
 
-	public function compile(Array $config) : String {
+	public function compile(Array $options) : String {
+		$options = array_merge($this->config['output'], $options);
 		$html = '';
 		foreach ($this->document AS $item) {
-			$html .= $item->compile($config);
+			$html .= $item->compile($options);
 		}
 		return $html;
 	}
 
-	public function save(string $file = null, string $charset = null) {
+	public function save(string $file = null, Array $options = Array()) {
 
 		// compile html
-		$html = $this->compile($this->config['output']);
+		$html = $this->compile($options);
 
 		// convert charset
-		if ($charset) {
-			$html = iconv(mb_internal_encoding(), $charset, $html);
+		if (!empty($options['charset'])) {
+			$html = iconv(mb_internal_encoding(), $options['charset'], $html);
 		}
 
 		// save file

@@ -172,6 +172,72 @@ class tag {
 		}
 	}
 
+	public function find(Array $selector) : Array {
+		$found = Array();
+		$match = true;
+		$searchChildren = true;
+		foreach ($selector AS $i => $item) {
+
+			// only search this level
+			if ($item['join'] == '>' && !$i) {
+				$searchChildren = false;
+			}
+
+			// pass rest of selector to level below
+			if ($item['join'] && $i) {
+				$match = false;
+				if (($children = $this->children->find(Array(array_slice($selector, $i)))) !== false) {
+					$found = array_merge($found, $children);
+				}
+				break;
+			} elseif (!empty($item['tag'])) {
+				if ($item['tag'] != $this->tagName) {
+					$match = false;
+					break;
+				}
+			} elseif (!empty($item['id'])) {
+				if (empty($this->attributes['id']) || $item['id'] != $this->attributes['id']) {
+					$match = false;
+					break;
+				}
+			} elseif (!empty($item['class'])) {
+				if (empty($this->attributes['class']) || !in_array($item['class'], explode(' ', $this->attributes['class']))) {
+					$match = false;
+					break;
+				}
+			} elseif (!empty($item['attribute'])) {
+				if (empty($this->attributes[$item['attribute']])) {
+					$match = false;
+					break;
+				} elseif (!empty($item['value'])) {
+					if ($item['comparison'] == '=') {
+						if ($this->attributes[$item['attribute']] != $item['value']) {
+							$match = false;
+							break;
+						}
+					} elseif ($item['comparison'] == '^=') {
+						if (strpos($item['value'], $this->attributes[$item['attribute']]) !== 0) {
+							$match = false;
+							break;
+						}
+					} elseif ($item['comparison'] == '$=') {
+						if (strpos($item['value'], $this->attributes[$item['attribute']]) !== strlen($this->attributes[$item['attribute']]) - strlen($item['value'])) {
+							$match = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		if ($match) {
+			$found[] = $this;
+		}
+		if ($searchChildren && $this->children && ($children = $this->children->find(Array($selector))) !== false) {
+			$found = array_merge($found, $children);
+		}
+		return $found;
+	}
+
 	public function attr(string $key) : string {
 		if (isset($this->attributes[$key])) {
 			return $this->attributes[$key];

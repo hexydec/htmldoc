@@ -240,6 +240,22 @@ class cssmin {
 					);
 					$join = false;
 					break;
+				case 'squareopen':
+					$parts = '';
+					while ($i++ < $count) {
+						if (!in_array($tokens[$i]['type'], Array('squareclose'))) {
+							$parts .= $tokens[$i]['value'];
+						} elseif ($tokens[$i]['type'] != 'whitespace') {
+							$i--;
+							break;
+						}
+					}
+					$selector[] = Array(
+						'selector' => '['.$parts.']',
+						'join' => $join
+					);
+					$join = false;
+					break;
 				case 'curlyopen':
 				case 'comma':
 					break 2;
