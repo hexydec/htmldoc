@@ -1,6 +1,6 @@
 {
   "name": "minify",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A token based HTML Document parser and minifier written in PHP",
   "main": "index.js",
   "directories": {
