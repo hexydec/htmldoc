@@ -11,6 +11,9 @@ require(__DIR__.'/tokens/script.php');
 
 class htmldoc implements \ArrayAccess {
 
+	/**
+	 * @var Array $token Regexp components keyed by their corresponding codename for tokenising HTML
+	 */
 	protected $tokens = Array(
 		'doctype' => '<!DOCTYPE',
 		'comment' => '<!--[\d\D]*?-->',
@@ -24,6 +27,10 @@ class htmldoc implements \ArrayAccess {
 		'attribute' => '[^<>"=\s]++',
 		'whitespace' => '\s++'
 	);
+
+	/**
+	 * @var Array $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
+	 */
 	protected $selectors = Array(
 		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
 		'join' => '\s*[>+~]\s*',
@@ -36,9 +43,13 @@ class htmldoc implements \ArrayAccess {
 		'colon' => ':',
 		'id' => '#[^ +>\.#{\[]++',
 		'class' => '\.[^ +>\.#{\[]++',
-		'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" #\.]++',
+		'string' => '!?[^\[\]{}\(\):;,>+*=~\^$!" #\.]++',
 		'whitespace' => '\s++',
 	);
+
+	/**
+	 * @var Array $config Object configuration array
+	 */
 	protected $config = Array(
 		'elements' => Array(
 			'inline' => Array(
@@ -106,18 +117,29 @@ class htmldoc implements \ArrayAccess {
 			'singletonclose' => ' />'
 		)
 	);
-	protected $document = Array();
-	protected $attributes = Array();
 
+	/**
+	 * @var Array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
+	 */
+	protected $children = Array();
+	//protected $attributes = Array();
+
+	/**
+	 * Constructs the object
+	 *
+	 * @param Array $config An array of configuration parameters that is recursively merged with the default config
+	 */
 	public function __construct(Array $config = Array()) {
 		$this->config = array_replace_recursive($this->config, $config);
 	}
 
 	/**
 	 * Retrieves the configuration of the object as an array
+	 *
+	 * @return Array An array of child nodes
 	 */
 	public function toArray() {
-		return $this->document;
+		return $this->children;
 	}
 
 	/**
@@ -127,8 +149,8 @@ class htmldoc implements \ArrayAccess {
 	 * @param mixed $value The value of the array key in the configuration array to be updated
 	 */
 	public function offsetSet($i, $value) {
-		if (is_null($i)) $this->document[] = $value;
-		else $this->document[$i] = $value;
+		if (is_null($i)) $this->children[] = $value;
+		else $this->children[$i] = $value;
 	}
 
 	/**
@@ -138,7 +160,7 @@ class htmldoc implements \ArrayAccess {
 	 * @return bool Whether the key exists in the config array
 	 */
 	public function offsetExists($i) {
-		return isset($this->document[$i]);
+		return isset($this->children[$i]);
 	}
 
 	/**
@@ -147,7 +169,7 @@ class htmldoc implements \ArrayAccess {
 	 * @param mixed $i The key to be removed, can be a string or integer
 	 */
 	public function offsetUnset($i) {
-		unset($this->document[$i]);
+		unset($this->children[$i]);
 	}
 
 	/**
@@ -157,19 +179,26 @@ class htmldoc implements \ArrayAccess {
 	 * @return mixed The requested value or null if the key doesn't exist
 	 */
 	public function &offsetGet($i) { // return reference so you can set it like an array
-		if (!isset($this->document[$i])) {
+		if (!isset($this->children[$i])) {
 			$null = null;
 			return $null;
 		} else {
-			return $this->document[$i];
+			return $this->children[$i];
 		}
 	}
 
-	public function open(String $url, String &$error = null) {
-		if (($handle = fopen($url, 'rb')) === false) {
-			$error = 'Could not open file';
+	/**
+	 * Open an HTML file from a URL
+	 *
+	 * @param string $url The address of the HTML file to retrieve
+	 * @param string $context An optional array of context parameters
+	 * @return bool Whether the file was loaded and parsed
+	 */
+	public function open(String $url, Resource $context = null, String &$error = null) {
+		if (($handle = fopen($url, 'rb', $context)) === false) {
+			$error = 'Could not open file "'.$url.'"';
 		} elseif (($html = stream_get_contents($handle)) === false) {
-			$error = 'Could not read file';
+			$error = 'Could not read file "'.$url.'"';
 		} else {
 
 			// find charset in headers
@@ -185,28 +214,35 @@ class htmldoc implements \ArrayAccess {
 			}
 
 			// load htmk
-			return $this->load($html, $charset);
+			return $this->load($html, $charset, $error);
 		}
 		return false;
 	}
 
-	public function load(string $html, string $charset = null) {
+	/**
+	 * Parse an HTML string into the object
+	 *
+	 * @param string $html A string containing valid HTML
+	 * @param string $charset The charset of the document
+	 * @return bool Whether the input HTML was parsed
+	 */
+	public function load(string $html, string $charset = null, &$error = null) {
 
 		// detect the charset
-		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== null) {
+		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== false || ($charset = mb_detect_encoding($html)) !== false) {
 			$html = iconv($charset, mb_internal_encoding(), $html);
 		}
 
 		// reset the document
-		$this->document = Array();
+		$this->children = Array();
 
 		// tokenise the input HTML
 		if (($tokens = $this->tokenise($html, $this->tokens)) === false) {
-			trigger_error('Could not tokenise input', E_USER_WARNING);
+			$error = 'Could not tokenise input';
 
 		// parse the document
 		} elseif (!$this->parse($tokens)) {
-			trigger_error('Input is not invalid', E_USER_WARNING);
+			$error = 'Input is not invalid';
 
 		// success
 		} else {
@@ -215,22 +251,34 @@ class htmldoc implements \ArrayAccess {
 		return false;
 	}
 
-	protected function getCharsetFromHtml(string $html) : string {
+	/**
+	 * Reads the charset defined in the Content-Type meta tag, or detects the charset from the HTML content
+	 *
+	 * @param string $html A string containing valid HTML
+	 * @return string The defined or detected charset or false if the charset is not defined
+	 */
+	protected function getCharsetFromHtml(string $html) {
 		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
 			$obj = new htmldoc();
 			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj[0]->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
 				return substr($charset, 8);
 			}
-		} else {
-			return mb_detect_encoding($html);
 		}
+		return false;
 	}
 
-	protected function tokenise($code, $patterns) {
+	/**
+	 * Tokenises the input using the supplied patterns
+	 *
+	 * @param String $str The string to be tokenised
+	 * @param Array $patterns An associative array of regexp patterns, keyed by their token name
+	 * @return Array An array of tokens, each token is an array containing the keys 'type' and 'value'
+	 */
+	protected function tokenise($str, $patterns) {
 
 		// prepare regexp and extract strings
 		$re = '/('.implode(')|(', $patterns).')/u';
-		if (preg_match_all($re, $code, $match)) {
+		if (preg_match_all($re, $str, $match)) {
 
 			// build tokens into types
 			$tokens = Array();
@@ -253,20 +301,28 @@ class htmldoc implements \ArrayAccess {
 		return false;
 	}
 
-	public function parse(Array &$tokens, string $parenttag = null, array &$attach = null) : bool {
+	/**
+	 * Parses an array of tokens into an HTML documents
+	 *
+	 * @param Array &$tokens An array of tokens generated by tokenise()
+	 * @param String $parenttag The tag name of the parent tag, or null if there is no parent
+	 * @param String &$attach A reference to any tags that should be attached to the level above
+	 * @return bool Whether the parser was able to capture any objects
+	 */
+	public function parse(Array &$tokens, String $parenttag = null, Array &$attach = null) : bool {
 
 		// keep whitespace for certain tags
 		if (in_array($parenttag, $this->config['elements']['pre'])) {
 			$item = new pre();
 			$item->parse($tokens);
-			$this->document[] = $item;
+			$this->children[] = $item;
 
 		// certain tags have thier own plugins
 		} elseif (in_array($parenttag, $this->config['elements']['custom'])) {
 			$class = '\\hexydec\\html\\'.$parenttag;
 			$item = new $class($this->config);
 			$item->parse($tokens);
-			$this->document[] = $item;
+			$this->children[] = $item;
 
 		// parse children
 		} elseif (!in_array($parenttag, $this->config['elements']['singleton'])) {
@@ -277,8 +333,8 @@ class htmldoc implements \ArrayAccess {
 					case 'doctype':
 						$item = new doctype();
 						$item->parse($tokens);
-						if (empty($this->document)) { // only add if found at the top of the document
-							$this->document[] = $item;
+						if (empty($this->children)) { // only add if found at the top of the document
+							$this->children[] = $item;
 						}
 						break;
 
@@ -288,9 +344,9 @@ class htmldoc implements \ArrayAccess {
 						// parse the tag
 						$item = new tag($tag, $this->config);
 						$item->parse($tokens, $attach);
-						$this->document[] = $item;
+						$this->children[] = $item;
 						if ($attach) {
-							$this->document[] = $attach;
+							$this->children[] = $attach;
 							$attach = null;
 						}
 						break;
@@ -300,8 +356,8 @@ class htmldoc implements \ArrayAccess {
 						if (strtolower($close) != strtolower($tag)) { // if tags not the same, go back to previous level
 
 							// if a tag isn't closed and we are closing a tag that isn't the parent, send the last child tag to the parent level
-							if ($tag && $parenttag != $close && get_class(end($this->document)) == 'hexydec\\html\\tag') {
-								$attach = array_pop($this->document);
+							if ($tag && $parenttag != $close && get_class(end($this->children)) == 'hexydec\\html\\tag') {
+								$attach = array_pop($this->children);
 							}
 							prev($tokens); // close the tag on each level below until we find itself
 							break 2;
@@ -311,41 +367,24 @@ class htmldoc implements \ArrayAccess {
 					case 'textnode':
 						$item = new text($this->config);
 						$item->parse($tokens);
-						$this->document[] = $item;
+						$this->children[] = $item;
 						break;
 
 					case 'cdata':
 						$item = new cdata();
 						$item->parse($tokens);
-						$this->document[] = $item;
+						$this->children[] = $item;
 						break;
 
 					case 'comment':
 						$item = new comment();
 						$item->parse($tokens);
-						$this->document[] = $item;
+						$this->children[] = $item;
 						break;
 				}
 			} while (($token = next($tokens)) !== false);
 		}
-		return !!$this->document;
-	}
-
-	public function find($selector) {
-		$found = Array();
-		if (is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
-			foreach ($this->document AS $item) {
-				if (get_class($item) == 'hexydec\\html\\tag') {
-					foreach ($selector AS $value) {
-						if (($items = $item->find($value)) !== false) {
-							$found = array_merge($found, $items);
-						}
-					}
-				}
-			}
-		}
-		return $found ? $found : false;
-		//return $this->document->find($selector);
+		return !!$this->children;
 	}
 
 	protected function parseSelector(String $selector) {
@@ -433,8 +472,61 @@ class htmldoc implements \ArrayAccess {
 		return false;
 	}
 
-	public function children() : Array {
-		return $this->document;
+	public function find($selector) {
+		$found = Array();
+
+		// parse selector and find tags
+		if (is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
+			foreach ($this->children AS $item) {
+				if (get_class($item) == 'hexydec\\html\\tag') {
+					foreach ($selector AS $value) {
+						if (($items = $item->find($value)) !== false) {
+							$found = array_merge($found, $items);
+						}
+					}
+				}
+			}
+		}
+
+		// create new document and return
+		$doc = new htmldoc($this->config);
+		if ($found) {
+			$doc->collection($found);
+		}
+		return $doc;
+	}
+
+	public function children() : htmldoc {
+		return $this->find('>*');
+	}
+
+	public function attr(string $key) {
+		foreach ($this->children AS $item) {
+			if (get_class($item) == 'hexydec\\html\\tag') {
+				return $item->attr($key);
+			}
+		}
+	}
+
+	public function text() : string {
+		$text = '';
+		foreach ($this->children AS $item) {
+
+			// only get text from these objects
+			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text', 'hexydec\\html\\pre'))) {
+				$text .= $item->text();
+
+				// add a space to make sure words aren't joined
+				if ($text && mb_substr($text, -1) != ' ') {
+					$text .= ' ';
+				}
+			}
+		}
+		return $text;
+	}
+
+	public function collection(Array $nodes) {
+		$this->children = $nodes;
 	}
 
 	public function minify(Array $config = Array(), tag $parent = null) {
@@ -459,7 +551,7 @@ class htmldoc implements \ArrayAccess {
 		// 	arsort($this->attributes, SORT_NUMERIC);
 		// 	$config['attributes']['sort'] = \array_keys($this->attributes);
 		// }
-		foreach ($this->document AS $item) {
+		foreach ($this->children AS $item) {
 			$item->minify($config, $parent);
 		}
 	}
@@ -467,7 +559,7 @@ class htmldoc implements \ArrayAccess {
 	public function compile(Array $options) : String {
 		$options = array_merge($this->config['output'], $options);
 		$html = '';
-		foreach ($this->document AS $item) {
+		foreach ($this->children AS $item) {
 			$html .= $item->compile($options);
 		}
 		return $html;

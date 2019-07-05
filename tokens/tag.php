@@ -98,7 +98,7 @@ class tag {
 					$this->attributes[$key] = implode(' ', $class);
 
 				// minify option tag
-				} elseif ($key == 'value' && $config['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->value == $value) {
+				} elseif ($key == 'value' && $config['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $value) {
 					unset($this->attributes[$key]);
 
 				// remove tag specific default attribute
@@ -190,7 +190,7 @@ class tag {
 					$found = array_merge($found, $children);
 				}
 				break;
-			} elseif (!empty($item['tag'])) {
+			} elseif (!empty($item['tag']) && $item['tag'] != '*') {
 				if ($item['tag'] != $this->tagName) {
 					$match = false;
 					break;
@@ -233,7 +233,7 @@ class tag {
 			$found[] = $this;
 		}
 		if ($searchChildren && $this->children && ($children = $this->children->find(Array($selector))) !== false) {
-			$found = array_merge($found, $children);
+			$found = array_merge($found, $children->toArray());
 		}
 		return $found;
 	}
@@ -241,6 +241,14 @@ class tag {
 	public function attr(string $key) : string {
 		if (isset($this->attributes[$key])) {
 			return $this->attributes[$key];
+		}
+	}
+
+	public function text() : string {
+		if ($this->children) {
+			return $this->children->text();
+		} else {
+			return '';
 		}
 	}
 

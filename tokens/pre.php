@@ -3,7 +3,7 @@ namespace hexydec\html;
 
 class pre {
 
-	protected $value = null;
+	protected $textContent = null;
 
 	public function parse(Array $tokens) : Array {
 		$value = '';
@@ -15,10 +15,14 @@ class pre {
 		}
 	}
 
+	public function text() {
+		return $this->textContent;
+	}
+
 	public function minify(Array $config) {
 	}
 
 	public function compile(Array $config) {
-		return htmlspecialchars($this->value);
+		return htmlspecialchars($this->textContent);
 	}
 }
