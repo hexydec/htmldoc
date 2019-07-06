@@ -21,4 +21,8 @@ class doctype {
 	public function compile(Array $config) {
 		return '<!DOCTYPE '.implode(' ', $this->type).'>';
 	}
+
+	public function __get($var) {
+		return $this->$var;
+	}
 }

@@ -6,9 +6,9 @@ class tag {
 	protected $config = Array();
 	protected $tagName;
 	protected $attributes = Array();
-	protected $children;
 	protected $singleton = false;
-	protected $quotes = 'double';
+	protected $children;
+	public $close = true;
 
 	public function __construct($tag, $config) {
 		$this->tagName = $tag;
@@ -155,6 +155,43 @@ class tag {
 			}
 		}
 
+		// work out whether to omit the closing tag
+		if ($config['close'] && in_array($this->tagName, $this->config['elements']['closeoptional'])) {
+			$tag = null;
+			$children = $parent->children();
+			$last = end($children);
+			$next = false;
+			foreach ($children AS $item) {
+
+				// find self in siblings
+				if ($item === $this) {
+					$next = true;
+
+				// find next tag
+				} elseif ($next) {
+					$type = get_class($item);
+
+					// if type is not text or the text content is empty
+					if ($type != 'hexydec\\html\\text' || !$item->content) {
+
+						// if the next tag is optinally closable too, then we can remove the closing tag of this
+						if ($type == 'hexydec\\html\\tag' && in_array($item->tagName, $this->config['elements']['closeoptional'])) {
+							$this->close = false;
+						}
+
+						// indicate we have process this
+						$next = false;
+						break;
+					}
+				}
+			}
+
+			// if last tag, remove closing tag
+			if ($next) {
+				$this->close = false;
+			}
+		}
+
 		// sort attributes
 		// if ($config['attributes']['sort']) {
 		// 	$attr = $this->attributes;
@@ -238,7 +275,7 @@ class tag {
 		return $found;
 	}
 
-	public function attr(string $key) : string {
+	public function attr(string $key) : ?string {
 		if (isset($this->attributes[$key])) {
 			return $this->attributes[$key];
 		}
@@ -252,7 +289,7 @@ class tag {
 		}
 	}
 
-	public function compile(Array $config) {
+	public function compile(Array $config) : String {
 		$html = '<'.$this->tagName;
 
 		// compile attributes
@@ -277,7 +314,9 @@ class tag {
 		} else {
 			$html .= '>';
 			$html .= $this->children->compile($config);
-			$html .= '</'.$this->tagName.'>';
+			if ($config['closetags'] || $this->close) {
+				$html .= '</'.$this->tagName.'>';
+			}
 		}
 		return $html;
 	}

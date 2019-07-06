@@ -64,7 +64,7 @@ $html = '
 			<a href="/minify/test/"><img src="test.png" alt="" class="image" /></a>
 			<a href="http://test.com/"><img src="test.png" class="image" alt="" /></a>
 			<div>
-				<h2>Heading tthat isn\'t closed
+				<h2>Heading tthat isn\'t closed</h2>
 				<p>Paragraph that isn\'t closed
 			</div>
 			<select name="select">
@@ -87,9 +87,9 @@ $html = '
 $time = microtime(true);
 $doc = new \hexydec\html\htmldoc();
 $doc->load($html);
-var_dump($doc->find('div > h2'));
 // $doc->open('https://www.php.net/manual/en/function.strcspn.php');
 $doc->minify();
+// print_r($doc->debug());
 exit($doc->save());
 // echo "\n\n".number_format(microtime(true) - $time, 8)."\n\n";
 

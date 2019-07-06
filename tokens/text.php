@@ -4,7 +4,7 @@ namespace hexydec\html;
 class text {
 
 	protected $config = Array();
-	protected $textContent = '';
+	protected $content = '';
 
 	public function __construct(Array $config) {
 		$this->config = $config;
@@ -12,18 +12,18 @@ class text {
 
 	public function parse(Array &$tokens) {
 		$token = current($tokens);
-		$this->textContent = html_entity_decode($token['value'], ENT_QUOTES);
+		$this->content = html_entity_decode($token['value'], ENT_QUOTES);
 	}
 
 	public function text() {
-		return $this->textContent;
+		return $this->content;
 	}
 
 	public function minify(Array $config, object $parent = null) {
 
 		// collapse whitespace
 		if ($config['whitespace']) {
-			$this->textContent = preg_replace('/\s++/', ' ', $this->textContent);
+			$this->content = preg_replace('/\s++/', ' ', $this->content);
 
 			if ($parent) {
 				$children = $parent->children();
@@ -46,7 +46,7 @@ class text {
 						}
 					}
 					if ($trim) {
-						$this->textContent = ltrim($this->textContent);
+						$this->content = ltrim($this->content);
 					}
 
 					// if next tag is a block element, rtrim the textnode
@@ -62,7 +62,7 @@ class text {
 						}
 					}
 					if ($trim) {
-						$this->textContent = rtrim($this->textContent);
+						$this->content = rtrim($this->content);
 					}
 				}
 			}
@@ -79,6 +79,10 @@ class text {
 	}
 
 	public function compile(Array $config) {
-		return $this->textContent ? htmlspecialchars($this->textContent) : '';
+		return $this->content ? htmlspecialchars($this->content) : '';
+	}
+
+	public function __get($var) {
+		return $this->$var;
 	}
 }

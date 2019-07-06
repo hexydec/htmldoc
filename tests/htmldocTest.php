@@ -23,6 +23,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-recycle.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -36,6 +37,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-minified.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -51,6 +53,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/whitespace-minified.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -68,6 +71,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'urls' => false, // update internal URL's to be shorter
 	   			'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/comments-minified.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -80,6 +84,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/comments-minified-ie.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -98,6 +103,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				//'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/urls-minified.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -115,6 +121,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				//'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/attributes-minified.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -132,6 +139,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				//'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/singleton-minified.html'));
 			$this->assertEquals($minified, $doc->save());
@@ -149,6 +157,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			//'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/quotes-minified.html'));
 			$this->assertEquals($minified, $doc->save());

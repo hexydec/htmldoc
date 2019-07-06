@@ -15,4 +15,8 @@ class cdata {
 	public function compile(Array $config) {
 		return $this->content === null ? '' : '<[CDATA['.$this->content.']]>';
 	}
+
+	public function __get($var) {
+		return $this->$var;
+	}
 }

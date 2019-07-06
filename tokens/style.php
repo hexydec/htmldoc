@@ -4,7 +4,7 @@ namespace hexydec\html;
 class style {
 
 	protected $config = Array();
-	protected $value = null;
+	protected $content = null;
 
 	public function __construct(array $config) {
 		$this->config = $config;
@@ -18,19 +18,23 @@ class style {
 			$token = next($tokens);
 		}
 		if ($value) {
-			$this->value = $value;
+			$this->content = $value;
 		}
 	}
 
 	public function minify(Array $config) {
-		if ($config['css'] && $this->value) {
-			$this->value = call_user_func($config['css'], $this->value);
+		if ($config['css'] && $this->content) {
+			$this->content = call_user_func($config['css'], $this->content);
 		} else {
-			$this->value = trim($this->value);
+			$this->content = trim($this->content);
 		}
 	}
 
 	public function compile(Array $config) {
-		return $this->value;
+		return $this->content;
+	}
+
+	public function __get($var) {
+		return $this->$var;
 	}
 }

@@ -3,7 +3,7 @@ namespace hexydec\html;
 
 class pre {
 
-	protected $textContent = null;
+	protected $content = null;
 
 	public function parse(Array $tokens) : Array {
 		$value = '';
@@ -11,18 +11,22 @@ class pre {
 			$value .= $token['value'];
 		}
 		if ($value) {
-			$this->value = html_entity_decode($value, ENT_QUOTES);
+			$this->content = html_entity_decode($value, ENT_QUOTES);
 		}
 	}
 
 	public function text() {
-		return $this->textContent;
+		return $this->content;
 	}
 
 	public function minify(Array $config) {
 	}
 
 	public function compile(Array $config) {
-		return htmlspecialchars($this->textContent);
+		return htmlspecialchars($this->content);
+	}
+
+	public function __get($var) {
+		return $this->$var;
 	}
 }

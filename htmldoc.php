@@ -58,8 +58,8 @@ class htmldoc implements \ArrayAccess {
 			'singleton' => Array(
 				'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
 			),
-			'unnestable' => Array(
-				'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+			'closeoptional' => Array(
+				'html', 'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup'
 			),
 			'pre' => Array('textarea', 'pre', 'code'), // which elements not to strip whitespace from
 			'custom' => Array('script', 'style'), // which elements have their own plugins
@@ -83,7 +83,7 @@ class htmldoc implements \ArrayAccess {
 					'type' => 'text'
 				)
 			),
-			'empty' => Array('id', 'class', 'style', 'title'), // attributes to remove if empty
+			'empty' => Array('id', 'class', 'style', 'title', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
 			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 		),
 		'minify' => Array(
@@ -110,11 +110,13 @@ class htmldoc implements \ArrayAccess {
 			),
 			'singleton' => true, // minify singleton element by removing slash
 			'quotes' => true, // minify attribute quotes
+			'close' => true // don't write close tags where possible
 		),
 		'output' => Array(
-			'charset' => null,
+			'charset' => null, // set the output charset
 			'quotestyle' => 'double', // double, single, minimal
-			'singletonclose' => ' />'
+			'singletonclose' => ' />', // string to close singleton tags
+			'closetags' => false // whether to force tags to have a closing tag (true) or follow tag::close
 		)
 	);
 
@@ -346,6 +348,7 @@ class htmldoc implements \ArrayAccess {
 						$item->parse($tokens, $attach);
 						$this->children[] = $item;
 						if ($attach) {
+							$item->close = false;
 							$this->children[] = $attach;
 							$attach = null;
 						}
@@ -358,6 +361,7 @@ class htmldoc implements \ArrayAccess {
 							// if a tag isn't closed and we are closing a tag that isn't the parent, send the last child tag to the parent level
 							if ($tag && $parenttag != $close && get_class(end($this->children)) == 'hexydec\\html\\tag') {
 								$attach = array_pop($this->children);
+								$attach->close = false;
 							}
 							prev($tokens); // close the tag on each level below until we find itself
 							break 2;
@@ -584,5 +588,33 @@ class htmldoc implements \ArrayAccess {
 			return true;
 		}
 		return false;
+	}
+
+	public function debug() {
+		$output = Array();
+		foreach ($this->children AS $item) {
+			$node = Array(
+				'type' => get_class($item)
+			);
+			switch ($node['type']) {
+				case 'hexydec\\html\\tag':
+					$node['tag'] = $item->tagName;
+					$node['attributes'] = $item->attributes;
+					$node['singleton'] = $item->singleton;
+					$node['close'] = $item->close;
+					if ($item->children) {
+						$node['children'] = $item->children->debug();
+					}
+					break;
+				case 'hexydec\\html\\doctype':
+					$node['doctype'] = $item->type;
+					break;
+				default:
+					$node['content'] = $item->content;
+					break;
+			}
+			$output[] = $node;
+		}
+		return $output;
 	}
 }
