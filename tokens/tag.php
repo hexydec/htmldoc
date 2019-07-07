@@ -161,7 +161,7 @@ class tag {
 			$children = $parent->children();
 			$last = end($children);
 			$next = false;
-			foreach ($children AS $item) {
+			foreach ($children->toArray() AS $item) {
 
 				// find self in siblings
 				if ($item === $this) {
@@ -322,7 +322,7 @@ class tag {
 	}
 
 	public function children() {
-		return $this->children->toArray();
+		return $this->children;
 	}
 
 	public function __get($var) {

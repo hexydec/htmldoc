@@ -22,7 +22,7 @@ The options set into the object are setup for general use, but can be configured
 |---------------|---------------------------------------------------|-------------------------------|
 | `inline`		| HTML elements that are considered inline			| `Array('b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span')` |
 | `singleton`	| HTML elements that are singletons					| `Array('area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr')` |
-| `closeoptional`	| HTML elements that don't have to be closed		| `Array('head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6')` |
+| `closeoptional`	| HTML elements that don't have to be closed		| `Array('head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup')` |
 | `pre`			| HTML elements that contain pre-formatted content	| `Array('textarea', 'pre', 'code')` |
 | `plugins`		| HTML elements that have a custom handler class	| `Array('script', 'style')` |
 
@@ -188,6 +188,13 @@ The optional `$options` array contains a list of configuration parameters to con
 			<td>Removes quotes from attribute values where possible</td>
 			<td>true</td>
 		</tr>
+		<tr>
+			<td><code>close</code></td>
+			<td>Boolean</td>
+			<td></td>
+			<td>Removes closing tags for elements defined in `htmldoc::$config['elements']['closeoptional']` where possible</td>
+			<td>true</td>
+		</tr>
 	</tbody>
 </table>
 
@@ -202,7 +209,6 @@ $doc->save($file, $options);
 ```
 
 #### Arguments
-
 
 <table>
 	<thead>
@@ -221,25 +227,30 @@ $doc->save($file, $options);
 			<td>null</td>
 		</tr>
 		<tr>
-			<td rowspan="4"><code>$options</code></td>
-			<td rowspan="4">Array</td>
-			<td colspan="2">An array of output options. *Note that for most scenarios, specifying this argument is not required*</td>
-			<td>Array()</td>
+			<td rowspan="5"><code>$options</code></td>
+			<td rowspan="5">Array</td>
+			<td colspan="2">An array of output options, the input is merged with `htmldoc::$config['output']`. *Note that for most scenarios, specifying this argument is not required*</td>
+			<td><code>>Array()</code</td>
 		</tr>
 		<tr>
 			<td><code>charset</code></td>
 			<td>The charset the output should be converted to. The default <code>null</code> will prevent any charset conversion.</td>
-			<td>null</td>
+			<td><code>null</code></td>
 		</tr>
 		<tr>
 			<td><code>quotestyle</code></td>
 			<td>Defines how to quote the attributes in the output, either <code>double</code>, <code>single</code>, or <code>minimal</code>. Note that using the <code>minify()</code> method using the option <code>'quotes' => true</code> will change the default setting to <code>minimal</code></td>
-			<td>double</td>
+			<td><code>&quot;double&quot;</code></td>
 		</tr>
 		<tr>
 			<td><code>singletonclose</code></td>
 			<td>A string defining how singleton tags will be closed. Note that using the <code>minify()</code> method using the option <code>'singleton' => true</code> will change the default setting to <code>&gt;</code></td>
-			<td><code> /></code></td>
+			<td><code>&quot; /&gt;&quot;</code></td>
+		</tr>
+		<tr>
+			<td><code>closetags</code></td>
+			<td>A boolean specifying whether to force elements to render a closing tag. If <code>false</code>, the renderer will follow the value defined in <code>tag::$close</code> (Which will be set according to whether the tag had no closing tag when the document was parsed, or may be set to false if the document has been minified with <code>minify()</code>)</td>
+			<td><code>false</code></td>
 		</tr>
 	</tbody>
 </table>
