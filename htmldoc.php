@@ -189,12 +189,24 @@ class htmldoc implements \ArrayAccess {
 		}
 	}
 
+	public function getConfig() {
+		$config = $this->config;
+		foreach (func_get_args() AS $item) {
+			if (isset($config[$item])) {
+				$config = $config[$item];
+			} else {
+				return null;
+			}
+		}
+		return $config;
+	}
+
 	/**
 	 * Open an HTML file from a URL
 	 *
 	 * @param string $url The address of the HTML file to retrieve
 	 * @param string $context An optional array of context parameters
-	 * @return bool Whether the file was loaded and parsed
+	 * @return mixed The loaded HTML, or false on error
 	 */
 	public function open(String $url, Resource $context = null, String &$error = null) {
 		if (($handle = fopen($url, 'rb', $context)) === false) {
@@ -216,7 +228,9 @@ class htmldoc implements \ArrayAccess {
 			}
 
 			// load htmk
-			return $this->load($html, $charset, $error);
+			if ($this->load($html, $charset, $error)) {
+				return $html;
+			}
 		}
 		return false;
 	}
@@ -228,7 +242,7 @@ class htmldoc implements \ArrayAccess {
 	 * @param string $charset The charset of the document
 	 * @return bool Whether the input HTML was parsed
 	 */
-	public function load(string $html, string $charset = null, &$error = null) {
+	public function load(string $html, string $charset = null, &$error = null) : bool {
 
 		// detect the charset
 		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== false || ($charset = mb_detect_encoding($html)) !== false) {
@@ -351,6 +365,9 @@ class htmldoc implements \ArrayAccess {
 							$item->close = false;
 							$this->children[] = $attach;
 							$attach = null;
+						}
+						if (in_array($tag, $this->config['elements']['singleton'])) {
+							$tag = null;
 						}
 						break;
 

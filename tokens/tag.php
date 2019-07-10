@@ -41,9 +41,11 @@ class tag {
 					break;
 
 				case 'tagopenend':
-					next($tokens);
-					$this->children = new htmldoc($this->config);
-					$this->children->parse($tokens, $this->tagName, $attach);
+					if (!in_array($this->tagName, $this->config['elements']['singleton'])) {
+						next($tokens);
+						$this->children = new htmldoc($this->config);
+						$this->children->parse($tokens, $this->tagName, $attach);
+					}
 					break 2;
 
 				case 'tagselfclose':
@@ -279,6 +281,7 @@ class tag {
 		if (isset($this->attributes[$key])) {
 			return $this->attributes[$key];
 		}
+		return null;
 	}
 
 	public function text() : string {
@@ -313,7 +316,9 @@ class tag {
 		// close opening tag and compile contents
 		} else {
 			$html .= '>';
-			$html .= $this->children->compile($config);
+			if ($this->children) {
+				$html .= $this->children->compile($config);
+			}
 			if ($config['closetags'] || $this->close) {
 				$html .= '</'.$this->tagName.'>';
 			}

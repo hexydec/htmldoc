@@ -5,7 +5,7 @@ class pre {
 
 	protected $content = null;
 
-	public function parse(Array $tokens) : Array {
+	public function parse(Array &$tokens) {
 		$value = '';
 		while (($token = next($tokens)) !== false && $token['type'] != 'tagclose') {
 			$value .= $token['value'];
