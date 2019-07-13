@@ -44,11 +44,31 @@ class tag {
 					if (!in_array($this->tagName, $this->config['elements']['singleton'])) {
 						next($tokens);
 						$this->children = new htmldoc($this->config);
-						$this->children->parse($tokens, $this->tagName, $attach);
+						$this->children->parse($tokens, $this->tagName);
 					}
-					break 2;
+					break;
 
 				case 'tagselfclose':
+					break 2;
+
+				case 'tagopenstart':
+					$tag = trim($token['value'], '<');
+					if ($tag == $this->tagName) {
+						$this->close = false;
+					}
+					prev($tokens);
+					break 2;
+
+				case 'tagclose':
+					$close = trim($token['value'], '</>');
+					if (strtolower($close) != strtolower($this->tagName)) { // if tags not the same, go back to previous level
+
+						// if the closing tag is optional then don't close the tag
+						if (in_array($this->tagName, $this->config['elements']['closeoptional'])) {
+							$this->close = false;
+						}
+						prev($tokens); // close the tag on each level below until we find itself
+					}
 					break 2;
 			}
 		}

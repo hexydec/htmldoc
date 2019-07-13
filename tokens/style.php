@@ -17,6 +17,7 @@ class style {
 			$value .= $token['value'];
 			$token = next($tokens);
 		}
+		prev($tokens);
 		if ($value) {
 			$this->content = $value;
 		}

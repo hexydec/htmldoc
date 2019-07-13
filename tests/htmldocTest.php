@@ -164,6 +164,21 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
+	public function testCanHandleBrokenHtml() {
+		$tests = Array(
+			'<a href="#"">Extra quote</a>' => '<a href="#">Extra quote</a>',
+			'<p title="</p>">Closing tag in titke</p>' => '<p title="&lt;/p&gt;">Closing tag in titke</p>',
+			'<p title=" <!-- hello world --> ">Comment in title</p>' => '<p title=" &lt;!-- hello world --&gt; ">Comment in title</p>',
+			'<section><div><h1>Wrong closing tag order</div></h1></section>' => '<section><div><h1>Wrong closing tag order</h1></div></section>'
+		);
+		$doc = new htmldoc();
+		foreach ($tests AS $input => $output) {
+			if ($doc->load($input, mb_internal_encoding())) {
+				$this->assertEquals($output, $doc->save());
+			}
+		}
+	}
+
 	/*public function testCanMinifyCss() {
 		$html = file_get_contents(__DIR__.'/templates/css.html');
 		$minified = file_get_contents(__DIR__.'/templates/css-minified.html');
