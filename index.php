@@ -193,14 +193,14 @@ if (!empty($_POST['action'])) {
 					<?php foreach ($options AS $key => $item) { ?>
 						<li>
 							<label>
-								<input type="checkbox" name="minify[]" value="<?= $key; ?>"<?= $minify[$key] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($key)); ?>
+								<input type="checkbox" name="minify[]" value="<?= $key; ?>"<?= isset($minify[$key]) && $minify[$key] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($key)); ?>
 							</label>
 							<?php if (is_array($item)) { ?>
 								<ul class="minify__options-list">
 									<?php foreach ($item AS $sub => $value) { ?>
 										<li>
 											<label>
-												<input type="checkbox" name="minify[<?= $key; ?>][]" value="<?= $sub; ?>"<?= !isset($minify[$key][$sub]) || $minify[$key][$sub] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($sub)); ?>
+												<input type="checkbox" name="minify[<?= $key; ?>][]" value="<?= $sub; ?>"<?= isset($minify[$key][$sub]) && $minify[$key][$sub] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($sub)); ?>
 											</label>
 										</li>
 									<?php } ?>
