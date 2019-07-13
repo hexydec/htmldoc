@@ -10,7 +10,7 @@ module.exports = function(grunt) {
 			},
 			options: {
 				bin: "php tools/phpunit.phar",
-				bootstrap: "tests/bootstrap.php",
+				bootstrap: "autoload.php",
 				testdox: true,
 				colors: true,
 				//debug: true

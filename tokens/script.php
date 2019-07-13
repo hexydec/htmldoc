@@ -13,8 +13,12 @@ class script {
 	public function parse(Array &$tokens) {
 		$value = '';
 		$token = current($tokens);
-		while ($token !== false && ($token['type'] != 'tagclose' || $token['value'] != '</script>')) {
+		$quotes = 0;
+		while ($token !== false && ($quotes % 2 || $token['type'] != 'tagclose' || $token['value'] != '</script>')) {
 			$value .= $token['value'];
+
+			// count quotes so we don't capture a script tag in a string
+			$quotes += substr_count(str_replace(['\\\\', '\\\\"', "\\\\'"], ['', '', ''], $token['value']), '"');
 			$token = next($tokens);
 		}
 		prev($tokens);

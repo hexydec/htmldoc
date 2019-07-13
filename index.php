@@ -19,8 +19,6 @@ if (!empty($_POST['action'])) {
 			trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
 		} elseif (!isset($url['host'])) {
 			trigger_error('Could not parse URL: No host was supplied', E_USER_WARNING);
-		} elseif (($input = file_get_contents($_POST['url'])) === false) {
-			trigger_error('Could not parse URL: The URL could not be retrieved', E_USER_WARNING);
 		} elseif (($input = $doc->open($_POST['url'], null, $error)) === false) {
 			trigger_error('Could not load HTML: '.$error, E_USER_WARNING);
 		}

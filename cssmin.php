@@ -1,5 +1,5 @@
 <?php
-namespace hexydec\minify;
+namespace hexydec\html;
 class cssmin {
 
 	protected static $config = Array(

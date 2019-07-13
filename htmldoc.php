@@ -23,7 +23,7 @@ class htmldoc implements \ArrayAccess {
 		'tagopenend' => '>',
 		'tagclose' => '<\/[^ >]++>',
 		'textnode' => '(?<=>)[^<]++(?=<)',
-		'attributevalue' => '=\s*+["\']?[^"\']*+["\']?',
+		'attributevalue' => '=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^ >]*+)',
 		'attribute' => '[^<>"=\s]++',
 		'whitespace' => '\s++'
 	);
@@ -70,7 +70,8 @@ class htmldoc implements \ArrayAccess {
 			),
 			'default' => Array( // default attributes that can be removed
 				'style' => Array(
-					'type' => 'text/css'
+					'type' => 'text/css',
+					'media' => 'all'
 				),
 				'script' => Array(
 					'type' => 'text/javascript',
@@ -87,7 +88,7 @@ class htmldoc implements \ArrayAccess {
 			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 		),
 		'minify' => Array(
-			'css' => 'hexydec\\minify\\cssmin::minify', // minify CSS
+			'css' => 'hexydec\\html\\cssmin::minify', // minify CSS
 			'js' => false, // minify javascript
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes
@@ -246,14 +247,14 @@ class htmldoc implements \ArrayAccess {
 
 		// detect the charset
 		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== false || ($charset = mb_detect_encoding($html)) !== false) {
-			$html = iconv($charset, mb_internal_encoding(), $html);
+			$html = mb_convert_encoding($html, $charset, mb_internal_encoding());
 		}
 
 		// reset the document
 		$this->children = Array();
 
 		// tokenise the input HTML
-		if (($tokens = $this->tokenise($html, $this->tokens)) === false) {
+		if (($tokens = tokenise::tokenise($html, $this->tokens)) === false) {
 			$error = 'Could not tokenise input';
 
 		// parse the document
@@ -280,40 +281,6 @@ class htmldoc implements \ArrayAccess {
 			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj[0]->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
 				return substr($charset, 8);
 			}
-		}
-		return false;
-	}
-
-	/**
-	 * Tokenises the input using the supplied patterns
-	 *
-	 * @param String $str The string to be tokenised
-	 * @param Array $patterns An associative array of regexp patterns, keyed by their token name
-	 * @return Array An array of tokens, each token is an array containing the keys 'type' and 'value'
-	 */
-	protected function tokenise($str, $patterns) {
-
-		// prepare regexp and extract strings
-		$re = '/('.implode(')|(', $patterns).')/u';
-		if (preg_match_all($re, $str, $match)) {
-
-			// build tokens into types
-			$tokens = Array();
-			$keys = array_keys($patterns);
-			foreach ($match[0] AS $i => $item) {
-
-				// go through tokens and find which one matched
-				foreach ($keys AS $token => $type) {
-					if ($match[$token+1][$i] !== '') {
-						$tokens[] = Array(
-							'type' => $type,
-							'value' => $item
-						);
-						break;
-					}
-				}
-			}
-			return $tokens;
 		}
 		return false;
 	}
@@ -400,7 +367,7 @@ class htmldoc implements \ArrayAccess {
 
 	protected function parseSelector(String $selector) {
 		$selector = trim($selector);
-		if (($tokens = $this->tokenise($selector, $this->selectors)) !== false) {
+		if (($tokens = tokenise::tokenise($selector, $this->selectors)) !== false) {
 			$selectors = $parts = Array();
 			$join = false;
 			$token = current($tokens);
