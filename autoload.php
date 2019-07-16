@@ -10,7 +10,7 @@ spl_autoload_register(function ($class) {
 		'hexydec\\html\\style' => __DIR__.'/tokens/style.php',
 		'hexydec\\html\\tag' => __DIR__.'/tokens/tag.php',
 		'hexydec\\html\\text' => __DIR__.'/tokens/text.php',
-		'hexydec\\minify\\cssmin' => __DIR__.'/cssmin.php',
+		'hexydec\\html\\cssmin' => __DIR__.'/cssmin.php',
 		'hexydec\\html\\tokenise' => __DIR__.'/tokens/tokenise.php'
 	);
 	if (isset($classes[$class])) {

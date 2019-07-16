@@ -17,7 +17,7 @@ class tokenise {
 		foreach ($tokens AS $key => $item) {
 			$patterns[] = '(?<'.$key.'>'.$item.')';
 		}
-		$re = '/'.implode('|', $patterns).'/';
+		$re = '/'.implode('|', $patterns).'/u';
 		if (preg_match_all($re, $input, $match)) {
 
 			// build tokens into types

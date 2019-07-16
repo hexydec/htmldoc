@@ -294,14 +294,8 @@ class htmldoc implements \ArrayAccess {
 	 */
 	public function parse(Array &$tokens, String $parenttag = null) : bool {
 
-		// keep whitespace for certain tags
-		if (in_array($parenttag, $this->config['elements']['pre'])) {
-			$item = new pre();
-			$item->parse($tokens);
-			$this->children[] = $item;
-
-		// certain tags have thier own plugins
-		} elseif (in_array($parenttag, $this->config['elements']['custom'])) {
+		// process custom tags
+		if (in_array($parenttag, $this->config['elements']['custom'])) {
 			$class = '\\hexydec\\html\\'.$parenttag;
 			$item = new $class($this->config);
 			$item->parse($tokens);

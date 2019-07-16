@@ -227,6 +227,9 @@ class tag {
 
 		// minify children
 		if ($this->children) {
+			if (in_array($this->tagName, $this->config['elements']['pre'])) {
+				$config['whitespace'] = false;
+			}
 			$this->children->minify($config, $this);
 		}
 	}

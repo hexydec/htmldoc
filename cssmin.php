@@ -16,29 +16,30 @@ class cssmin {
 		'sortproperties' => true,
 		'mergeblocks' => true,
 		'output' => 'minify',
-		'report' => false,
-		'tokens' => Array(
-			'whitespace' => '\s++',
-			'comment' => '\/\*(?!!)[\d\D]*?\*\/',
-			'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
-			'join' => '[>+~]',
-			'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
-			'curlyopen' => '{',
-			'curlyclose' => '}',
-			'squareopen' => '\[',
-			'squareclose' => '\]',
-			'bracketopen' => '\(',
-			'bracketclose' => '\)',
-			'comma' => ',',
-			'colon' => ':',
-			'semicolon' => ';',
-			'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
-		)
+		'report' => false
+	);
+
+	protected static $tokens = Array(
+		'whitespace' => '\s++',
+		'comment' => '\/\*(?!!)[\d\D]*?\*\/',
+		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
+		'join' => '[>+~]',
+		'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
+		'curlyopen' => '{',
+		'curlyclose' => '}',
+		'squareopen' => '\[',
+		'squareclose' => '\]',
+		'bracketopen' => '\(',
+		'bracketclose' => '\)',
+		'comma' => ',',
+		'colon' => ':',
+		'semicolon' => ';',
+		'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
 	);
 
 	public static function minify($code, $config = Array()) {
 		$config = array_merge(self::$config, $config);
-		if (($tokens = tokenise::tokenise($code, $config)) === false) {
+		if (($tokens = tokenise::tokenise($code, self::$tokens)) === false) {
 			trigger_error('Could not tokenise input', E_USER_WARNING);
 		} elseif (($ast = self::parse($tokens)) === false) {
 			trigger_error('Input is not invalid', E_USER_WARNING);

@@ -11,7 +11,7 @@ $timing = Array(
 
 $doc = new hexydec\html\htmldoc();
 $options = $doc->getConfig('minify');
-$options = array_filter($options, function ($item) {return $item !== false && !is_string($item);});
+// $options = array_filter($options, function ($item) {return $item !== false && !is_string($item);});
 if (!empty($_POST['action'])) {
 	$timing['fetch'] = microtime(true);
 	if (!empty($_POST['url'])) {
