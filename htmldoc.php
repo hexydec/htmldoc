@@ -43,7 +43,7 @@ class htmldoc implements \ArrayAccess {
 		'colon' => ':',
 		'id' => '#[^ +>\.#{\[]++',
 		'class' => '\.[^ +>\.#{\[]++',
-		'string' => '[^\[\]{}\(\):;,>+=~\^$!" #\.]++',
+		'string' => '[^\[\]{}\(\):;,>+=~\^$!" #\.*]++',
 		'whitespace' => '\s++',
 	);
 
@@ -528,8 +528,8 @@ class htmldoc implements \ArrayAccess {
 		}
 	}
 
-	public function compile(Array $options) : String {
-		$options = array_merge($this->config['output'], $options);
+	public function compile(Array $options = null) : String {
+		$options = $options ? array_merge($this->config['output'], $options) : $this->config['output'];
 		$html = '';
 		foreach ($this->children AS $item) {
 			$html .= $item->compile($options);

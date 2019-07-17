@@ -249,7 +249,7 @@ class tag {
 			if ($item['join'] && $i) {
 				$match = false;
 				if (($children = $this->children->find(Array(array_slice($selector, $i)))) !== false) {
-					$found = array_merge($found, $children);
+					$found = array_merge($found, $children->toArray());
 				}
 				break;
 			} elseif (!empty($item['tag']) && $item['tag'] != '*') {
@@ -278,12 +278,17 @@ class tag {
 							break;
 						}
 					} elseif ($item['comparison'] == '^=') {
-						if (strpos($item['value'], $this->attributes[$item['attribute']]) !== 0) {
+						if (strpos($this->attributes[$item['attribute']], $item['value']) !== 0) {
+							$match = false;
+							break;
+						}
+					} elseif ($item['comparison'] == '*=') {
+						if (strpos($this->attributes[$item['attribute']], $item['value']) === false) {
 							$match = false;
 							break;
 						}
 					} elseif ($item['comparison'] == '$=') {
-						if (strpos($item['value'], $this->attributes[$item['attribute']]) !== strlen($this->attributes[$item['attribute']]) - strlen($item['value'])) {
+						if (strpos($this->attributes[$item['attribute']], $item['value']) !== strlen($this->attributes[$item['attribute']]) - strlen($item['value'])) {
 							$match = false;
 							break;
 						}
@@ -315,10 +320,13 @@ class tag {
 		}
 	}
 
-	public function compile(Array $config) : String {
-		$html = '<'.$this->tagName;
+	public function compile(Array $config = null) : String {
+
+		// merge config
+		$config = $config ? array_merge($this->config['output'], $config) : $this->config['output'];
 
 		// compile attributes
+		$html = '<'.$this->tagName;
 		foreach ($this->attributes AS $key => $value) {
 			$html .= ' '.$key;
 			if ($value !== null) {

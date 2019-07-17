@@ -182,6 +182,30 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
+	public function testCanFindElements() {
+		$doc = new htmldoc();
+		if ($doc->open(__DIR__.'/templates/find.html')) {
+			$doc->minify(Array(
+				'css' => false, // minify css
+				'js' => false, // minify javascript
+				//'whitespace' => false, // remove whitespace
+				'comments' => false, // remove comments
+				'urls' => false, // update internal URL's to be shorter
+				'attributes' => false, // remove values from boolean attributes);
+	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
+			));
+			// var_dump($doc->find('title'));
+			$this->assertEquals('<title>Find</title>', $doc->find('title')->compile());
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div>', $doc->find('.find')->compile());
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class^=find]')->compile());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class*=__]')->compile());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('[class$=heading]')->compile());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('h1[class$=heading]')->compile());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('html h1[class$=heading]')->compile());
+		}
+	}
+
 	/*public function testCanMinifyCss() {
 		$html = file_get_contents(__DIR__.'/templates/css.html');
 		$minified = file_get_contents(__DIR__.'/templates/css-minified.html');
