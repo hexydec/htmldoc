@@ -468,6 +468,25 @@ class htmldoc implements \ArrayAccess {
 		return $doc;
 	}
 
+	public function first() : htmldoc {
+		return $this->eq(0);
+	}
+
+	public function last() : htmldoc {
+		return $this->eq(-1);
+	}
+
+	public function eq(int $index) : htmldoc {
+		$doc = new htmldoc($this->config);
+		if ($index < 0) {
+			$index = count($this->children) + $index;
+		}
+		if (isset($this->children[$index])) {
+			$doc->collection(Array($this->children[$index]));
+		}
+		return $doc;
+	}
+
 	public function children() : htmldoc {
 		return $this->find('>*');
 	}
