@@ -25,9 +25,7 @@ class style {
 
 	public function minify(Array $config) {
 		if ($config['css'] && $this->content) {
-			$this->content = call_user_func($config['css'], $this->content);
-		} else {
-			$this->content = trim($this->content);
+			$this->content = $config['css'] === true ? trim($this->content) : call_user_func($config['css'], $this->content);
 		}
 	}
 

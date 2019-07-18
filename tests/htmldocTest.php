@@ -203,6 +203,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('[class$=heading]')->compile());
 			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('h1[class$=heading]')->compile());
 			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('html h1[class$=heading]')->compile());
+			$this->assertEquals('<div class="first">First</div>', $doc->find('div:first-child')->compile());
+			$this->assertEquals('<div class="last">Last</div>', $doc->find('div:last-child')->compile());
 		}
 	}
 

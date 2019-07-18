@@ -11,7 +11,6 @@ $timing = Array(
 
 $doc = new hexydec\html\htmldoc();
 $options = $doc->getConfig('minify');
-// $options = array_filter($options, function ($item) {return $item !== false && !is_string($item);});
 if (!empty($_POST['action'])) {
 	$timing['fetch'] = microtime(true);
 	if (!empty($_POST['url'])) {
@@ -37,7 +36,7 @@ if (!empty($_POST['action'])) {
 			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? Array() : true) : false;
 			if (is_array($item)) {
 				foreach ($item AS $sub => $value) {
-					if (isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
+					if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
 						$minify[$key][$sub] = true;
 					} elseif ($minify[$key]) {
 						$minify[$key][$sub] = false;
@@ -50,6 +49,8 @@ if (!empty($_POST['action'])) {
 		$output = $doc->save();
 		$timing['output'] = microtime(true);
 	}
+} else {
+	$minify = $options;
 }
 ?>
 <!DOCTYPE html>
@@ -198,7 +199,7 @@ if (!empty($_POST['action'])) {
 									<?php foreach ($item AS $sub => $value) { ?>
 										<li>
 											<label>
-												<input type="checkbox" name="minify[<?= $key; ?>][]" value="<?= $sub; ?>"<?= isset($minify[$key][$sub]) && $minify[$key][$sub] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($sub)); ?>
+												<input type="checkbox" name="minify[<?= $key; ?>][]" value="<?= $sub; ?>"<?= !isset($minify[$key][$sub]) || $minify[$key][$sub] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($sub)); ?>
 											</label>
 										</li>
 									<?php } ?>

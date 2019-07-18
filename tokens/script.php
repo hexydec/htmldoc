@@ -29,9 +29,7 @@ class script {
 
 	public function minify(Array $config) {
 		if ($config['js'] && $this->content) {
-			$this->content = call_user_func($config['js'], $this->content);
-		} else {
-			$this->content = trim($this->content);
+			$this->content = $config['js'] === true ? trim($this->content) : call_user_func($config['js'], $this->content);
 		}
 	}
 
