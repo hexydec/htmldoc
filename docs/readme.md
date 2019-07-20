@@ -66,6 +66,80 @@ $doc->load($html, $charset = null);
 | `$html`	| String	| The HTML to be parsed into the object			|
 | `$charset`| String	| The charset of the document, or `null` to auto-detect |
 
+### find()
+
+Find elements within the document using a CSS selector.
+
+```php
+$doc = new \hexydec/html\htmldoc();
+if ($doc->load($html, $charset)) {
+	$found = $doc->find($selector);
+}
+```
+#### $selector
+
+A CSS selector defining the nodes to find within the document. The following selectors can be used:
+
+| Selector				| Example			|
+|-----------------------|-------------------|
+| Any element			| `*`				|
+| Tag					| `div`				|
+| ID					| `#foo`			|
+| Class					| `.foo`			|
+| Attribute				| `[href]`			|
+| Attribute equals		| `[href=/foo/bar/]`|
+| Attribute begins with	| `[href^=/foo]`	|
+| Attribute contains	| `[href*=foo]`		|
+| Attribute ends with	| `[href$=bar/]`	|
+| First Child			| `:first-child`	|
+| Last Child			| `:last-child`		|
+| Child selector		| `>`				|
+
+Selectors can be put together in combinations, and multiple selectors can be used:
+
+```php
+$found = $doc->find('div.foo');
+$found = $doc->find('a.foo[href^=/foo]');
+$found = $doc->find('div.foo[data-attr*=foo]:first-child');
+$found = $doc->find('table.list th');
+$found = $doc->find('ul.list > li');
+$found = $doc->find('form a.button, form label.button');
+```
+#### Returns
+
+An HTMKDoc object containing the matched nodes.
+
+### eq()
+
+Builds a new HTMLDoc collection containing only the node at the index requested.
+
+```php
+$doc = new \hexydec/html\htmldoc();
+if ($doc->load($html, $charset)) {
+	$found = $doc->find($selector)->eq($index);
+}
+```
+
+#### $index
+
+An integer indicating the zero based index of the element to return. A minus value will return that many items from the end of the collection.
+
+#### Returns
+
+An HTMLDoc collection containing the element at the index requested, or an empty HTMLDoc collection if the index is out of range.
+
+### first()
+
+Returns a new HTMLDoc collection containing the first element in the collection.
+
+### last()
+
+Returns a new HTMLDoc collection containing the last element in the collection.
+
+### get()
+
+Extracts an array of tag objects from an HTMLDoc collection.
+
 ### minify()
 
 Minifies the HTML document with the inputted or default options.
