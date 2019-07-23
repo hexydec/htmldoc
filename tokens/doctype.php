@@ -3,23 +3,24 @@ namespace hexydec\html;
 
 class doctype {
 
-	protected $type = Array();
+	protected $content = null;
 
-	public function parse(Array &$tokens) {
-		$this->type = Array();
+	public function parse(array &$tokens) {
+		$content = '';
 		while (($token = next($tokens)) !== false && $token['type'] != 'tagopenend') {
 			if ($token['type'] == 'attribute') {
-				$this->type[]  = html_entity_decode($token['value']);
+				$content .= ($content ? ' ' : '').$token['value'];
 			}
 		}
+		$this->content = html_entity_decode($content);
 	}
 
 	public function minify() {
 
 	}
 
-	public function compile(Array $config) {
-		return '<!DOCTYPE '.implode(' ', $this->type).'>';
+	public function html() {
+		return '<!DOCTYPE '.\htmlspecialchars($this->content).'>';
 	}
 
 	public function __get($var) {

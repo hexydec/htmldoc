@@ -104,13 +104,13 @@ class htmldoc implements \ArrayAccess {
 			'singleton' => true, // minify singleton element by removing slash
 			'quotes' => true, // minify attribute quotes
 			'close' => true // don't write close tags where possible
-		),
-		'output' => Array(
-			'charset' => null, // set the output charset
-			'quotestyle' => 'double', // double, single, minimal
-			'singletonclose' => ' />', // string to close singleton tags
-			'closetags' => false // whether to force tags to have a closing tag (true) or follow tag::close
 		)
+	);
+	protected $output = Array(
+		'charset' => null, // set the output charset
+		'quotestyle' => 'double', // double, single, minimal
+		'singletonclose' => ' />', // string to close singleton tags
+		'closetags' => false // whether to force tags to have a closing tag (true) or follow tag::close
 	);
 
 	/**
@@ -126,6 +126,10 @@ class htmldoc implements \ArrayAccess {
 	 */
 	public function __construct(Array $config = Array()) {
 		$this->config = array_replace_recursive($this->config, $config);
+	}
+
+	public function __get($var) {
+		return $this->$var;
 	}
 
 	/**
@@ -269,7 +273,7 @@ class htmldoc implements \ArrayAccess {
 	 */
 	protected function getCharsetFromHtml(string $html) {
 		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
-			$obj = new htmldoc();
+			$obj = new htmldoc($this->config);
 			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj[0]->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
 				return substr($charset, 8);
 			}
@@ -284,7 +288,7 @@ class htmldoc implements \ArrayAccess {
 	 * @return bool Whether the parser was able to capture any objects
 	 */
 	protected function parse(array &$tokens) {
-		$tag = new tag($this->config);
+		$tag = new tag($this);
 		$this->children = $tag->parseChildren($tokens);
 		return !!$this->children;
 	}
@@ -460,25 +464,21 @@ class htmldoc implements \ArrayAccess {
 		return $text;
 	}
 
-	public function collection(Array $nodes) {
+	public function collection(array $nodes) {
 		$this->children = $nodes;
 	}
 
-	public function minify(Array $config = Array(), tag $parent = null) {
+	public function minify(array $minify = Array()) {
 
-		if (!$parent) {
-			$parent = $this;
+		// merge config
+		$minify = array_replace_recursive($this->config['minify'], $minify);
 
-			// merge config
-			$config = array_replace_recursive($this->config['minify'], $config);
-
-			// set minify output parameters
-			if ($config['singleton']) {
-				$this->config['output']['singletonclose'] = '>';
-			}
-			if ($config['quotes']) {
-				$this->config['output']['quotestyle'] = 'minimal';
-			}
+		// set minify output parameters
+		if ($minify['singleton']) {
+			$this->output['singletonclose'] = '>';
+		}
+		if ($minify['quotes']) {
+			$this->output['quotestyle'] = 'minimal';
 		}
 
 		// sort attributes
@@ -487,14 +487,15 @@ class htmldoc implements \ArrayAccess {
 		// 	$config['attributes']['sort'] = \array_keys($this->attributes);
 		// }
 		foreach ($this->children AS $item) {
-			$item->minify($config);
+			$item->minify($minify);
 		}
 	}
 
-	public function compile(array $options = null) : string {
+	public function html(array $options = null) : string {
+		$options = $options ? array_merge($this->output, $options) : $this->output;
 		$html = '';
 		foreach ($this->children AS $item) {
-			$html .= $item->compile($options);
+			$html .= $item->html($options);
 		}
 		return $html;
 	}
@@ -502,12 +503,11 @@ class htmldoc implements \ArrayAccess {
 	public function save(string $file = null, Array $options = Array()) {
 
 		// compile html
-		$options = $options ? array_merge($this->config['output'], $options) : $this->config['output'];
-		$html = $this->compile($options);
+		$html = $this->html($options);
 
 		// convert charset
 		if (!empty($options['charset'])) {
-			$html = iconv(mb_internal_encoding(), $options['charset'], $html);
+			$html = mb_convert_encoding(mb_internal_encoding(), $options['charset'], $html);
 		}
 
 		// save file

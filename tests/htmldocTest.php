@@ -196,15 +196,15 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'close' => false // don't write close tags where possible
 			));
 			// var_dump($doc->find('title'));
-			$this->assertEquals('<title>Find</title>', $doc->find('title')->compile());
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div>', $doc->find('.find')->compile());
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class^=find]')->compile());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class*=__]')->compile());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('[class$=heading]')->compile());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('h1[class$=heading]')->compile());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('html h1[class$=heading]')->compile());
-			$this->assertEquals('<div class="first">First</div>', $doc->find('div:first-child')->compile());
-			$this->assertEquals('<div class="last">Last</div>', $doc->find('div:last-child')->compile());
+			$this->assertEquals('<title>Find</title>', $doc->find('title')->html());
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div>', $doc->find('.find')->html());
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class^=find]')->html());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class*=__]')->html());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('[class$=heading]')->html());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('h1[class$=heading]')->html());
+			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('html h1[class$=heading]')->html());
+			$this->assertEquals('<div class="first">First</div>', $doc->find('div:first-child')->html());
+			$this->assertEquals('<div class="last">Last</div>', $doc->find('div:last-child')->html());
 		}
 	}
 

@@ -5,14 +5,14 @@ class cdata {
 
 	protected $content = null;
 
-	public function parse(Array $tokens) {
+	public function parse(array &$tokens) {
 		$this->content = substr($tokens[$i]['value'], 9, -3);
 	}
 
-	public function minify(Array $config) {
+	public function minify() {
 	}
 
-	public function compile(Array $config) {
+	public function html() {
 		return $this->content === null ? '' : '<[CDATA['.$this->content.']]>';
 	}
 
