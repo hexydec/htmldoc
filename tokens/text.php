@@ -26,7 +26,7 @@ class text {
 			$this->content = preg_replace('/\s++/', ' ', $this->content);
 
 			if ($parent) {
-				$children = get_class($parent) == 'hexydec\\html\\htmldoc' ? $parent->toArray() : $parent->children->toArray();
+				$children = $parent->children();
 				if (($index = $this->getIndex($children)) !== false) {
 					$keys = array_keys($children);
 					$i = array_search($index, $keys, true);
