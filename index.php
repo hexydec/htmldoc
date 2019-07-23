@@ -8,11 +8,15 @@ $minify = Array();
 $timing = Array(
 	'start' => microtime(true)
 );
+$mem = Array(
+	'start' => memory_get_usage()
+);
 
 $doc = new hexydec\html\htmldoc();
 $options = $doc->getConfig('minify');
 if (!empty($_POST['action'])) {
 	$timing['fetch'] = microtime(true);
+	$mem['fetch'] = memory_get_usage();
 	if (!empty($_POST['url'])) {
 		if (($url = parse_url($_POST['url'])) === false) {
 			trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
@@ -31,6 +35,7 @@ if (!empty($_POST['action'])) {
 
 	if ($input) {
 		$timing['parse'] = microtime(true);
+		$mem['parse'] = memory_get_usage();
 		$isset = isset($_POST['minify']) && is_array($_POST['minify']);
 		foreach ($options AS $key => $item) {
 			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? Array() : true) : false;
@@ -46,8 +51,10 @@ if (!empty($_POST['action'])) {
 		}
 		$doc->minify($minify);
 		$timing['minify'] = microtime(true);
+		$mem['minify'] = memory_get_usage();
 		$output = $doc->save();
 		$timing['output'] = microtime(true);
+		$mem['output'] = memory_get_usage();
 	}
 } else {
 	$minify = $options;
@@ -149,11 +156,12 @@ if (!empty($_POST['action'])) {
 								<th>Output (bytes)</th>
 								<th>Diff (bytes)</th>
 								<th>% of Original</th>
-								<th>Load (ms)</th>
-								<th>Parse (ms)</th>
-								<th>Minify (ms)</th>
-								<th>Output (ms)</th>
-								<th>Total Processing (ms)</th>
+								<th></th>
+								<th>Load</th>
+								<th>Parse</th>
+								<th>Minify</th>
+								<th>Output</th>
+								<th>Total (sec) / Peak (kb)</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -169,11 +177,12 @@ if (!empty($_POST['action'])) {
 								<td><?= htmlspecialchars(number_format($olen)); ?></td>
 								<td><?= htmlspecialchars(number_format($ilen - $olen)); ?></td>
 								<td><?= htmlspecialchars(number_format((100 / $ilen) * $olen)); ?>%</td>
-								<td rowspan="2"><?= htmlspecialchars(number_format($timing['fetch'] - $timing['start'], 8)); ?></td>
-								<td rowspan="2"><?= htmlspecialchars(number_format($timing['parse'] - $timing['fetch'], 8)); ?></td>
-								<td rowspan="2"><?= htmlspecialchars(number_format($timing['minify'] - $timing['parse'], 8)); ?></td>
-								<td rowspan="2"><?= htmlspecialchars(number_format($timing['output'] - $timing['minify'], 8)); ?></td>
-								<td rowspan="2"><?= htmlspecialchars(number_format($timing['output'] - $timing['fetch'], 8)); ?></td>
+								<td style="font-weight:bold;">Time (sec)</td>
+								<td><?= htmlspecialchars(number_format($timing['fetch'] - $timing['start'], 4)); ?>s</td>
+								<td><?= htmlspecialchars(number_format($timing['parse'] - $timing['fetch'], 4)); ?>s</td>
+								<td><?= htmlspecialchars(number_format($timing['minify'] - $timing['parse'], 4)); ?>s</td>
+								<td><?= htmlspecialchars(number_format($timing['output'] - $timing['minify'], 4)); ?>s</td>
+								<td><?= htmlspecialchars(number_format($timing['output'] - $timing['fetch'], 4)); ?>s</td>
 							</tr>
 							<tr>
 								<td>Compressed</td>
@@ -181,6 +190,12 @@ if (!empty($_POST['action'])) {
 								<td><?= htmlspecialchars(number_format($golen)); ?></td>
 								<td><?= htmlspecialchars(number_format($gilen - $golen)); ?></td>
 								<td><?= htmlspecialchars(number_format((100 / $gilen) * $golen)); ?>%</td>
+								<td style="font-weight:bold;">Memory (kb)</td>
+								<td><?= htmlspecialchars(number_format($mem['fetch'] / 1024, 0)); ?>kb</td>
+								<td><?= htmlspecialchars(number_format($mem['parse'] / 1024, 0)); ?>kb</td>
+								<td><?= htmlspecialchars(number_format($mem['minify'] / 1024, 0)); ?>kb</td>
+								<td><?= htmlspecialchars(number_format($mem['output'] / 1024, 0)); ?>kb</td>
+								<td><?= htmlspecialchars(number_format(memory_get_peak_usage() / 1024, 0)); ?>kb</td>
 							</tr>
 						</tbody>
 					</table>
