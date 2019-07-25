@@ -411,17 +411,18 @@ class tag {
 
 			// match pseudo selector
 			} elseif (!empty($item['pseudo'])) {
+				$children = $this->parent->children();
 
 				// match first-child
 				if ($item['pseudo'] == 'first-child') {
-					if ($this !== $this->parent->toArray()[0]) {
+					if (!isset($children[0]) || $this !== $children[0]) {
 						$match = false;
 						break;
 					}
 
 				// match last child
 				} elseif ($item['pseudo'] == 'last-child') {
-					if ($this !== $this->parent->toArray()[0]) {
+					if (($last = end($children)) === false || $this !== $last) {
 						$match = false;
 						break;
 					}
@@ -492,6 +493,16 @@ class tag {
 
 	public function toArray() {
 		return $this->children;
+	}
+
+	public function children() {
+		$children = Array();
+		foreach ($this->children AS $item) {
+			if (get_class($item) == 'hexydec\\html\\tag') {
+				$children[] = $item;
+			}
+		}
+		return $children;
 	}
 
 	public function __get($var) {
