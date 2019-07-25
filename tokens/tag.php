@@ -4,11 +4,11 @@ namespace hexydec\html;
 class tag {
 
 	protected $root;
+	protected $parent = null;
 	protected $tagName = null;
 	protected $attributes = Array();
 	protected $singleton = false;
 	protected $children = Array();
-	protected $parent = null;
 	public $close = true;
 
 	public function __construct(htmldoc $root, string $tag = null, tag $parent = null) {
@@ -29,6 +29,7 @@ class tag {
 		// cache vars
 		$config = $this->root->config;
 		$tag = $this->tagName;
+		$attributes = Array();
 
 		// parse tokens
 		$attr = false;
@@ -38,7 +39,7 @@ class tag {
 				// remember attribute
 				case 'attribute':
 					if ($attr) {
-						$this->attributes[$attr] = null;
+						$attributes[$attr] = null;
 						$attr = false;
 					}
 					$attr = $token['value'];
@@ -50,7 +51,7 @@ class tag {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$this->attributes[$attr] = html_entity_decode(trim(trim($token['value'], '= '), '"'), ENT_QUOTES); // set charset?
+						$attributes[$attr] = html_entity_decode(trim(trim($token['value'], '= '), '"'), ENT_QUOTES); // set charset?
 						$attr = false;
 					}
 					break;
@@ -87,8 +88,10 @@ class tag {
 			}
 		}
 		if ($attr) {
-			$this->attributes[$attr] = null;
-			$attr = false;
+			$attributes[$attr] = null;
+		}
+		if ($attributes) {
+			$this->attributes = $attributes;
 		}
 	}
 

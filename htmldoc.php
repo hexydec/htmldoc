@@ -274,7 +274,7 @@ class htmldoc implements \ArrayAccess {
 	protected function getCharsetFromHtml(string $html) {
 		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
 			$obj = new htmldoc($this->config);
-			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj[0]->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
+			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj->eq(0)->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
 				return substr($charset, 8);
 			}
 		}
