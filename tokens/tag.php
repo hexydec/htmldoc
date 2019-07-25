@@ -450,11 +450,20 @@ class tag {
 	}
 
 	public function text() : string {
-		if ($this->children) {
-			return $this->children->text();
-		} else {
-			return '';
+		$text = '';
+		foreach ($this->children AS $item) {
+
+			// only get text from these objects
+			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text'))) {
+				$text .= $item->text();
+
+				// add a space to make sure words aren't joined
+				if ($text && mb_substr($text, -1) != ' ') {
+					$text .= ' ';
+				}
+			}
 		}
+		return $text;
 	}
 
 	public function html(array $options = null) : string {
