@@ -414,17 +414,18 @@ class tag {
 
 			// match pseudo selector
 			} elseif (!empty($item['pseudo'])) {
+				$children = $this->parent->children();
 
 				// match first-child
 				if ($item['pseudo'] == 'first-child') {
-					if ($this !== $this->parent->toArray()[0]) {
+					if (!isset($children[0]) || $this !== $children[0]) {
 						$match = false;
 						break;
 					}
 
 				// match last child
 				} elseif ($item['pseudo'] == 'last-child') {
-					if ($this !== $this->parent->toArray()[0]) {
+					if (($last = end($children)) === false || $this !== $last) {
 						$match = false;
 						break;
 					}
@@ -452,11 +453,20 @@ class tag {
 	}
 
 	public function text() : string {
-		if ($this->children) {
-			return $this->children->text();
-		} else {
-			return '';
+		$text = '';
+		foreach ($this->children AS $item) {
+
+			// only get text from these objects
+			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text'))) {
+				$text .= $item->text();
+
+				// add a space to make sure words aren't joined
+				if ($text && mb_substr($text, -1) != ' ') {
+					$text .= ' ';
+				}
+			}
 		}
+		return $text;
 	}
 
 	public function html(array $options = null) : string {
@@ -495,6 +505,16 @@ class tag {
 
 	public function toArray() {
 		return $this->children;
+	}
+
+	public function children() {
+		$children = Array();
+		foreach ($this->children AS $item) {
+			if (get_class($item) == 'hexydec\\html\\tag') {
+				$children[] = $item;
+			}
+		}
+		return $children;
 	}
 
 	public function __get($var) {
