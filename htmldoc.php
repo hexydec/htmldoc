@@ -10,14 +10,15 @@ class htmldoc implements \ArrayAccess {
 		'doctype' => '<!DOCTYPE',
 		'comment' => '<!--[\d\D]*?-->',
 		'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
-		'tagopenstart' => '<[^ >\/]++',
-		'tagselfclose' => '\/>',
-		'tagopenend' => '>',
+		'tagopenstart' => '<[^\s>\/]++',
+		'tagselfclose' => '\s*+\/>',
+		'tagopenend' => '\s*+>',
 		'tagclose' => '<\/[^ >]++>',
-		'textnode' => '(?<=>)[^<]++(?=<)',
+		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
 		'attributevalue' => '=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^ >]*+)',
-		'attribute' => '[^<>"=\s]++',
-		'whitespace' => '\s++'
+		'attribute' => '[^<>"\'=\s]++',
+		'whitespace' => '\s++',
+		'other' => '.'
 	);
 
 	/**
@@ -109,7 +110,7 @@ class htmldoc implements \ArrayAccess {
 	protected $output = Array(
 		'charset' => null, // set the output charset
 		'quotestyle' => 'double', // double, single, minimal
-		'singletonclose' => ' />', // string to close singleton tags
+		'singletonclose' => false, // string to close singleton tags, or false to leave as is
 		'closetags' => false // whether to force tags to have a closing tag (true) or follow tag::close
 	);
 
@@ -474,9 +475,6 @@ class htmldoc implements \ArrayAccess {
 		$minify = array_replace_recursive($this->config['minify'], $minify);
 
 		// set minify output parameters
-		if ($minify['singleton']) {
-			$this->output['singletonclose'] = '>';
-		}
 		if ($minify['quotes']) {
 			$this->output['quotestyle'] = 'minimal';
 		}
@@ -538,7 +536,7 @@ class htmldoc implements \ArrayAccess {
 					}
 					break;
 				case 'hexydec\\html\\doctype':
-					$node['doctype'] = $item->type;
+					$node['doctype'] = $item->content;
 					break;
 				default:
 					$node['content'] = $item->content;

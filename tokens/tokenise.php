@@ -19,31 +19,52 @@ class tokenise {
 		}
 		$re = '/'.implode('|', $patterns).'/u';
 
-		if (preg_match_all($re, $input, $match, PREG_UNMATCHED_AS_NULL)) {
-			$keys = array_keys($tokens);
-			$count = count($match[0]);
+		$output = Array();
+		$keys = array_keys($tokens);
+		$callback = function ($match) use ($keys, &$output) {
 
-			// delete input to save memory
-			unset($input);
-			$match = array_intersect_key($match, $tokens);
-
-			// build tokens into types
-			$output = Array();
-			for ($i = 0; $i < $count; $i++) {
-
-				// go through tokens and find which one matched
-				foreach ($keys AS $key) {
-					if (isset($match[$key][$i])) {
-						$output[] = Array(
-							'type' => $key,
-							'value' => $match[$key][$i]
-						);
-						break;
-					}
+			// go through tokens and find which one matched
+			foreach ($keys AS $key) {
+				if ($match[$key] !== '') {
+					$output[] = Array(
+						'type' => $key,
+						'value' => $match[$key]
+					);
+					break;
 				}
 			}
-			return $output;
+			return '';
+		};
+		if (($remain = preg_replace_callback($re, $callback, $input)) !== '') {
+			//\var_dump($remain);
 		}
-		return false;
+		return $output ? $output : false;
+
+		// if (preg_match_all($re, $input, $match, PREG_UNMATCHED_AS_NULL)) {
+		// 	$keys = array_keys($tokens);
+		// 	$count = count($match[0]);
+		//
+		// 	// delete input to save memory
+		// 	unset($input);
+		// 	$match = array_intersect_key($match, $tokens);
+		//
+		// 	// build tokens into types
+		// 	$output = Array();
+		// 	for ($i = 0; $i < $count; $i++) {
+		//
+		// 		// go through tokens and find which one matched
+		// 		foreach ($keys AS $key) {
+		// 			if (isset($match[$key][$i])) {
+		// 				$output[] = Array(
+		// 					'type' => $key,
+		// 					'value' => $match[$key][$i]
+		// 				);
+		// 				break;
+		// 			}
+		// 		}
+		// 	}
+		// 	return $output;
+		// }
+		// return false;
 	}
 }

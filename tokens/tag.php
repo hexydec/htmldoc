@@ -51,7 +51,7 @@ class tag {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$attributes[$attr] = html_entity_decode(trim(trim($token['value'], '= '), '"'), ENT_QUOTES); // set charset?
+						$attributes[$attr] = html_entity_decode(trim(trim($token['value'], '= '), '"\''), ENT_QUOTES);
 						$attr = false;
 					}
 					break;
@@ -60,10 +60,14 @@ class tag {
 					if (!in_array($tag, $config['elements']['singleton'])) {
 						next($tokens);
 						$this->children = $this->parseChildren($tokens, $config);
+						break;
+					} else {
+						$this->singleton = $token['value'];
+						break 2;
 					}
-					break;
 
 				case 'tagselfclose':
+					$this->singleton = $token['value'];
 					break 2;
 
 				case 'tagopenstart':
@@ -123,9 +127,7 @@ class tag {
 					case 'doctype':
 						$item = new doctype();
 						$item->parse($tokens);
-						if (empty($children)) { // only add if found at the top of the document
-							$children[] = $item;
-						}
+						$children[] = $item;
 						break;
 
 					case 'tagopenstart':
@@ -270,6 +272,11 @@ class tag {
 					}
 				}
 			}
+		}
+
+		// minify singleton closing style
+		if ($minify['singleton'] && $this->singleton) {
+			$this->singleton = '>';
 		}
 
 		// work out whether to omit the closing tag
@@ -487,8 +494,8 @@ class tag {
 		}
 
 		// close singleton tags
-		if (in_array($this->tagName, $this->root->config['elements']['singleton'])) {
-			$html .= $options['singletonclose'];
+		if ($this->singleton) {
+			$html .= empty($options['singletonclose']) ? $this->singleton : $options['singletonclose'];
 
 		// close opening tag and compile contents
 		} else {
