@@ -40,7 +40,7 @@ class text {
 				if (($index = $this->getIndex($children)) !== false) {
 					$keys = array_keys($children);
 					$i = array_search($index, $keys, true);
-					$inline = $this->root->config['elements']['inline'];
+					$inline = $this->root->getConfig('elements', 'inline');
 					$min = Array('hexydec\\html\\comment', 'hexydec\\html\\doctype');
 
 					// if previous tag is a block element, ltrim the textnode

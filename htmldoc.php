@@ -1,7 +1,7 @@
 <?php
 namespace hexydec\html;
 
-class htmldoc implements \ArrayAccess {
+class htmldoc {
 
 	/**
 	 * @var Array $token Regexp components keyed by their corresponding codename for tokenising HTML
@@ -129,62 +129,13 @@ class htmldoc implements \ArrayAccess {
 		$this->config = array_replace_recursive($this->config, $config);
 	}
 
-	public function __get($var) {
-		return $this->$var;
-	}
-
 	/**
-	 * Retrieves the configuration of the object as an array
+	 * Retrieves the children of the document as an array
 	 *
 	 * @return Array An array of child nodes
 	 */
 	public function toArray() {
 		return $this->children;
-	}
-
-	/**
-	 * Array access method allows you to set the object's configuration as properties
-	 *
-	 * @param mixed $i The key to be updated, can be a string or integer
-	 * @param mixed $value The value of the array key in the configuration array to be updated
-	 */
-	public function offsetSet($i, $value) {
-		if (is_null($i)) $this->children[] = $value;
-		else $this->children[$i] = $value;
-	}
-
-	/**
-	 * Array access method allows you to check that a key exists in the configuration array
-	 *
-	 * @param mixed $i The key to be checked, can be a string or integer
-	 * @return bool Whether the key exists in the config array
-	 */
-	public function offsetExists($i) {
-		return isset($this->children[$i]);
-	}
-
-	/**
-	 * Removes a key from the configuration array
-	 *
-	 * @param mixed $i The key to be removed, can be a string or integer
-	 */
-	public function offsetUnset($i) {
-		unset($this->children[$i]);
-	}
-
-	/**
-	 * Retrieves a value from the configuration array with the specified key
-	 *
-	 * @param mixed $i The key to be accessed, can be a string or integer
-	 * @return mixed The requested value or null if the key doesn't exist
-	 */
-	public function &offsetGet($i) { // return reference so you can set it like an array
-		if (!isset($this->children[$i])) {
-			$null = null;
-			return $null;
-		} else {
-			return $this->children[$i];
-		}
 	}
 
 	public function getConfig() {
@@ -207,10 +158,16 @@ class htmldoc implements \ArrayAccess {
 	 * @return mixed The loaded HTML, or false on error
 	 */
 	public function open(String $url, Resource $context = null, String &$error = null) {
+
+		// open a handle to the stream
 		if (($handle = fopen($url, 'rb', $context)) === false) {
 			$error = 'Could not open file "'.$url.'"';
+
+		// retrieve the stream contents
 		} elseif (($html = stream_get_contents($handle)) === false) {
 			$error = 'Could not read file "'.$url.'"';
+
+		// success
 		} else {
 
 			// find charset in headers
@@ -225,7 +182,7 @@ class htmldoc implements \ArrayAccess {
 				}
 			}
 
-			// load htmk
+			// load html
 			if ($this->load($html, $charset, $error)) {
 				return $html;
 			}
@@ -519,31 +476,31 @@ class htmldoc implements \ArrayAccess {
 		return false;
 	}
 
-	public function debug() {
-		$output = Array();
-		foreach ($this->children AS $item) {
-			$node = Array(
-				'type' => get_class($item)
-			);
-			switch ($node['type']) {
-				case 'hexydec\\html\\tag':
-					$node['tag'] = $item->tagName;
-					$node['attributes'] = $item->attributes;
-					$node['singleton'] = $item->singleton;
-					$node['close'] = $item->close;
-					if ($item->children) {
-						$node['children'] = $item->children->debug();
-					}
-					break;
-				case 'hexydec\\html\\doctype':
-					$node['doctype'] = $item->content;
-					break;
-				default:
-					$node['content'] = $item->content;
-					break;
-			}
-			$output[] = $node;
-		}
-		return $output;
-	}
+	// public function debug() {
+	// 	$output = Array();
+	// 	foreach ($this->children AS $item) {
+	// 		$node = Array(
+	// 			'type' => get_class($item)
+	// 		);
+	// 		switch ($node['type']) {
+	// 			case 'hexydec\\html\\tag':
+	// 				$node['tag'] = $item->tagName;
+	// 				$node['attributes'] = $item->attributes;
+	// 				$node['singleton'] = $item->singleton;
+	// 				$node['close'] = $item->close;
+	// 				if ($item->children) {
+	// 					$node['children'] = $item->children->debug();
+	// 				}
+	// 				break;
+	// 			case 'hexydec\\html\\doctype':
+	// 				$node['doctype'] = $item->content;
+	// 				break;
+	// 			default:
+	// 				$node['content'] = $item->content;
+	// 				break;
+	// 		}
+	// 		$output[] = $node;
+	// 	}
+	// 	return $output;
+	// }
 }

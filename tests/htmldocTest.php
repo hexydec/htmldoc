@@ -7,8 +7,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	public function testCanParseDocument() {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/document.html')) {
-			$html = trim(file_get_contents(__DIR__.'/templates/document.html'));
-			$this->assertEquals($html, $doc->save());
+			$html = file_get_contents(__DIR__.'/templates/document.html');
+			$this->assertEquals($html, $doc->save(), 'Parsed document successfully');
 		}
 	}
 
@@ -25,8 +25,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-recycle.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/lowercase-recycle.html');
+			$this->assertEquals($minified, $doc->save(), 'Case of tags now match in opening and closing');
 		}
 
 		if ($doc->open(__DIR__.'/templates/lowercase.html')) {
@@ -39,8 +39,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/lowercase-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/lowercase-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can lowercase tag and attribute names');
 		}
 	}
 
@@ -56,7 +56,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 				'close' => false // don't write close tags where possible
 			));
 			$minified = trim(file_get_contents(__DIR__.'/templates/whitespace-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$this->assertEquals($minified, $doc->save(), 'Can strip whitepace');
 		}
 	}
 
@@ -73,8 +73,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/comments-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/comments-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can strip all comments');
 		}
 
 		// test allowing IE conditional comments
@@ -86,8 +86,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/comments-minified-ie.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/comments-minified-ie.html');
+			$this->assertEquals($minified, $doc->save(), 'Can strip comments but leave IE comments intact');
 		}
 	}
 
@@ -105,8 +105,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/urls-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/urls-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can minify URLs');
 		}
 	}
 
@@ -123,8 +123,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/attributes-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/attributes-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can minify attributes');
 		}
 	}
 
@@ -141,8 +141,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/singleton-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/singleton-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can minify singletons');
 		}
 	}
 
@@ -159,8 +159,8 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 	   			//'quotes' => false, // minify attribute quotes
 				'close' => false // don't write close tags where possible
 			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/quotes-minified.html'));
-			$this->assertEquals($minified, $doc->save());
+			$minified = file_get_contents(__DIR__.'/templates/quotes-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can minify attribute quotes');
 		}
 	}
 

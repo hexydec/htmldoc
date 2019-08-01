@@ -27,7 +27,7 @@ class tag {
 	public function parse(array &$tokens) {
 
 		// cache vars
-		$config = $this->root->config;
+		$config = $this->root->getConfig();
 		$tag = $this->tagName;
 		$attributes = Array();
 
@@ -108,18 +108,18 @@ class tag {
 	 */
 	public function parseChildren(array &$tokens) : array {
 		$parenttag = $this->tagName;
-		$config = $this->root->config;
+		$config = $this->root->getConfig('elements');
 		$children = Array();
 
 		// process custom tags
-		if (in_array($parenttag, $config['elements']['custom'])) {
+		if (in_array($parenttag, $config['custom'])) {
 			$class = '\\hexydec\\html\\'.$parenttag;
 			$item = new $class($this->root);
 			$item->parse($tokens);
 			$children[] = $item;
 
 		// parse children
-		} elseif (!in_array($parenttag, $config['elements']['singleton'])) {
+		} else {
 			$tag = null;
 			$token = current($tokens);
 			do {
@@ -132,7 +132,7 @@ class tag {
 
 					case 'tagopenstart':
 						$tag = trim($token['value'], '<');
-						if ($tag == $parenttag && in_array($tag, $config['elements']['closeoptional'])) {
+						if ($tag == $parenttag && in_array($tag, $config['closeoptional'])) {
 							prev($tokens);
 							break 2;
 						} else {
@@ -141,7 +141,7 @@ class tag {
 							$item = new tag($this->root, $tag, $this);
 							$item->parse($tokens);
 							$children[] = $item;
-							if (in_array($tag, $config['elements']['singleton'])) {
+							if (in_array($tag, $config['singleton'])) {
 								$tag = null;
 							}
 						}
@@ -175,7 +175,7 @@ class tag {
 	}
 
 	public function minify(array $minify) {
-		$config = $this->root->config;
+		$config = $this->root->getConfig();
 		$attr = $config['attributes'];
 		if ($minify['lowercase']) {
 			$this->tagName = strtolower($this->tagName);
