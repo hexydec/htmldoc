@@ -15,7 +15,7 @@ class htmldoc {
 		'tagopenend' => '\s*+>',
 		'tagclose' => '<\/[^ >]++>',
 		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
-		'attributevalue' => '=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^ >]*+)',
+		'attributevalue' => '=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^\s>]*+)',
 		'attribute' => '[^<>"\'=\s]++',
 		'whitespace' => '\s++',
 		'other' => '.'
@@ -104,14 +104,16 @@ class htmldoc {
 			),
 			'singleton' => true, // minify singleton element by removing slash
 			'quotes' => true, // minify attribute quotes
-			'close' => true // don't write close tags where possible
+			'close' => true, // don't write close tags where possible
+			'email' => false // sets the minification presets to email safe options
 		)
 	);
 	protected $output = Array(
 		'charset' => null, // set the output charset
 		'quotestyle' => 'double', // double, single, minimal
 		'singletonclose' => false, // string to close singleton tags, or false to leave as is
-		'closetags' => false // whether to force tags to have a closing tag (true) or follow tag::close
+		'closetags' => false, // whether to force tags to have a closing tag (true) or follow tag::close
+		'xml' => false // sets the output presets to produce XML valid code
 	);
 
 	/**
@@ -436,6 +438,18 @@ class htmldoc {
 			$this->output['quotestyle'] = 'minimal';
 		}
 
+		// email minification
+		if (!empty($options['email'])) {
+			if ($minify['comments'] !== false) {
+				$minify['comments']['ie'] = true;
+			}
+			$minify['url'] = false;
+			if ($minify['attributes'] !== false) {
+				$minify['attributes']['empty'] = false;
+			}
+			$minify['close'] = false;
+		}
+
 		// sort attributes
 		// if ($config['attributes']['sort']) {
 		// 	arsort($this->attributes, SORT_NUMERIC);
@@ -448,6 +462,15 @@ class htmldoc {
 
 	public function html(array $options = null) : string {
 		$options = $options ? array_merge($this->output, $options) : $this->output;
+
+		// presets
+		if (!empty($options['xml'])) {
+			$options['quotestyle'] = 'double';
+			$options['singletonclose'] = '/>';
+			$options['closetags'] = true;
+		}
+
+		// output HTML
 		$html = '';
 		foreach ($this->children AS $item) {
 			$html .= $item->html($options);

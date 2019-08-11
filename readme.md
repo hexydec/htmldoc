@@ -3,9 +3,9 @@
 A tokeniser based HTML and CSS document parser and minifier, written in PHP.
 
 ![Licence](https://img.shields.io/badge/Licence-MIT-lightgrey.svg)
-![Project Status](https://img.shields.io/badge/Project%20Status-Alpha-yellow.svg)
+![Project Status](https://img.shields.io/badge/Project%20Status-Beta-yellow.svg)
 
-**This project is currently alpha code, it is currently not recommended to deploy this code into production**
+**This project is currently beta code, it is recommended to test your integration thoroughly before deploy this code into production**
 
 ## Description
 
@@ -37,4 +37,14 @@ $doc->minify();
 echo $doc->save();
 ```
 
-Find out more details of [how to use HTMLDoc in the docs](docs/)
+## Documentation
+
+- [How it works](how-it-works.md)
+- [How to use and examples](how-to-use.md)
+- [API Reference](api/readme.md)
+- [About Document Recycling](recycling.md)
+- [Object Performance](performance.md)
+
+## Licence
+
+The MIT License (MIT). Please see [License File](LICENCE) for more information.

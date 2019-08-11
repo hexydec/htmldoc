@@ -173,6 +173,15 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 			'<section><div><h1>Wrong closing tag order</div></h1></section>' => '<section><div><h1>Wrong closing tag order</h1></div></section>',
 			'<p class=test data-test=tester>Unquoted attributes</p>' => '<p class="test" data-test="tester">Unquoted attributes</p>',
 			'<script>let test = "</script><div>Test</div>";</script>' => '<script>let test = "</script><div>Test</div>";</script>',
+			'<a
+    href="https://github.com/hexydec"
+    class = \'test\'
+    title=test
+    >
+        Test
+</a>' => '<a href="https://github.com/hexydec" class="test" title="test">
+        Test
+</a>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {

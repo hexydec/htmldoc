@@ -49,7 +49,9 @@ if (!empty($_POST['action'])) {
 				}
 			}
 		}
-		$doc->minify($minify);
+		if ($minify) {
+			$doc->minify($minify);
+		}
 		$timing['minify'] = microtime(true);
 		$mem['minify'] = memory_get_usage();
 		$output = $doc->save();
@@ -207,7 +209,7 @@ if (!empty($_POST['action'])) {
 					<?php foreach ($options AS $key => $item) { ?>
 						<li>
 							<label>
-								<input type="checkbox" name="minify[]" value="<?= $key; ?>"<?= isset($minify[$key]) && $minify[$key] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($key)); ?>
+								<input type="checkbox" name="minify[]" value="<?= $key; ?>"<?= !isset($minify[$key]) || $minify[$key] === false ? '' : ' checked="checked"'; ?> /><?= htmlspecialchars(ucfirst($key)); ?>
 							</label>
 							<?php if (is_array($item)) { ?>
 								<ul class="minify__options-list">
