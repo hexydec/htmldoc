@@ -14,4 +14,5 @@ This document describes how to configure and use the HTMLDoc object.
 | [attr()](attr.md)					| Retrieve the value of an attribute		|
 | [text()](text.md)					| Extract text from an HTMLDoc		 		|
 | [minify()](minify.md)				| Minify the HTMLDoc						|
+| [html()](html.md)					| Render the document as HTMLDoc	 		|
 | [save()](save.md)					| Save as a file or output as a string 		|
