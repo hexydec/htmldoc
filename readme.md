@@ -39,11 +39,11 @@ echo $doc->save();
 
 ## Documentation
 
-- [How it works](how-it-works.md)
-- [How to use and examples](how-to-use.md)
-- [API Reference](api/readme.md)
-- [About Document Recycling](recycling.md)
-- [Object Performance](performance.md)
+- [How it works](docs/how-it-works.md)
+- [How to use and examples](docs/how-to-use.md)
+- [API Reference](docs/api/readme.md)
+- [About Document Recycling](docs/recycling.md)
+- [Object Performance](docs/performance.md)
 
 ## Licence
 

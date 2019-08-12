@@ -42,4 +42,4 @@ $found = $doc->find('form a.button, form label.button');
 ```
 ## Returns
 
-An HTMKDoc object containing the matched nodes, or an empty HTMLDoc collection if no matches were found.
+An HTMLDoc object containing the matched nodes, or an empty HTMLDoc collection if no matches were found.
