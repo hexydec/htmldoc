@@ -34,8 +34,8 @@ class htmldoc {
 		'bracketclose' => '\)',
 		'comma' => ',',
 		'pseudo' => ':[A-Za-z-]++',
-		'id' => '#[^ +>\.#{\[]++',
-		'class' => '\.[^ +>\.#{\[]++',
+		'id' => '#[^ +>\.#{\[,]++',
+		'class' => '\.[^ +>\.#{\[,]++',
 		'string' => '\*|[^\[\]{}\(\):;,>+=~\^$!" #\.*]++',
 		'whitespace' => '\s++',
 	);
@@ -131,6 +131,13 @@ class htmldoc {
 		$this->config = array_replace_recursive($this->config, $config);
 	}
 
+	public function __get($var) {
+		if ($var == 'length') {
+			return count($this->chhildren);
+		}
+		return null;
+	}
+
 	/**
 	 * Retrieves the children of the document as an array
 	 *
@@ -203,7 +210,7 @@ class htmldoc {
 
 		// detect the charset
 		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== false || ($charset = mb_detect_encoding($html)) !== false) {
-			$html = mb_convert_encoding($html, $charset, mb_internal_encoding());
+			$html = mb_convert_encoding($html, mb_internal_encoding(), $charset);
 		}
 
 		// reset the document
@@ -219,7 +226,7 @@ class htmldoc {
 
 		// success
 		} else {
-			// \var_dump($this->debug());
+			// var_dump($tokens);
 			return true;
 		}
 		return false;
@@ -408,20 +415,16 @@ class htmldoc {
 	}
 
 	public function text() : string {
-		$text = '';
+		$text = Array();
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
 			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text'))) {
-				$text .= $item->text();
-
-				// add a space to make sure words aren't joined
-				if ($text && mb_substr($text, -1) != ' ') {
-					$text .= ' ';
-				}
+				$value = $item->text();
+				$text = array_merge($text, is_array($value) ? $value : Array($value));
 			}
 		}
-		return $text;
+		return implode(' ', $text);
 	}
 
 	public function collection(array $nodes) {
@@ -485,12 +488,21 @@ class htmldoc {
 
 		// convert charset
 		if (!empty($options['charset'])) {
-			$html = mb_convert_encoding(mb_internal_encoding(), $options['charset'], $html);
+
+			// if not UTF-8, convert all applicable HTML entities
+			if ($options['charset'] != 'UTF-8') {
+				$html = mb_convert_encoding($html, 'HTML-ENTITIES');
+			}
+
+			// convert to target charset
+			$html = mb_convert_encoding($html, $options['charset']);
 		}
 
-		// save file
+		// send back as string
 		if (!$file) {
 			return $html;
+
+		// save file
 		} elseif (file_put_contents($file, $html) === false) {
 			trigger_error('File could not be written', E_USER_WARNING);
 		} else {

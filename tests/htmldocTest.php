@@ -1,8 +1,7 @@
 <?php
-
 use hexydec\html\htmldoc;
 
-final class HtmldocTest extends \PHPUnit\Framework\TestCase {
+final class htmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanParseDocument() {
 		$doc = new htmldoc();
@@ -12,159 +11,7 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanLowercaseTagsAndAttributes() {
-		$doc = new htmldoc();
-
-		if ($doc->open(__DIR__.'/templates/lowercase.html')) {
-			$doc->minify(Array(
-				'lowercase' => false, // locase attribute and tags names
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/lowercase-recycle.html');
-			$this->assertEquals($minified, $doc->save(), 'Case of tags now match in opening and closing');
-		}
-
-		if ($doc->open(__DIR__.'/templates/lowercase.html')) {
-			$doc->minify(Array(
-				'lowercase' => true, // locase attribute and tags names
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/lowercase-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can lowercase tag and attribute names');
-		}
-	}
-
-	public function testCanStripWhitespace() {
-		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/whitespace.html')) {
-			$doc->minify(Array(
-				//'whitespace' => true, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = trim(file_get_contents(__DIR__.'/templates/whitespace-minified.html'));
-			$this->assertEquals($minified, $doc->save(), 'Can strip whitepace');
-		}
-	}
-
-	public function testCanStripComments() {
-
-		// strip all comments
-		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/comments.html')) {
-			$doc->minify(Array(
-	   			'whitespace' => false, // remove whitespace
-	   			'comments' => Array('ie' => false), // remove comments
-	   			'urls' => false, // update internal URL's to be shorter
-	   			'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/comments-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can strip all comments');
-		}
-
-		// test allowing IE conditional comments
-		if ($doc->open(__DIR__.'/templates/comments.html')) {
-			$doc->minify(Array(
-				'whitespace' => false, // remove whitespace
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/comments-minified-ie.html');
-			$this->assertEquals($minified, $doc->save(), 'Can strip comments but leave IE comments intact');
-		}
-	}
-
-	public function testCanMinifyUrls() {
-		$_SERVER['HTTPS'] = '';
-		$_SERVER['HTTP_HOST'] = 'test.com';
-		$_SERVER['REQUEST_URI'] = '/url/';
-		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/urls.html')) {
-			$doc->minify(Array(
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				//'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/urls-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can minify URLs');
-		}
-	}
-
-	public function testCanMinifyAttributes() {
-		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/attributes.html')) {
-			$doc->minify(Array(
-				'css' => false, // minify css
-				'js' => false, // minify javascript
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				//'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/attributes-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can minify attributes');
-		}
-	}
-
-	public function testCanMinifySingletons() {
-		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/singleton.html')) {
-			$doc->minify(Array(
-				'css' => false, // minify css
-				'js' => false, // minify javascript
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				//'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/singleton-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can minify singletons');
-		}
-	}
-
-	public function testCanMinifyQuotes() {
-		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/quotes.html')) {
-			$doc->minify(Array(
-				'css' => false, // minify css
-				'js' => false, // minify javascript
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			//'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/quotes-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can minify attribute quotes');
-		}
-	}
-
-	public function testCanHandleBrokenHtml() {
+	public function testCanHandleDifficultHtml() {
 		$tests = Array(
 			'<a href="#"">Extra quote</a>' => '<a href="#">Extra quote</a>',
 			'<p title="</p>">Closing tag in titke</p>' => '<p title="&lt;/p&gt;">Closing tag in titke</p>',
@@ -186,47 +33,51 @@ final class HtmldocTest extends \PHPUnit\Framework\TestCase {
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
 			if ($doc->load($input, mb_internal_encoding())) {
-				$this->assertEquals($output, $doc->save());
+				$this->assertEquals($output, $doc->html());
 			}
 		}
 	}
 
-	public function testCanFindElements() {
+	public function testCanEncodeAttributes() {
+		$tests = Array(
+			'<p title="test single quotes \'"></p>' => '<p title="test single quotes \'"></p>',
+			'<p title="test single quotes &apos;"></p>' => '<p title="test single quotes \'"></p>',
+			'<p title="test single quotes &#39;"></p>' => '<p title="test single quotes \'"></p>',
+			"<p title='test single quotes &#39;'></p>" => '<p title="test single quotes \'"></p>',
+		);
 		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/find.html')) {
-			$doc->minify(Array(
-				'css' => false, // minify css
-				'js' => false, // minify javascript
-				//'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			// var_dump($doc->find('title'));
-			$this->assertEquals('<title>Find</title>', $doc->find('title')->html());
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div>', $doc->find('.find')->html());
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p></div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class^=find]')->html());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>', $doc->find('[class*=__]')->html());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('[class$=heading]')->html());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('h1[class$=heading]')->html());
-			$this->assertEquals('<h1 class="find__heading">Heading</h1>', $doc->find('html h1[class$=heading]')->html());
-			$this->assertEquals('<div class="first">First</div>', $doc->find('div:first-child')->html());
-			$this->assertEquals('<div class="last">Last</div>', $doc->find('div:last-child')->html());
+		foreach ($tests AS $input => $output) {
+			if ($doc->load($input, mb_internal_encoding())) {
+				$this->assertEquals($output, $doc->html());
+			}
+		}
+		if ($doc->load('<p title="test single quotes &quot; \'"></p>', mb_internal_encoding())) {
+			$this->assertEquals("<p title='test single quotes &quot; &apos;'></p>", $doc->html(Array('quotestyle' => 'single')));
 		}
 	}
 
-	/*public function testCanMinifyCss() {
-		$html = file_get_contents(__DIR__.'/templates/css.html');
-		$minified = file_get_contents(__DIR__.'/templates/css-minified.html');
-		$output = htmlmin::minify($html, Array(
-			'whitespace' => false, // remove whitespace
-			'comments' => false, // remove comments
-			'inlinestyles' => false, // minify inline CSS
-			'urls' => false, // update internal URL's to be shorter
-			'attributes' => false, // remove values from boolean attributes);
-		));
-		$this->assertEquals($minified, $output);
-	}*/
+	public function testCanEncodeTextNodes() {
+		$tests = Array(
+			'<p>"Test"</p>' => '<p>&quot;Test&quot;</p>',
+			'<p>&#128512; &#128513; &#128514; &#129315;</p>' => '<p>😀 😁 😂 🤣</p>'
+		);
+		$doc = new htmldoc();
+		foreach ($tests AS $input => $output) {
+			if ($doc->load($input, mb_internal_encoding())) {
+				$this->assertEquals($output, $doc->html());
+			}
+		}
+	}
+
+	public function testCanConvertEncodings() {
+		$doc = new htmldoc();
+
+		// test input encoding conversion
+		$input = mb_convert_encoding('<p title="Héllo ÿ &#128512;">Héllo ÿ &#129315;</p>', 'iso-8859-1');
+		$output = '<p title="Héllo ÿ 😀">Héllo ÿ 🤣</p>';
+		if ($doc->load($input, 'iso-8859-1')) {
+			$this->assertEquals($output, $doc->html());
+			$this->assertEquals($input, $doc->save(null, Array('charset' => 'iso-8859-1')));
+		}
+	}
 }

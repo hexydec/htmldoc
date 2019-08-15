@@ -24,7 +24,7 @@ class text {
 		$this->content = html_entity_decode($token['value'], ENT_QUOTES);
 	}
 
-	public function text() {
+	public function text() : string {
 		return $this->content;
 	}
 
@@ -88,8 +88,8 @@ class text {
 		return false;
 	}
 
-	public function html() {
-		return $this->content ? htmlspecialchars($this->content) : '';
+	public function html(array $options = null) : string {
+		return $this->content ? htmlspecialchars($this->content, ENT_COMPAT | ENT_HTML5) : '';
 	}
 
 	public function __get($var) {

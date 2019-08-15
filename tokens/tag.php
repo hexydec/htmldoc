@@ -51,7 +51,11 @@ class tag {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$attributes[$attr] = html_entity_decode(trim(trim($token['value'], '= '), '"\''), ENT_QUOTES);
+						$value = trim($token['value'], "= \t\r\n");
+						if (strpos($value, '"') === 0 || strpos($value, "'") === 0) {
+							$value = substr($value, 1, -1);
+						}
+						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 						$attr = false;
 					}
 					break;
@@ -459,18 +463,14 @@ class tag {
 		return null;
 	}
 
-	public function text() : string {
-		$text = '';
+	public function text() : array {
+		$text = Array();
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
 			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text'))) {
-				$text .= $item->text();
-
-				// add a space to make sure words aren't joined
-				if ($text && mb_substr($text, -1) != ' ') {
-					$text .= ' ';
-				}
+				$value = $item->text();
+				$text = array_merge($text, is_array($value) ? $value : Array($value));
 			}
 		}
 		return $text;
@@ -489,7 +489,7 @@ class tag {
 				} elseif ($value && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$quote = '';
 				}
-				$html .= '='.$quote.htmlspecialchars($value).$quote;
+				$html .= '='.$quote.htmlspecialchars($value, ENT_HTML5 | ($options['quotestyle'] == 'single' ? ENT_QUOTES : ENT_COMPAT)).$quote;
 			}
 		}
 
