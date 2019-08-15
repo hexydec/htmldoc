@@ -491,7 +491,7 @@ class htmldoc {
 
 			// if not UTF-8, convert all applicable HTML entities
 			if ($options['charset'] != 'UTF-8') {
-				$html = mb_convert_encoding($html, 'HTML-ENTITIES');
+				$html = $this->htmlentities($html, $options['charset']);
 			}
 
 			// convert to target charset
@@ -509,6 +509,29 @@ class htmldoc {
 			return true;
 		}
 		return false;
+	}
+
+	protected function htmlentities($html, $charset) {
+
+		// generate single-byte characters
+		$str = '';
+		for ($i = 1; $i < 256; $i++) {
+			$str .= chr($i);
+		}
+		$str = mb_convert_encoding($str, mb_internal_encoding(), $charset);
+
+		// build html entities conversion map
+		$replace = Array();
+		foreach (preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY) AS $chr) {
+			$ent = mb_convert_encoding($chr, 'HTML-ENTITIES');
+			if ($ent != $chr) {
+				$replace[$chr] = $ent;
+			}
+		}
+
+		// convert entities
+		$html = mb_convert_encoding($html, 'HTML-ENTITIES');
+		return str_replace(array_values($replace), array_keys($replace), $html);
 	}
 
 	// public function debug() {
