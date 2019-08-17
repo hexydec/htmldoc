@@ -44,6 +44,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			'<p title="test single quotes &apos;"></p>' => '<p title="test single quotes \'"></p>',
 			'<p title="test single quotes &#39;"></p>' => '<p title="test single quotes \'"></p>',
 			"<p title='test single quotes &#39;'></p>" => '<p title="test single quotes \'"></p>',
+			"<p disabled></p>" => '<p disabled></p>',
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
@@ -78,6 +79,20 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 		if ($doc->load($input, 'iso-8859-1')) {
 			$this->assertEquals($output, $doc->html());
 			$this->assertEquals($input, $doc->save(null, Array('charset' => 'iso-8859-1')));
+		}
+	}
+
+	public function testCanProduceXml() {
+		$tests = Array(
+			"<p disabled></p>" => '<p disabled=""></p>',
+			"<p title='disabled'></p>" => '<p title="disabled"></p>',
+			'<p class="para__first">Test<p class="para__second">Test 2' => '<p class="para__first">Test</p><p class="para__second">Test 2</p>'
+		);
+		$doc = new htmldoc();
+		foreach ($tests AS $input => $output) {
+			if ($doc->load($input, mb_internal_encoding())) {
+				$this->assertEquals($output, $doc->html(Array('xml' => true)));
+			}
 		}
 	}
 }

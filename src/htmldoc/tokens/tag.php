@@ -482,14 +482,18 @@ class tag {
 		$html = '<'.$this->tagName;
 		foreach ($this->attributes AS $key => $value) {
 			$html .= ' '.$key;
-			if ($value !== null) {
+			if ($value !== null || $options['xml']) {
+				$empty = in_array($value, Array(null, ''));
 				$quote = '"';
 				if ($options['quotestyle'] == 'single') {
 					$quote = "'";
-				} elseif ($value && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
+				} elseif (!$empty && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$quote = '';
 				}
-				$html .= '='.$quote.htmlspecialchars($value, ENT_HTML5 | ($options['quotestyle'] == 'single' ? ENT_QUOTES : ENT_COMPAT)).$quote;
+				if (!$empty) {
+					$value = htmlspecialchars($value, ENT_HTML5 | ($options['quotestyle'] == 'single' ? ENT_QUOTES : ENT_COMPAT));
+				}
+				$html .= '='.$quote.$value.$quote;
 			}
 		}
 

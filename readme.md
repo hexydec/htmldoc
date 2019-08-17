@@ -45,6 +45,12 @@ echo $doc->save();
 - [About Document Recycling](docs/recycling.md)
 - [Object Performance](docs/performance.md)
 
+## Contributing
+
+If you find an issue with HTMLDoc, please create an issue in the tracker.
+
+If you wish to fix an issues yourself, please fork the code, fix the issue, then create a pull request, and I will evaluate your submission.
+
 ## Licence
 
 The MIT License (MIT). Please see [License File](LICENCE) for more information.
