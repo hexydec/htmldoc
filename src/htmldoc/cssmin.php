@@ -1,121 +1,87 @@
 <?php
 namespace hexydec\html;
+
 class cssmin {
 
-	protected static $config = Array(
-		'removesemicolon' => true,
-		'removezerounits' => true,
-		'removeleadingzero' => true,
-		'convertquotes' => true,
-		'removequotes' => true,
-		'shortenhex' => true,
-		'lowerhex' => true,
-		'sortselectors' => true,
-		'mergeselectors' => true,
-		'removeoverwrittenproperties' => true,
-		'sortproperties' => true,
-		'mergeblocks' => true,
-		'output' => 'minify',
-		'report' => false
-	);
+   protected static $tokens = Array(
+	   'whitespace' => '\s++',
+	   'comment' => '\/\*(?!!)[\d\D]*?\*\/',
+	   'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
+	   'join' => '[>+~]',
+	   'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
+	   'curlyopen' => '{',
+	   'curlyclose' => '}',
+	   'squareopen' => '\[',
+	   'squareclose' => '\]',
+	   'bracketopen' => '\(',
+	   'bracketclose' => '\)',
+	   'comma' => ',',
+	   'colon' => ':',
+	   'semicolon' => ';',
+	   'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
+   );
 
-	protected static $tokens = Array(
-		'whitespace' => '\s++',
-		'comment' => '\/\*(?!!)[\d\D]*?\*\/',
-		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
-		'join' => '[>+~]',
-		'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
-		'curlyopen' => '{',
-		'curlyclose' => '}',
-		'squareopen' => '\[',
-		'squareclose' => '\]',
-		'bracketopen' => '\(',
-		'bracketclose' => '\)',
-		'comma' => ',',
-		'colon' => ':',
-		'semicolon' => ';',
-		'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
-	);
+   	protected static $config = Array(
+   		'removesemicolon' => true,
+   		'removezerounits' => true,
+   		'removeleadingzero' => true,
+   		'convertquotes' => true,
+   		'removequotes' => true,
+   		'shortenhex' => true,
+   		'lowerhex' => true,
+   		'sortselectors' => true,
+   		'mergeselectors' => true,
+   		'removeoverwrittenproperties' => true,
+   		'sortproperties' => true,
+   		'mergeblocks' => true,
+   		'report' => false,
+	   	'output' => 'minify'
+   	);
 
-	public static function minify($code, $config = Array()) {
+	public static function minify(string $code, array $config = Array()) {
 		$config = array_merge(self::$config, $config);
 		if (($tokens = tokenise::tokenise($code, self::$tokens)) === false) {
 			trigger_error('Could not tokenise input', E_USER_WARNING);
 		} elseif (($ast = self::parse($tokens)) === false) {
 			trigger_error('Input is not invalid', E_USER_WARNING);
-		} elseif (($ast = self::minifyAst($ast)) === false) {
+		} elseif (($ast = self::minifyAst($ast, $config)) === false) {
 			trigger_error('AST could not be minified', E_USER_WARNING);
 		} elseif (($css = self::compile($ast, $config)) === false) {
 			trigger_error('Could not compile CSS', E_USER_WARNING);
 		} else {
 			return $css;
 		}
-
-
-		// $code = self::clean($code);
-		// if (($rules = self::tokenise($code, $config)) !== false) {
-		// 	return self::compile($rules, $config['output'] == 'minify', !$config['removesemicolon']);
-		// }
-		// return false;
 	}
 
-	protected function tokenise($code, $config) {
-
-		// prepare regexp and extract strings
-		$re = '/('.implode(')|(', $config['tokens']).')/u';
-		if (preg_match_all($re, $code, $match)) {
-
-			// build tokens into types
-			$tokens = Array();
-			$keys = array_keys($config['tokens']);
-			foreach ($match[0] AS $i => $item) {
-
-				// go through tokens and find which one matched
-				foreach ($keys AS $token => $type) {
-					if ($match[$token+1][$i] !== '') {
-						$tokens[] = Array(
-							'type' => $type,
-							'value' => $item
-						);
-						break;
-					}
-				}
-			}
-			return $tokens;
-		}
-		return false;
-	}
-
-	protected static function parse($tokens, &$i = 0) {
+	protected static function parse(array &$tokens) {
 		$rules = Array();
-		$count = count($tokens);
 		$select = true;
 		$comment = false;
 		$media = false;
 		$selectors = Array();
 		$properties = Array();
-		while ($i < $count) {
+		$token = current($tokens);
+		do {
 
 			// process selectors
 			if ($select) {
-				if ($tokens[$i]['type'] != 'whitespace') {
-					if ($tokens[$i]['type'] == 'comment') {
-						$comment = $tokens[$i]['value'];
-					} elseif ($tokens[$i]['type'] == 'curlyclose') {
+				if ($token['type'] != 'whitespace') {
+					if ($token['type'] == 'comment') {
+						$comment = $token['value'];
+					} elseif ($token['type'] == 'curlyclose') {
 						return $rules;
-					} elseif ($tokens[$i]['type'] == 'string') {
-						if ($tokens[$i]['value'] == '@media') {
-							$i++;
+					} elseif ($token['type'] == 'string') {
+						if ($token['value'] == '@media') {
 							$rules[] = Array(
-								'media' => self::parseMediaQuery($tokens, $count, $i),
+								'media' => self::parseMediaQuery($tokens),
 								'rules' => self::parse($tokens, $i),
 								'comment' => $comment
 							);
 							$comment = false;
 						} else {
-							$i--;
-							$selectors[] = self::parseSelectors($tokens, $count, $i);
-							if ($tokens[$i]['type'] == 'curlyopen') {
+							// prev($tokens);
+							$selectors[] = self::parseSelectors($tokens);
+							if (current($tokens)['type'] == 'curlyopen') {
 								$select = false;
 							}
 						}
@@ -123,19 +89,21 @@ class cssmin {
 				}
 
 			// process properties
-			} elseif ($tokens[$i]['type'] == 'string') {
-				$prop = $tokens[$i]['value'];
-				if ($tokens[++$i]['type'] == 'colon') {
+			} elseif ($token['type'] == 'string') {
+				$prop = $token['value'];
+				if (next($tokens)['type'] == 'colon') {
 					$properties[$prop] = Array(
-						'value' => self::parsePropertyValue($tokens, $count, $i, $important, $propcomment),
+						'value' => self::parsePropertyValue($tokens, $important, $propcomment),
 						'important' => $important,
 						'semicolon' => ';',
 						'comment' => $propcomment
 					);
+				} else {
+					prev($tokens);
 				}
 
 			// end rule
-			} elseif ($tokens[$i]['type'] == 'curlyclose') {
+			} elseif ($token['type'] == 'curlyclose') {
 				$rules[] = Array(
 					'selectors' => $selectors,
 					'properties' => $properties,
@@ -146,14 +114,13 @@ class cssmin {
 				$select = true;
 				$comment = false;
 			}
-			$i++;
-		}
+		} while (($token = next($tokens)) !== false);
 		// print_r($rules);
 		// exit();
 		return $rules;
 	}
 
-	protected static function parseMediaQuery($tokens, $count, &$i) {
+	protected static function parseMediaQuery(array &$tokens) {
 		$media = Array();
 		$default = $rule = Array(
 			'media' => 'all',
@@ -161,37 +128,37 @@ class cssmin {
 			'not' => false,
 			'properties' => Array()
 		);
-		while ($i++ < $count) {
-			switch ($tokens[$i]['type']) {
+		while (($token = next($tokens)) !== false) {
+			switch ($token['type']) {
 				case 'string':
-					if ($tokens[$i]['value'] == 'only') {
+					if ($token['value'] == 'only') {
 						$rule['only'] = true;
-					} elseif ($tokens[$i]['value'] == 'not') {
+					} elseif ($token['value'] == 'not') {
 						$rule['not'] = true;
-					} elseif ($tokens[$i]['value'] != 'and') {
-						$rule['media'] = $tokens[$i]['value'];
+					} elseif ($token['value'] != 'and') {
+						$rule['media'] = $token['value'];
 					}
 					break;
 				case 'bracketopen':
 					$compare = false;
-					while ($i++ < $count && $tokens[$i]['type'] != 'bracketclose') {
-						if ($tokens[$i]['type'] == 'string') {
+					while (($token = next($tokens)) !== false && $token['type'] != 'bracketclose') {
+						if ($token['type'] == 'string') {
 							if (!$compare) {
-								$prop = $tokens[$i]['value'];
+								$prop = $token['value'];
 							} elseif ($compare == ':') {
-								$rule['properties'][$prop] = $tokens[$i]['value'];
+								$rule['properties'][$prop] = $token['value'];
 								$compare = false;
 							} else {
 								if (intval($prop)) {
-									$rule['properties']['min-'.$tokens[$i]['value']] = $prop;
-									$prop = 'max'.$tokens[$i]['value'];
+									$rule['properties']['min-'.$token['value']] = $prop;
+									$prop = 'max'.$token['value'];
 								} else {
-									$rule['properties'][$prop] = $tokens[$i]['value'];
+									$rule['properties'][$prop] = $token['value'];
 								}
 							}
-						} elseif ($tokens[$i]['type'] == 'colon') {
+						} elseif ($token['type'] == 'colon') {
 							$compare = ':';
-						} elseif ($tokens[$i]['type'] == 'comparison' && $tokens[$i]['value'] == '<=') {
+						} elseif ($token['type'] == 'comparison' && $token['value'] == '<=') {
 							$compare = '<=';
 						}
 					}
@@ -208,11 +175,12 @@ class cssmin {
 		return $media;
 	}
 
-	protected static function parseSelectors($tokens, $count, &$i) {
+	protected static function parseSelectors(array &$tokens) {
 		$selector = Array();
 		$join = false;
-		while ($i++ < $count) {
-			switch ($tokens[$i]['type']) {
+		$token = current($tokens);
+		do {
+			switch ($token['type']) {
 				case 'whitespace':
 					if (!$join) {
 						$join = ' ';
@@ -220,18 +188,18 @@ class cssmin {
 					break;
 				case 'string':
 					$selector[] = Array(
-						'selector' => $tokens[$i]['value'],
+						'selector' => $token['value'],
 						'join' => $join
 					);
 					$join = false;
 					break;
 				case 'colon':
 					$parts = ':';
-					while ($i++ < $count) {
-						if (!in_array($tokens[$i]['type'], Array('whitespace', 'comma', 'curlyopen'))) {
-							$parts .= $tokens[$i]['value'];
+					while (($token = next($tokens)) !== false) {
+						if (!in_array($token['type'], Array('whitespace', 'comma', 'curlyopen'))) {
+							$parts .= $token['value'];
 						} else {
-							$i--;
+							prev($tokens);
 							break;
 						}
 					}
@@ -243,11 +211,11 @@ class cssmin {
 					break;
 				case 'squareopen':
 					$parts = '';
-					while ($i++ < $count) {
-						if (!in_array($tokens[$i]['type'], Array('squareclose'))) {
-							$parts .= $tokens[$i]['value'];
-						} elseif ($tokens[$i]['type'] != 'whitespace') {
-							$i--;
+					while (($token = next($tokens)) !== false) {
+						if (!in_array($token['type'], Array('squareclose'))) {
+							$parts .= $token['value'];
+						} elseif ($token['type'] != 'whitespace') {
+							prev($tokens);
 							break;
 						}
 					}
@@ -261,38 +229,38 @@ class cssmin {
 				case 'comma':
 					break 2;
 				case 'join':
-					$join = $tokens[$i]['value'];
+					$join = $token['value'];
 					break;
 			}
-		}
+		} while (($token = next($tokens)) !== false);
 		return $selector;
 	}
 
-	protected static function parsePropertyValue($tokens, $count, &$i, &$important = false, &$comment = false) {
+	protected static function parsePropertyValue($tokens, &$important = false, &$comment = false) {
 		$properties = Array();
 		$values = Array();
 		$important = false;
 		$comment = false;
-		while ($i++ < $count) {
-			if ($tokens[$i]['type'] == 'comma') {
+		while (($token = next($tokens)) !== false) {
+			if ($token['type'] == 'comma') {
 				$properties[] = $values;
 				$values = Array();
-			} elseif ($tokens[$i]['value'] == '!important') {
+			} elseif ($token['value'] == '!important') {
 				$important = true;
-			} elseif ($tokens[$i]['type'] == 'bracketopen') {
-				$values[] = self::parsePropertyValue($tokens, $count, $i);
-			} elseif (in_array($tokens[$i]['type'], Array('semicolon', 'bracketclose'))) {
-				$n = $i;
-				while ($n++ < $count) {
-					if ($tokens[$n]['type'] == 'comment') {
-						$comment = $tokens[$n]['value'];
-					} elseif ($tokens[$n]['type'] != 'whitespace') {
+			} elseif ($token['type'] == 'bracketopen') {
+				$values[] = self::parsePropertyValue($tokens);
+			} elseif (in_array($token['type'], Array('semicolon', 'bracketclose'))) {
+				while (($token = next($tokens)) !== false) {
+					if ($token['type'] == 'comment') {
+						$comment = $token['value'];
+					} elseif ($token['type'] != 'whitespace') {
+						prev($tokens);
 						break;
 					}
 				}
 				break;
-			} elseif ($tokens[$i]['type'] != 'whitespace') {
-				$values[] = $tokens[$i]['value'];
+			} elseif ($token['type'] != 'whitespace') {
+				$values[] = $token['value'];
 			}
 		}
 		if ($values) {
@@ -301,26 +269,33 @@ class cssmin {
 		return $properties;
 	}
 
-	protected static function minifyAst($ast) {
+	protected static function minifyAst(array $ast, array $config) {
 		foreach ($ast AS &$item) {
 			if (isset($item['media'])) {
-				$item['rules'] = self::minifyAst($item['rules']);
+				$item['rules'] = self::minifyAst($item['rules'], $config);
 			} else {
 				foreach ($item['properties'] AS &$prop) {
 					foreach ($prop['value'] AS &$group) {
-						$group = self::minifyValues($group);
+						$group = self::minifyValues($group, $config);
 					}
 					unset($group);
 				}
 				unset($prop);
+
+				if ($config['sortproperties']) {
+					ksort($item['properties']);
+				}
+				if ($config['removesemicolon']) {
+					end($item['properties']);
+					$item['properties'][key($item['properties'])]['semicolon'] = '';
+				}
 			}
 		}
 		unset($item);
 		return $ast;
 	}
 
-	protected static function minifyValues($values) {
-		$config = self::$config;
+	protected static function minifyValues($values, $config) {
 		foreach ($values AS &$value) {
 
 			// value in brackets
@@ -344,22 +319,13 @@ class cssmin {
 				if ($config['lowerhex'] && preg_match('/^#[a-f0-6]{3,6}$/i', $value)) {
 					$value = strtolower($value);
 				}
-				if ($config['sortselectors']) {
-
-				}
 				if ($config['mergeselectors']) {
 
 				}
 				if ($config['removeoverwrittenproperties']) {
 
 				}
-				if ($config['sortproperties']) {
-
-				}
 				if ($config['mergeblocks']) {
-
-				}
-				if ($config['removesemicolon']) {
 
 				}
 			}
@@ -444,130 +410,11 @@ class cssmin {
 				if (is_array($item)) {
 					$compiled .= '('.self::compileProperty($item, $b).')';
 				} else {
-					$compiled .= ($compiled ? ' ' : '').$item;
+					$compiled .= ($compiled !== '' ? ' ' : '').$item;
 				}
 			}
 			$properties[] = $compiled;
 		}
 		return implode($b ? ', ' : ',', $properties);
 	}
-
-	/*protected static function clean($code) {
-		$replace = Array(
-			'/\/\*(?!!)[\d\D]*?\*\//' => '', // remove comments
-			'/("(?:[^"\\\\]++|\\\\.)*+")?\s++/i' => '$1 ', // collapse whitespace to single space
-		);
-		return preg_replace(array_keys($replace), $replace, $code);
-	}
-
-	protected static function tokenise($code, $config, $sub = false) {
-
-		// split declarations
-		if (preg_match_all('/([^{]++)({([^{}]++|(?2))*})/', $code, $items, PREG_SET_ORDER)) {
-			$css = Array(); // stores the compiled CSS
-			foreach ($items AS $item) {
-
-				// process media queries in their own block
-				$isat = strpos($item[0], '@') === 0; // @selectors are special
-				if ($isat && !in_array($item[1], Array('@font-face', '@import', '@charset'))) {
-					$css[] = Array(
-						'selectors' => $item[1],
-						'properties' => self::tokenise(substr($item[2], 1, -1), $config, true)
-					);
-
-				// process rules
-			} elseif (!empty($item[3]) && ($properties = self::tokeniseProperties($item[3], $config)) !== false) {
-					$css[] = Array(
-						'selectors' => self::tokeniseSelectors($item[1], $config),
-						'properties' => $properties
-					);
-				}
-			}
-			return $css;
-		}
-		return false;
-	}
-
-	protected static function tokeniseSelectors($selector, $config) {
-		$selector = preg_replace('/("(?:[^"\\\\]++|\\\\.)*+")\s?|\s?([()+>,])\s?|^\s|\s$/i', '$1$2', $selector);
-		$selectors = explode(',', $selector);
-
-		// sort selectors alphabetically - gzips better and enables better collapsing
-		if ($config['sortselectors']) {
-			sort($selectors);
-		}
-		return $selectors;
-	}
-
-	protected static function tokeniseProperties($code, $config) {
-		$pat = '/([^:]++):((?:[^;\(\)!]*+(\((?:[^\(\)]++|(?3))*\))*+[^;\(\)!]*+)++)(!important)?(?:;|$)/';
-		if (preg_match_all($pat, $code, $matches, PREG_SET_ORDER)) { // match properties
-			$properties = Array();
-			foreach ($matches AS $match) {
-				// STORE THE PROPERTY ##################################
-				$properties[] = Array(
-					'property' => $match[1],
-					'value' => self::minifyProperty($match[1], $match[2], $config),
-					'important' => !empty($match[4])
-				);
-			}
-			return $properties;
-		}
-		return false;
-	}
-
-	protected static function minifyProperty($prop, $value, $config) {
-		return $value;
-
-		// remove unit from zero values
-		if ($config['removezerounits']) {
-			$value = preg_replace('/((?: |^|$)0)(?:px|pt|pc|%|em|rem)/i', '$1', $value);
-		}
-
-		// strip zero from floats
-		if ($config['removeleadingzero']) {
-			$value = preg_replace('/( |^|$)0++(\.\d++)/i', '$1$2', $value);
-		}
-
-		// convert single quotes to double quotes
-		if ($config['convertquotes']) {
-			$value = preg_replace('/(?<!\\\\)\'([^\'\\\\]++|\\\\.)*+\'/i', '"$1"', $value);
-		}
-
-		// remove quotes
-		if ($config['removequotes'] && !in_array($prop, Array('content', 'filter'))) {
-			$value = preg_replace('/"([^\'\\\\]++|\\\\.)*+")/i', '$1', $value);
-		}
-
-		// shorten hex colours, not in filter
-		if ($config['shortenhex'] && $prop != 'filter') {
-			$value = preg_replace('/#([a-f0-9])\\1([a-f0-9])\\2([a-f0-9])\\3/i', '#$1$2$3', $value);
-		}
-
-		// lowercase hex values
-		if ($config['lowerhex']) {
-			$value = preg_replace_callback('/(?<=[ ,])#(?:[a-f0-9]{6}|[a-f0-9]{3})/i', function ($match) {
-				return strtolower($match[0]);
-			}, $value);
-		}
-		return $value;
-	}
-
-	protected static function compile($rules, $min = true, $semiColon = false) {
-		$output = '';
-		foreach ($rules AS $item) {
-			$output .= is_array($item['selectors']) ? implode($min ? ', ' : ',', $item['selectors']) : $item['selectors'];
-			$output .= $min ? '{' : " {\n\t";
-			if (is_array($item['properties'])) {
-				$properties = Array();
-				foreach ($item['properties'] AS $value) {
-					$properties[] = $value['property'].($min ? ':' : ': ').$value['value'].($value['important'] ? ($min ? '' : ' ').'!important' : '');
-				}
-				$output .= implode(';'.($min ? '' : "\n\t"), $properties);
-				var_dump($item['properties'], $properties);
-			}
-			$output .= ($semiColon ? '' : ';').($min ? '}' : "\n}\n");
-		}
-		return $output;
-	}*/
 }

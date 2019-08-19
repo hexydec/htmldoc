@@ -7,7 +7,7 @@ class htmldoc {
 	 * @var Array $token Regexp components keyed by their corresponding codename for tokenising HTML
 	 */
 	protected static $tokens = Array(
-		'doctype' => '<!DOCTYPE',
+		'doctype' => '<!(?i:DOCTYPE)',
 		'comment' => '<!--[\d\D]*?-->',
 		'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
 		'tagopenstart' => '<[^\s>\/]++',

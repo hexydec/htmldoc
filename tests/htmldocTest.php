@@ -13,6 +13,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanHandleDifficultHtml() {
 		$tests = Array(
+			'<!doctype html>' => '<!DOCTYPE html>',
 			'<a href="#"">Extra quote</a>' => '<a href="#">Extra quote</a>',
 			'<p title="</p>">Closing tag in titke</p>' => '<p title="&lt;/p&gt;">Closing tag in titke</p>',
 			'<p title=" <!-- hello world --> ">Comment in title</p>' => '<p title=" &lt;!-- hello world --&gt; ">Comment in title</p>',
@@ -82,11 +83,12 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanProduceXml() {
+	public function testCanProduceXhtml() {
 		$tests = Array(
 			"<p disabled></p>" => '<p disabled=""></p>',
 			"<p title='disabled'></p>" => '<p title="disabled"></p>',
-			'<p class="para__first">Test<p class="para__second">Test 2' => '<p class="para__first">Test</p><p class="para__second">Test 2</p>'
+			'<p class="para__first">Test<p class="para__second">Test 2' => '<p class="para__first">Test</p><p class="para__second">Test 2</p>',
+			"<img src='test.png' alt=''>" => '<img src="test.png" alt=""/>',
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
