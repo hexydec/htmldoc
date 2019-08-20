@@ -6,7 +6,7 @@ class cssmin {
    protected static $tokens = Array(
 	   'whitespace' => '\s++',
 	   'comment' => '\/\*(?!!)[\d\D]*?\*\/',
-	   'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
+	   'quotes' => '(?<!\\\\)("(?:[^"\\\\]++|\\\\.)*+"|\'(?:[^\'\\\\]++|\	\\\.)*+\')',
 	   'join' => '[>+~]',
 	   'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
 	   'curlyopen' => '{',
@@ -236,7 +236,7 @@ class cssmin {
 		return $selector;
 	}
 
-	protected static function parsePropertyValue($tokens, &$important = false, &$comment = false) {
+	protected static function parsePropertyValue(&$tokens, &$important = false, &$comment = false) {
 		$properties = Array();
 		$values = Array();
 		$important = false;
@@ -274,9 +274,9 @@ class cssmin {
 			if (isset($item['media'])) {
 				$item['rules'] = self::minifyAst($item['rules'], $config);
 			} else {
-				foreach ($item['properties'] AS &$prop) {
+				foreach ($item['properties'] AS $key => &$prop) {
 					foreach ($prop['value'] AS &$group) {
-						$group = self::minifyValues($group, $config);
+						$group = self::minifyValues($key, $group, $config);
 					}
 					unset($group);
 				}
@@ -295,12 +295,12 @@ class cssmin {
 		return $ast;
 	}
 
-	protected static function minifyValues($values, $config) {
+	protected static function minifyValues($key, $values, $config) {
 		foreach ($values AS &$value) {
 
 			// value in brackets
 			if (is_array($value)) {
-				$value = self::minifyValues($value);
+				$value = self::minifyValues($key, $value, $config);
 			} else {
 				if ($config['removezerounits'] && preg_match('/^0(?:\.0*)?[a-z%]++$/i', $value)) {
 					$value = '0';
@@ -308,10 +308,10 @@ class cssmin {
 				if ($config['removeleadingzero'] && preg_match('/^0++(\.0*+[1-9][0-9%a-z]*+)$/', $value, $match)) {
 					$value = $match[1];
 				}
-				if ($config['removequotes'] && preg_match('/^("|\')([^ \'"]++)\\2$/i', $value, $match)) {
+				if ($config['removequotes'] && $key != 'content' && preg_match('/^("|\')([^ \'"()]++)\\1$/i', $value, $match)) {
 					$value = $match[2];
-				} elseif ($config['convertquotes']) {
-
+				} elseif ($config['convertquotes'] && strpos($value, "'") === 0) {
+					$value = '"'.addcslashes(stripslashes(trim($value, "'")), "'").'"';
 				}
 				if ($config['shortenhex'] && preg_match('/^#(([a-f0-6])\\2)(([a-f0-6])\\4)(([a-f0-6])\\6)/i', $value, $match)) {
 					$value = '#'.$match[2].$match[4].$match[6];
