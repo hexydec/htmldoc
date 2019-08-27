@@ -43,9 +43,6 @@ class tag {
 						$attr = false;
 					}
 					$attr = $token['value'];
-
-					// cache attribute for minifier
-					//$this->attributes[$attr] = isset($this->attributes[$attr]) ? $this->attributes[$attr] + 1 : 1;
 					break;
 
 				// record attribute and value
@@ -56,6 +53,11 @@ class tag {
 							$value = substr($value, 1, -1);
 						}
 						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
+
+						// cache value for minifier
+						if ($attr == 'class') {
+							$this->root->cache('class', array_filter(explode(' ', $attributes[$attr])));
+						}
 						$attr = false;
 					}
 					break;
@@ -100,6 +102,10 @@ class tag {
 		}
 		if ($attributes) {
 			$this->attributes = $attributes;
+
+			// cache attribute for minifier
+			$this->root->cache('attr', array_keys($attributes));
+			$this->root->cache('attrvalues', array_map(function ($val, $key) {return $key.'='.$val;}, $attributes, array_keys($attributes)));
 		}
 	}
 
@@ -216,9 +222,7 @@ class tag {
 
 				// sort classes
 				} elseif ($key == 'class' && $minify['attributes']['class'] && strpos($value, ' ') !== false) {
-					$class = array_filter(explode(' ', $value));
-					sort($class);
-					$this->attributes[$key] = implode(' ', $class);
+					$this->attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $value)));
 
 				// minify option tag
 				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $value) {
@@ -321,15 +325,10 @@ class tag {
 		}
 
 		// sort attributes
-		// if ($config['attributes']['sort']) {
-		// 	$attr = $this->attributes;
-		// 	$this->attributes = Array();
-		// 	foreach ($config['attributes']['sort'] AS $key) {
-		// 		if (isset($attr[$key])) {
-		// 			$this->attributes[$key] = $attr[$key];
-		// 		}
-		// 	}
-		// }
+		if ($minify['attributes']['sort'] && $this->attributes) {
+			$attr = $this->attributes;
+			$this->attributes = array_replace(array_intersect_key(array_fill_keys($minify['attributes']['sort'], false), $attr), $attr);
+		}
 
 		// minify children
 		if ($this->children) {
@@ -457,8 +456,8 @@ class tag {
 	}
 
 	public function attr(string $key) : ?string {
-		if (isset($this->attributes[$key])) {
-			return $this->attributes[$key];
+		if (array_key_exists($key, $this->attributes)) {
+			return $this->attributes[$key] === null ? true : $this->attributes[$key];
 		}
 		return null;
 	}
@@ -487,7 +486,7 @@ class tag {
 				$quote = '"';
 				if ($options['quotestyle'] == 'single') {
 					$quote = "'";
-				} elseif (!$empty && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
+				} elseif ($options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$quote = '';
 				}
 				if (!$empty) {

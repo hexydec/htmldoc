@@ -74,7 +74,7 @@ class cssmin {
 						if ($token['value'] == '@media') {
 							$rules[] = Array(
 								'media' => self::parseMediaQuery($tokens),
-								'rules' => self::parse($tokens, $i),
+								'rules' => self::parse($tokens),
 								'comment' => $comment
 							);
 							$comment = false;
@@ -261,6 +261,8 @@ class cssmin {
 				break;
 			} elseif ($token['type'] != 'whitespace') {
 				$values[] = $token['value'];
+			} else {
+				break;
 			}
 		}
 		if ($values) {

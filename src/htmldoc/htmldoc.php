@@ -77,7 +77,7 @@ class htmldoc {
 					'type' => 'text'
 				)
 			),
-			'empty' => Array('id', 'class', 'style', 'title', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
+			'empty' => Array('id', 'class', 'style', 'title', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
 			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 		),
 		'minify' => Array(
@@ -108,6 +108,10 @@ class htmldoc {
 			'email' => false // sets the minification presets to email safe options
 		)
 	);
+
+	/**
+	 * @var Array Contains the output settings
+	 */
 	protected $output = Array(
 		'charset' => null, // set the output charset
 		'quotestyle' => 'double', // double, single, minimal
@@ -120,18 +124,28 @@ class htmldoc {
 	 * @var Array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
 	protected $children = Array();
-	//protected $attributes = Array();
+
+	/**
+	 * @var Array A cache of attribute and class names for sorting
+	 */
+	protected $cache = Array();
 
 	/**
 	 * Constructs the object
 	 *
 	 * @param Array $config An array of configuration parameters that is recursively merged with the default config
 	 */
-	public function __construct(Array $config = Array()) {
+	public function __construct(array $config = Array()) {
 		$this->config = array_replace_recursive($this->config, $config);
 	}
 
-	public function __get($var) {
+	/**
+	 * Calculates the length property
+	 *
+	 * @param string $var The name of the property to retrieve, currently only 'length'
+	 * @return int The number of children in the object, or null if the parameter doesn't exist
+	 */
+	public function __get(string $var) : ?int {
 		if ($var == 'length') {
 			return count($this->chhildren);
 		}
@@ -147,6 +161,12 @@ class htmldoc {
 		return $this->children;
 	}
 
+	/**
+	 * Retrieves the requested value of the object configuration
+	 *
+	 * @param string $key... One or more array keys indicating the configuration value to retrieve
+	 * @return mixed The value requested, or null if the value doesn't exist
+	 */
 	public function getConfig() {
 		$config = $this->config;
 		foreach (func_get_args() AS $item) {
@@ -260,6 +280,12 @@ class htmldoc {
 		return !!$this->children;
 	}
 
+	/**
+	 * Parses a CSS selector string
+	 *
+	 * @param string $selector The CSS seelctor string to parse
+	 * @return array An array of selector components
+	 */
 	protected static function parseSelector(string $selector) {
 		$selector = trim($selector);
 		if (($tokens = tokenise::tokenise($selector, self::$selectors)) !== false) {
@@ -332,6 +358,36 @@ class htmldoc {
 		return false;
 	}
 
+	/**
+	 * Caches the input values and records the number of occurences
+	 *
+	 * @param string $key The key to store the value under
+	 * @param array $values An array of values to add to the cache
+	 * @return void
+	 */
+	public function cache(string $key, array $values) : void {
+
+		// initialise cache
+		if (!isset($this->cache[$key])) {
+			$this->cache[$key] = Array();
+		}
+
+		// count values
+		foreach ($values AS $item) {
+			if (!isset($this->cache[$key][$item])) {
+				$this->cache[$key][$item] = 1;
+			} else {
+				$this->cache[$key][$item]++;
+			}
+		}
+	}
+
+	/**
+	 * Retrieves the tag object at the specified index, or all children of type tag
+	 *
+	 * @param int $index The index of the child tag to retrieve
+	 * @return mixed A tag object if index is specified, or an array of tag objects, or null if the specified index doesn't exist or the object is empty
+	 */
 	public function get(int $index = null) {
 
 		// build children that are tags
@@ -359,7 +415,13 @@ class htmldoc {
 		return null;
 	}
 
-	public function find($selector) {
+	/**
+	 * Find children within the object using a CSS selector
+	 *
+	 * @param string $selector A CSS selector specifying the children to find
+	 * @return htmldoc A new htmldoc object containing the found tag items
+	 */
+	public function find(string $selector) : htmldoc {
 		$found = Array();
 
 		// parse selector and find tags
@@ -383,14 +445,30 @@ class htmldoc {
 		return $doc;
 	}
 
+	/**
+	 * Retrieves an htmldoc object containing the first tag in the collection
+	 *
+	 * @return htmldoc A new htmldoc object
+	 */
 	public function first() : htmldoc {
 		return $this->eq(0);
 	}
 
+	/**
+	 * Retrieves an htmldoc object containing the last tag in the collection
+	 *
+	 * @return htmldoc A new htmldoc object
+	 */
 	public function last() : htmldoc {
 		return $this->eq(-1);
 	}
 
+	/**
+	 * Retrieves an htmldoc object containing the tag in the collection at the specificed index
+	 *
+	 * @param int $index The index position of the tag to retrieve
+	 * @return htmldoc A new htmldoc object
+	 */
 	public function eq(int $index) : htmldoc {
 		$doc = new htmldoc($this->config);
 		if ($index < 0) {
@@ -402,18 +480,35 @@ class htmldoc {
 		return $doc;
 	}
 
+	/**
+	 * Generate a new htmldoc object containing all the child tags of the parents
+	 *
+	 * @return htmldoc A new htmldoc object
+	 */
 	public function children() : htmldoc {
 		return $this->find('>*');
 	}
 
-	public function attr(string $key) {
+	/**
+	 * Retrieves the specified attribute value from the first tag in the collection
+	 *
+	 * @param string $key The name of the attribute to retrieve
+	 * @return string The value of the attribute or null if the attribute doesn't exist
+	 */
+	public function attr(string $key) : ?string {
 		foreach ($this->children AS $item) {
 			if (get_class($item) == 'hexydec\\html\\tag') {
 				return $item->attr($key);
 			}
 		}
+		return null;
 	}
 
+	/**
+	 * Retrievves the value of the text nodes contained within the object, multiple values are concatenated with a space
+	 *
+	 * @return string The value of the contained text nodes concatenated together with spaces
+	 */
 	public function text() : string {
 		$text = Array();
 		foreach ($this->children AS $item) {
@@ -427,11 +522,23 @@ class htmldoc {
 		return implode(' ', $text);
 	}
 
-	public function collection(array $nodes) {
+	/**
+	 * Adds the specified nodes to the htmldoc object
+	 *
+	 * @param array $nodes An array of nodes to add to the collection
+	 * @return void
+	 */
+	protected function collection(array $nodes) : void {
 		$this->children = $nodes;
 	}
 
-	public function minify(array $minify = Array()) {
+	/**
+	 * Minifies the internal representation of the document
+	 *
+	 * @param array $minify An array indicating which minification operations to perform, this is merged with htmldoc::$minify
+	 * @return void
+	 */
+	public function minify(array $minify = Array()) : void {
 
 		// merge config
 		$minify = array_replace_recursive($this->config['minify'], $minify);
@@ -453,16 +560,43 @@ class htmldoc {
 			$minify['close'] = false;
 		}
 
-		// sort attributes
-		// if ($config['attributes']['sort']) {
-		// 	arsort($this->attributes, SORT_NUMERIC);
-		// 	$config['attributes']['sort'] = \array_keys($this->attributes);
-		// }
+		// sort classes by occurence, then by string
+		if ($minify['attributes']['class'] && !empty($this->cache['class'])) {
+			$minify['attributes']['class'] = array_keys($this->cache['class']);
+			$occurences = array_values($this->cache['class']);
+			array_multisort($occurences, SORT_DESC, SORT_NUMERIC, $minify['attributes']['class'], SORT_STRING);
+		}
+
+		// sort attribute values by most frequent
+		if ($minify['attributes']['sort'] && !empty($this->cache['attr'])) {
+			arsort($this->cache['attr']);
+			arsort($this->cache['attrvalues']);
+			$attr = Array();
+			foreach ($this->cache['attrvalues'] AS $item => $occurences) {
+				if ($occurences > 5) {
+					$item = strstr($item, '=', true);
+					if (!in_array($item, $attr)) {
+						$attr[] = $item;
+					}
+				} else {
+					break;
+				}
+			}
+			$minify['attributes']['sort'] = array_unique(array_merge($attr, array_keys($this->cache['attr'])));
+		}
+
+		// minify children
 		foreach ($this->children AS $item) {
 			$item->minify($minify);
 		}
 	}
 
+	/**
+	 * Compile the document as an HTML string
+	 *
+	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
+	 * @return string The compiled HTML
+	 */
 	public function html(array $options = null) : string {
 		$options = $options ? array_merge($this->output, $options) : $this->output;
 
@@ -481,6 +615,12 @@ class htmldoc {
 		return $html;
 	}
 
+	/**
+	 * Compile the document as an HTML string and save it to the specified location
+	 *
+	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
+	 * @return string The compiled HTML
+	 */
 	public function save(string $file = null, Array $options = Array()) {
 
 		// compile html
@@ -511,7 +651,14 @@ class htmldoc {
 		return false;
 	}
 
-	protected function htmlentities($html, $charset) {
+	/**
+	 * Converts out of tange characters into HTML entities within the selected charset
+	 *
+	 * @param string $html A UTF-8 encoded HTML string
+	 * @param string $charset The target charset
+	 * @return string The input HTML with the out of range characters in the selected cahrset converted to HTML entities
+	 */
+	protected function htmlentities(string $html, string $charset) {
 
 		// generate single-byte characters
 		$str = '';

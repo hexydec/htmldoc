@@ -1,5 +1,5 @@
 <?php
-require(__DIR__.'/autoload.php');
+require(__DIR__.'/src/autoload.php');
 
 $url = '';
 $input = '';
@@ -38,7 +38,7 @@ if (!empty($_POST['action'])) {
 		$mem['parse'] = memory_get_usage();
 		$isset = isset($_POST['minify']) && is_array($_POST['minify']);
 		foreach ($options AS $key => $item) {
-			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? Array() : true) : false;
+			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? Array() : $options[$key]) : false;
 			if (is_array($item)) {
 				foreach ($item AS $sub => $value) {
 					if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
