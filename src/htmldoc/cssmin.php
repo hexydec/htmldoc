@@ -259,10 +259,11 @@ class cssmin {
 					}
 				}
 				break;
+			} elseif ($token['type'] == 'curlyclose') {
+				prev($tokens);
+				break;
 			} elseif ($token['type'] != 'whitespace') {
 				$values[] = $token['value'];
-			} else {
-				break;
 			}
 		}
 		if ($values) {
