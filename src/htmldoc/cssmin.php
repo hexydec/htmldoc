@@ -34,20 +34,42 @@ class cssmin {
    		'removeoverwrittenproperties' => true,
    		'sortproperties' => true,
    		'mergeblocks' => true,
-   		'report' => false,
+   		'email' => false,
+		'maxline' => false,
 	   	'output' => 'minify'
    	);
 
 	public static function minify(string $code, array $config = Array()) {
 		$config = array_merge(self::$config, $config);
+
+		// set email options
+		if ($config['email']) {
+			$config['maxline'] = 800;
+			$config['shortenhex'] = false;
+			$config['sortselectors'] = false;
+			$config['mergeselectors'] = false;
+			$config['removeoverwrittenproperties'] = false;
+			$config['sortproperties'] = false;
+			$config['mergeblocks'] = false;
+		}
+
+		// tokenise the input CSS
 		if (($tokens = tokenise::tokenise($code, self::$tokens)) === false) {
 			trigger_error('Could not tokenise input', E_USER_WARNING);
+
+		// parse the tokens
 		} elseif (($ast = self::parse($tokens)) === false) {
 			trigger_error('Input is not invalid', E_USER_WARNING);
+
+		// minify the internal representation
 		} elseif (($ast = self::minifyAst($ast, $config)) === false) {
 			trigger_error('AST could not be minified', E_USER_WARNING);
+
+		// compile the output
 		} elseif (($css = self::compile($ast, $config)) === false) {
 			trigger_error('Could not compile CSS', E_USER_WARNING);
+
+		// return CSS
 		} else {
 			return $css;
 		}
@@ -92,7 +114,8 @@ class cssmin {
 			} elseif ($token['type'] == 'string') {
 				$prop = $token['value'];
 				if (next($tokens)['type'] == 'colon') {
-					$properties[$prop] = Array(
+					$properties[] = Array(
+						'property' => $prop,
 						'value' => self::parsePropertyValue($tokens, $important, $propcomment),
 						'important' => $important,
 						'semicolon' => ';',
@@ -274,20 +297,28 @@ class cssmin {
 
 	protected static function minifyAst(array $ast, array $config) {
 		foreach ($ast AS &$item) {
+
+			// minify media query
 			if (isset($item['media'])) {
 				$item['rules'] = self::minifyAst($item['rules'], $config);
+
+			// minify rule
 			} else {
-				foreach ($item['properties'] AS $key => &$prop) {
+
+				// minify values
+				foreach ($item['properties'] AS &$prop) {
 					foreach ($prop['value'] AS &$group) {
-						$group = self::minifyValues($key, $group, $config);
+						$group = self::minifyValues($prop['property'], $group, $config);
 					}
 					unset($group);
 				}
 				unset($prop);
 
-				if ($config['sortproperties']) {
-					ksort($item['properties']);
-				}
+				// if ($config['sortproperties']) {
+				// 	ksort($item['properties']);
+				// }
+
+				// remove training semi-colon
 				if ($config['removesemicolon']) {
 					end($item['properties']);
 					$item['properties'][key($item['properties'])]['semicolon'] = '';
@@ -305,8 +336,14 @@ class cssmin {
 			if (is_array($value)) {
 				$value = self::minifyValues($key, $value, $config);
 			} else {
-				if ($config['removezerounits'] && preg_match('/^0(?:\.0*)?[a-z%]++$/i', $value)) {
+				if ($config['removezerounits'] && preg_match('/^0(?:\.0*)?([a-z%]++)$/i', $value, $match)) {
 					$value = '0';
+					if ($match[1] == 'ms') {
+						$match[1] = 's';
+					}
+					if ($match[1] == 's') {
+						$value .= 's';
+					}
 				}
 				if ($config['removeleadingzero'] && preg_match('/^0++(\.0*+[1-9][0-9%a-z]*+)$/', $value, $match)) {
 					$value = $match[1];
@@ -341,66 +378,80 @@ class cssmin {
 		$b = $config['output'] != 'minify';
 		$tabs = $b ? str_repeat("\t", $indent) : '';
 		$css = '';
+		$len = 0;
 		foreach ($ast AS $item) {
+			$rule = '';
 
 			// comment
 			if ($b && $item['comment']) {
-				$css .= $tabs.$item['comment']."\n";
+				$rule .= $tabs.$item['comment']."\n";
 			}
 
 			// build properties
 			if (isset($item['media'])) {
-				$css .= '@media';
+				$rule .= '@media';
 				foreach ($item['media'] AS $i => $media) {
 					if ($media['only']) {
-						$css .= ' only';
+						$rule .= ' only';
 					}
 					if ($media['media']) {
-						$css .= ' '.$media['media'];
+						$rule .= ' '.$media['media'];
 					}
 					if ($media['not']) {
-						$css .= ' not';
+						$rule .= ' not';
 					}
 					$join = $b ? ' ' : '';
 					foreach ($media['properties'] AS $prop => $value) {
-						$css .= $join.'('.$prop.':'.($b ? ' ' : '').$value.')';
+						$rule .= $join.'('.$prop.':'.($b ? ' ' : '').$value.')';
 						$join = ' and ';
 					}
 				}
-				$css .= $b ? " {\n" : '{';
-				$css .= self::compile($item['rules'], $config, $indent + 1);
+				$rule .= $b ? " {\n" : '{';
+				$rule .= self::compile($item['rules'], $config, $indent + 1);
 			} else {
 
 				// build selectors
 				foreach ($item['selectors'] AS $i => $selector) {
 					if ($i) {
-						$css .= $b ? ', ' : ',';
+						$rule .= $b ? ', ' : ',';
 					} else {
-						$css .= $tabs;
+						$rule .= $tabs;
 					}
 					foreach ($selector AS $select) {
 						if (!empty($select['join'])) {
-							$css .= $b && $select['join'] != ' ' ? ' '.$select['join'].' ' : $select['join'];
+							$rule .= $b && $select['join'] != ' ' ? ' '.$select['join'].' ' : $select['join'];
 						}
-						$css .= $select['selector'];
+						$rule .= $select['selector'];
 					}
 				}
-				$css .= $b ? ' {' : '{';
+				$rule .= $b ? ' {' : '{';
 
-				foreach ($item['properties'] AS $prop => $value) {
-					$css .= ($b ? "\n\t".$tabs : '').$prop.($b ? ': ' : ':');
-					$css .= self::compileProperty($value['value'], $b);
+				foreach ($item['properties'] AS $value) {
+					$rule .= ($b ? "\n\t".$tabs : '').$value['property'].($b ? ': ' : ':');
+					$rule .= self::compileProperty($value['value'], $b);
 					if ($value['important']) {
-						$css .= ($b ? ' ' : '').'!important';
+						$rule .= ($b ? ' ' : '').'!important';
 					}
-					$css .= $value['semicolon'];
+					$rule .= $value['semicolon'];
 					if ($b && $value['comment']) {
-						$css .= ' '.$value['comment'];
+						$rule .= ' '.$value['comment'];
 					}
 				}
 			}
 
-			$css .= $b ? "\n".$tabs."}\n\n" : '}';
+			$rule .= $b ? "\n".$tabs."}\n\n" : '}';
+
+			// break long lines in email
+			if (!$b && $config['maxline']) {
+				$rlen = strlen($rule);
+				if ($len + $rlen > $config['maxline']) {
+					$rule .= "\n";
+				}
+				$len += $rlen;
+			}
+
+			// add to css
+			$css .= $rule;
 		}
 		return rtrim($css);
 	}

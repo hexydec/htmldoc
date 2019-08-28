@@ -80,9 +80,11 @@ class htmldoc {
 			'empty' => Array('id', 'class', 'style', 'title', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
 			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 		),
+		'css' => 'hexydec\\html\\cssmin::minify', // specify the CSS minifier
+		'js' => false, // specify the javascript minifier
 		'minify' => Array(
-			'css' => 'hexydec\\html\\cssmin::minify', // minify CSS
-			'js' => false, // minify javascript
+			'css' => Array(), // specify CSS minifier options
+			'js' => Array(), // specify CSS javascript options
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes
 			'comments' => Array( // remove comments

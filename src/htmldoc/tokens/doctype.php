@@ -15,11 +15,17 @@ class doctype {
 		$this->content = html_entity_decode($content);
 	}
 
+	/**
+	 * Minifies the internal representation of the doctype
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
 	public function minify() {
 
 	}
 
-	public function html() {
+	public function html() : string {
 		return '<!DOCTYPE '.\htmlspecialchars($this->content).'>';
 	}
 

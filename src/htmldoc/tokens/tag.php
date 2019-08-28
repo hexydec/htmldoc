@@ -184,7 +184,13 @@ class tag {
 		return $children;
 	}
 
-	public function minify(array $minify) {
+	/**
+	 * Minifies the internal representation of the tag
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
+	public function minify(array $minify) : void {
 		$config = $this->root->getConfig();
 		$attr = $config['attributes'];
 		if ($minify['lowercase']) {

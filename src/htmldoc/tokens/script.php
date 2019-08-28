@@ -3,7 +3,24 @@ namespace hexydec\html;
 
 class script {
 
+	/**
+	 * @var htmldoc The parent htmldoc object
+	 */
+	protected $root;
+
+	/**
+	 * @var string A string containing javascript
+	 */
 	protected $content = null;
+
+	/**
+	 * Constructs the script object
+	 *
+	 * @param htmldoc $root The parent htmldoc object
+	 */
+	public function __construct(htmldoc $root) {
+		$this->root = $root;
+	}
 
 	/**
 	 * Parses an array of tokens into an HTML documents
@@ -29,9 +46,16 @@ class script {
 		}
 	}
 
+	/**
+	 * Minifies the internal representation of the script using an external minifier
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
 	public function minify(array $minify) {
-		if ($minify['js'] && $this->content) {
-			$this->content = $minify['js'] === true ? trim($this->content) : call_user_func($minify['js'], $this->content);
+		if ($minify['js'] !== false && $this->content) {
+			$func = $this->root->getConfig('js');
+			$this->content = $func === false ? trim($this->content) : call_user_func($func, $this->content, $minify['js']);
 		}
 	}
 

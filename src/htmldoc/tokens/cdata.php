@@ -9,10 +9,16 @@ class cdata {
 		$this->content = substr($tokens[$i]['value'], 9, -3);
 	}
 
-	public function minify() {
+	/**
+	 * Minifies the internal representation of the CDATA object, currently does nothing
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
+	public function minify() : void {
 	}
 
-	public function html() {
+	public function html() : string {
 		return $this->content === null ? '' : '<[CDATA['.$this->content.']]>';
 	}
 

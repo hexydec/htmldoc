@@ -28,6 +28,12 @@ class text {
 		return $this->content;
 	}
 
+	/**
+	 * Minifies the internal representation of the text object
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
 	public function minify(array $minify) {
 
 		// collapse whitespace

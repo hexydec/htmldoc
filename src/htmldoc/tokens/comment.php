@@ -17,13 +17,19 @@ class comment {
 		$this->content = substr($token['value'], 4, -3);
 	}
 
+	/**
+	 * Minifies the internal representation of the comment
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
 	public function minify(array $minify) {
 		if ($minify['comments'] && (empty($minify['comments']['ie']) || (strpos($this->content, '[if ') !== 0 && $this->content != '<![endif]'))) {
 			$this->content = null;
 		}
 	}
 
-	public function html() {
+	public function html() : string {
 		return $this->content === null ? '' : '<!--'.$this->content.'-->';
 	}
 

@@ -3,7 +3,24 @@ namespace hexydec\html;
 
 class style {
 
+	/**
+	 * @var htmldoc The parent htmldoc object
+	 */
+	protected $root;
+
+	/**
+	 * @var string A string containing CSS styles
+	 */
 	protected $content = null;
+
+	/**
+	 * Constructs the style object
+	 *
+	 * @param htmldoc $root The parent htmldoc object
+	 */
+	public function __construct(htmldoc $root) {
+		$this->root = $root;
+	}
 
 	/**
 	 * Parses an array of tokens into an HTML documents
@@ -25,9 +42,16 @@ class style {
 		}
 	}
 
+	/**
+	 * Minifies the internal representation of the styles using an external minifier
+	 *
+	 * @param array $minify An array of minification options controlling which operations are performed
+	 * @return void
+	 */
 	public function minify(array $minify) {
-		if ($minify['css'] && $this->content) {
-			$this->content = $minify['css'] === true ? trim($this->content) : call_user_func($minify['css'], $this->content);
+		if ($minify['css'] !== false && $this->content) {
+			$func = $this->root->getConfig('css');
+			$this->content = $func === false ? trim($this->content) : call_user_func($func, $this->content, $minify['css']);
 		}
 	}
 
