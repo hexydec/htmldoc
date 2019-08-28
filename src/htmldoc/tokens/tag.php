@@ -275,15 +275,18 @@ class tag {
 				// minify option tag
 				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $this->attributes[$key]) {
 					unset($this->attributes[$key]);
+					continue;
 
 				// remove tag specific default attribute
 				} elseif ($minify['attributes']['default'] && isset($attr['default'][$this->tagName][$key]) && ($attr['default'][$this->tagName][$key] === true || $attr['default'][$this->tagName][$key] == $this->attributes[$key])) {
 					unset($this->attributes[$key]);
+					continue;
 				}
 
 				// remove other attributes
 				if ($this->attributes[$key] === '' && $minify['attributes']['empty'] && in_array($key, $attr['empty'])) {
 					unset($this->attributes[$key]);
+					continue;
 				}
 			}
 		}
