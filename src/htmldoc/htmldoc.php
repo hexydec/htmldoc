@@ -77,7 +77,7 @@ class htmldoc {
 					'type' => 'text'
 				)
 			),
-			'empty' => Array('id', 'class', 'style', 'title', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
+			'empty' => Array('id', 'class', 'style', 'title', 'action', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
 			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
 		),
 		'css' => 'hexydec\\html\\cssmin::minify', // specify the CSS minifier

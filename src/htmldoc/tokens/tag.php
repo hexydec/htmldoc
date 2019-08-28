@@ -208,43 +208,6 @@ class tag {
 				$this->attributes[$key] = $value;
 			}
 
-			// minify attributes
-			if ($minify['attributes']) {
-
-				// trim attribute
-				$value = $this->attributes[$key] = trim($value);
-
-				// boolean attributes
-				if ($minify['attributes']['boolean'] && in_array($key, $attr['boolean'])) {
-					$this->attributes[$key] = null;
-
-				// minify style tag
-				} elseif ($key == 'style' && $minify['attributes']['style']) {
-					$this->attributes[$key] = trim(str_replace(
-						Array('  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '),
-						Array(' ', ':', ':', ':', ';', ';', ';'),
-						$value
-					), '; ');
-
-				// sort classes
-				} elseif ($key == 'class' && $minify['attributes']['class'] && strpos($value, ' ') !== false) {
-					$this->attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $value)));
-
-				// minify option tag
-				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $value) {
-					unset($this->attributes[$key]);
-
-				// remove tag specific default attribute
-				} elseif ($minify['attributes']['default'] && isset($attr['default'][$this->tagName][$key]) && ($attr['default'][$this->tagName][$key] === true || $attr['default'][$this->tagName][$key] == $value)) {
-					unset($this->attributes[$key]);
-				}
-
-				// remove other attributes
-				if ($value === '' && $minify['attributes']['empty'] && in_array($key, $attr['empty'])) {
-					unset($this->attributes[$key]);
-				}
-			}
-
 			// minify urls
 			if ($minify['urls'] && in_array($key, $attr['urls'])) {
 
@@ -282,8 +245,45 @@ class tag {
 
 					// minify
 					if (strpos($this->attributes[$key], $folder) === 0) {
-						$this->attributes[$key] = substr($this->attributes[$key], strlen($folder));
+						$this->attributes[$key] = mb_substr($this->attributes[$key], mb_strlen($folder));
 					}
+				}
+			}
+
+			// minify attributes
+			if ($minify['attributes']) {
+
+				// trim attribute
+				$this->attributes[$key] = trim($this->attributes[$key]);
+
+				// boolean attributes
+				if ($minify['attributes']['boolean'] && in_array($key, $attr['boolean'])) {
+					$this->attributes[$key] = null;
+
+				// minify style tag
+				} elseif ($key == 'style' && $minify['attributes']['style']) {
+					$this->attributes[$key] = trim(str_replace(
+						Array('  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '),
+						Array(' ', ':', ':', ':', ';', ';', ';'),
+						$this->attributes[$key]
+					), '; ');
+
+				// sort classes
+				} elseif ($key == 'class' && $minify['attributes']['class'] && strpos($this->attributes[$key], ' ') !== false) {
+					$this->attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $this->attributes[$key])));
+
+				// minify option tag
+				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $this->attributes[$key]) {
+					unset($this->attributes[$key]);
+
+				// remove tag specific default attribute
+				} elseif ($minify['attributes']['default'] && isset($attr['default'][$this->tagName][$key]) && ($attr['default'][$this->tagName][$key] === true || $attr['default'][$this->tagName][$key] == $this->attributes[$key])) {
+					unset($this->attributes[$key]);
+				}
+
+				// remove other attributes
+				if ($this->attributes[$key] === '' && $minify['attributes']['empty'] && in_array($key, $attr['empty'])) {
+					unset($this->attributes[$key]);
 				}
 			}
 		}
@@ -492,7 +492,7 @@ class tag {
 				$quote = '"';
 				if ($options['quotestyle'] == 'single') {
 					$quote = "'";
-				} elseif ($options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
+				} elseif (!$empty && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$quote = '';
 				}
 				if (!$empty) {
