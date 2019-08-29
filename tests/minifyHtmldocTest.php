@@ -122,6 +122,10 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'<a href="https://test.com/different/folders/">Different Folders</a>' => '<a href="/different/folders/">Different Folders</a>',
 				'<a href="https://test.com/deep/lot/test">Back two</a>' => '<a href="../../test">Back two</a>',
 				'<a href="https://test.com/deep/lot/test/this/and/this.php">Back two</a>' => '<a href="../../test/this/and/this.php">Back two</a>',
+				'<link rel="stylesheet" href="/deep/css/build/file.css?_12345">' => '<link rel="stylesheet" href="/deep/css/build/file.css?_12345">', // shorter to stay as is
+			),
+			'https://test.com/alotof/of/folders/' => Array(
+				'<link rel="stylesheet" href="/alotof/css/build/file.css?_12345">' => '<link rel="stylesheet" href="../../css/build/file.css?_12345">',
 			)
 		);
 		$doc = new htmldoc();

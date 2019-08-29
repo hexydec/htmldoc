@@ -259,17 +259,19 @@ class tag {
 				if ($minify['urls']['parent'] && $dirs && mb_strpos($this->attributes[$key], '/') !== false) {
 
 					$compare = explode('/', trim(dirname($this->attributes[$key]), '/'));
-					$updated = false;
-					foreach ($compare AS $i => &$item) {
+					$update = false;
+					$count = 0;
+					foreach ($compare AS $i => $item) {
 						if (isset($dirs[$i]) && $item == $dirs[$i]) {
-							$item = '..';
-							$updated = true;
+							array_shift($compare);
+							$update = true;
+							$count++;
 						} else {
 							break;
 						}
 					}
-					unset($item);
-					if ($updated) {
+					if ($update) {
+						$compare = array_merge(array_fill(0, count($dirs) - $count, '..'), $compare);
 						$url = implode('/', $compare).'/'.basename($this->attributes[$key]);
 						if (strlen($url) <= strlen($this->attributes[$key])) { // compare as bytes
 							$this->attributes[$key] = $url;
