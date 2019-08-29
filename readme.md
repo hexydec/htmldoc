@@ -42,6 +42,7 @@ echo $doc->save();
 - [How it works](docs/how-it-works.md)
 - [How to use and examples](docs/how-to-use.md)
 - [API Reference](docs/api/readme.md)
+- [Mitigating Side Effects of Minification](docs/mitigating-side-effects.md)
 - [About Document Recycling](docs/recycling.md)
 - [Object Performance](docs/performance.md)
 
