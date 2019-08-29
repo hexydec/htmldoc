@@ -213,12 +213,13 @@ class tag {
 			if ($minify['urls'] && in_array($key, $attr['urls'])) {
 
 				// make folder variables
-				if (!$folder && isset($_SERVER['REQUEST_URI'])) {
-					$folder = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-					if (mb_substr($folder, -1) != '/') {
-						$folder = dirname($folder).'/';
+				if ($folder === false && isset($_SERVER['REQUEST_URI'])) {
+					if (($folder = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== '') {
+						if (mb_substr($folder, -1) != '/') {
+							$folder = dirname($folder).'/';
+						}
+						$dirs = explode('/', trim($folder, '/'));
 					}
-					$dirs = explode('/', trim($folder, '/'));
 				}
 
 				// strip scheme from absolute URL's if the same as current scheme
@@ -246,7 +247,7 @@ class tag {
 				if ($minify['urls']['relative'] && $folder) {
 
 					// minify
-					if (mb_strpos($this->attributes[$key], $folder) === 0) {
+					if (mb_strpos($this->attributes[$key], $folder) === 0 && ($folder != '/' || mb_strpos($this->attributes[$key], '//') !== 0)) {
 						if ($this->attributes[$key] == $folder && $this->attributes[$key] != $_SERVER['REQUEST_URI']) {
 							$this->attributes[$key] = './';
 						} else {

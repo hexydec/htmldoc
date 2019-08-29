@@ -84,6 +84,17 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanMinifyUrls() {
 		$html = Array(
+			'https://test.com/' => Array(
+				'<a href="https://test.com/test">Own Host</a>' => '<a href="test">Own Host</a>',
+				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="url/test.php">Own Host under folder</a>',
+				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="url/test.php">Own Host under folder no scheme</a>',
+				'<a href="/url/test.php">Own Host under folder no host</a>' => '<a href="url/test.php">Own Host under folder no host</a>',
+				'<a href="/">Same URL, no query string</a>' => '<a href="">Same URL, no query string</a>',
+				'<a href="/?var=value">Same URL including query string</a>' => '<a href="?var=value">Same URL including query string</a>',
+				'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
+				'<a href="https://tester.com/test">Different Host</a>' => '<a href="//tester.com/test">Different Host</a>',
+				'<video src="https://test.com/assets/video.mp4" poster="https://test.com/assets/video.jpg"></video>' => '<video src="assets/video.mp4" poster="assets/video.jpg"></video>'
+			),
 			'http://test.com/url/' => Array(
 				'<a href="http://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
 				'<a href="http://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
