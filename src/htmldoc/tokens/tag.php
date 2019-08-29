@@ -256,7 +256,7 @@ class tag {
 				}
 
 				// use parent folders if it is shorter
-				if ($minify['urls']['parent'] && $dirs && mb_strpos($this->attributes[$key], '/') !== false) {
+				if ($minify['urls']['parent'] && $dirs && mb_strpos($this->attributes[$key], '/') === 0 && mb_strpos($this->attributes[$key], '//') === false) {
 
 					$compare = explode('/', trim(dirname($this->attributes[$key]), '/'));
 					$update = false;
