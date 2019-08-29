@@ -14,7 +14,7 @@ class comment {
 	 */
 	public function parse(array &$tokens) {
 		$token = current($tokens);
-		$this->content = substr($token['value'], 4, -3);
+		$this->content = mb_substr($token['value'], 4, -3);
 	}
 
 	/**
@@ -24,7 +24,7 @@ class comment {
 	 * @return void
 	 */
 	public function minify(array $minify) {
-		if ($minify['comments'] && (empty($minify['comments']['ie']) || (strpos($this->content, '[if ') !== 0 && $this->content != '<![endif]'))) {
+		if ($minify['comments'] && (empty($minify['comments']['ie']) || (mb_strpos($this->content, '[if ') !== 0 && $this->content != '<![endif]'))) {
 			$this->content = null;
 		}
 	}

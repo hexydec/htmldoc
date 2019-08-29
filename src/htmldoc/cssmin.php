@@ -350,14 +350,14 @@ class cssmin {
 				}
 				if ($config['removequotes'] && $key != 'content' && preg_match('/^("|\')([^ \'"()]++)\\1$/i', $value, $match)) {
 					$value = $match[2];
-				} elseif ($config['convertquotes'] && strpos($value, "'") === 0) {
+				} elseif ($config['convertquotes'] && mb_strpos($value, "'") === 0) {
 					$value = '"'.addcslashes(stripslashes(trim($value, "'")), "'").'"';
 				}
 				if ($config['shortenhex'] && preg_match('/^#(([a-f0-6])\\2)(([a-f0-6])\\4)(([a-f0-6])\\6)/i', $value, $match)) {
 					$value = '#'.$match[2].$match[4].$match[6];
 				}
 				if ($config['lowerhex'] && preg_match('/^#[a-f0-6]{3,6}$/i', $value)) {
-					$value = strtolower($value);
+					$value = mb_strtolower($value);
 				}
 				if ($config['mergeselectors']) {
 
@@ -443,7 +443,7 @@ class cssmin {
 
 			// break long lines in email
 			if (!$b && $config['maxline']) {
-				$rlen = strlen($rule);
+				$rlen = mb_strlen($rule);
 				if ($len + $rlen > $config['maxline']) {
 					$rule .= "\n";
 				}

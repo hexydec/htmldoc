@@ -50,14 +50,14 @@ An optional array contains a list of configuration parameters to configure the m
 			<td>true</td>
 		</tr>
 		<tr>
-			<td rowspan="4"><code>urls</code></td>
-			<td rowspan="4">Array</td>
+			<td rowspan="5"><code>urls</code></td>
+			<td rowspan="5">Array</td>
 			<td colspan="2">Minify internal URL's</td>
 			<td><code>Array()</code></td>
 		</tr>
 		<tr>
-			<td><code>absolute</code></td>
-			<td>Process absolute URLs to make them relative to the current document</td>
+			<td><code>scheme</code></td>
+			<td>Remove the scheme from URLs that have the same scheme as the current document</td>
 			<td>true</td>
 		</tr>
 		<tr>
@@ -66,8 +66,13 @@ An optional array contains a list of configuration parameters to configure the m
 			<td>true</td>
 		</tr>
 		<tr>
-			<td><code>scheme</code></td>
-			<td>Remove the scheme from URLs that have the same scheme as the current document</td>
+			<td><code>relative</code></td>
+			<td>Process absolute URLs to make them relative to the current document</td>
+			<td>true</td>
+		</tr>
+		<tr>
+			<td><code>parent</code></td>
+			<td>Process relative URLs to use parent folders (<code>../</code>) where it is shorter</td>
 			<td>true</td>
 		</tr>
 		<tr>
@@ -144,4 +149,4 @@ An optional array contains a list of configuration parameters to configure the m
 
 ## Returns
 
-`null`
+`void`

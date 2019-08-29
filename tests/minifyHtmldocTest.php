@@ -83,21 +83,65 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testCanMinifyUrls() {
-		$_SERVER['HTTPS'] = '';
-		$_SERVER['HTTP_HOST'] = 'test.com';
-		$_SERVER['REQUEST_URI'] = '/url/';
+		$html = Array(
+			'http://test.com/url/' => Array(
+				'<a href="http://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+				'<a href="http://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
+				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
+				'<a href="/url/test.php">Own Host under folder no host</a>' => '<a href="test.php">Own Host under folder no host</a>',
+				'<a href="/url/">Same URL, no query string</a>' => '<a href="">Same URL, no query string</a>',
+				'<a href="/url/?var=value">Same URL including query string</a>' => '<a href="?var=value">Same URL including query string</a>',
+				'<a href="https://test.com/test">Different scheme</a>' => '<a href="https://test.com/test">Different scheme</a>',
+				'<a href="http://tester.com/test">Different Host</a>' => '<a href="//tester.com/test">Different Host</a>',
+				'<video src="http://test.com/assets/video.mp4" poster="http://test.com/assets/video.jpg"></video>' => '<video src="/assets/video.mp4" poster="/assets/video.jpg"></video>'
+			),
+			'https://test.com/url/' => Array(
+				'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+				'<a href="https://test.com/url">Own Host</a>' => '<a href="/url">Own Host</a>',
+				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
+				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
+				'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
+				'<a href="http://tester.com/test">Different Host</a>' => '<a href="http://tester.com/test">Different Host</a>',
+			),
+			'https://test.com/url' => Array(
+				'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="/url/test.php">Own Host under folder</a>',
+				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="/url/test.php">Own Host under folder no scheme</a>',
+				'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
+				'<a href="http://tester.com/test">Different Host</a>' => '<a href="http://tester.com/test">Different Host</a>',
+			),
+			'https://test.com/url/?var=value' => Array(
+				'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
+				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
+				'<a href="https://test.com/url">Same URL with no querystring or slash</a>' => '<a href="/url">Same URL with no querystring or slash</a>',
+				'<a href="https://test.com/url/">Same URL with no querystring</a>' => '<a href="./">Same URL with no querystring</a>',
+			),
+			'https://test.com/deep/lot/of/folders/' => Array(
+				'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
+				'<a href="https://test.com/different/folders/">Different Folders</a>' => '<a href="/different/folders/">Different Folders</a>',
+				'<a href="https://test.com/deep/lot/test">Back two</a>' => '<a href="../../test">Back two</a>',
+				'<a href="https://test.com/deep/lot/test/this/and/this.php">Back two</a>' => '<a href="../../test/this/and/this.php">Back two</a>',
+			)
+		);
 		$doc = new htmldoc();
-		if ($doc->open(__DIR__.'/templates/urls.html')) {
-			$doc->minify(Array(
-				'whitespace' => false, // remove whitespace
-				'comments' => false, // remove comments
-				//'urls' => false, // update internal URL's to be shorter
-				'attributes' => false, // remove values from boolean attributes);
-	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
-			));
-			$minified = file_get_contents(__DIR__.'/templates/urls-minified.html');
-			$this->assertEquals($minified, $doc->save(), 'Can minify URLs');
+		foreach ($html AS $url => $items) {
+			$_SERVER['HTTPS'] = parse_url($url, PHP_URL_SCHEME) == 'https' ? 'on' : '';
+			$_SERVER['HTTP_HOST'] = parse_url($url, PHP_URL_HOST);
+			$_SERVER['REQUEST_URI'] = parse_url($url, PHP_URL_PATH).parse_url($url, PHP_URL_QUERY);
+			foreach ($items AS $input => $output) {
+				if ($doc->load($input, mb_internal_encoding())) {
+					$doc->minify(Array(
+						'whitespace' => false, // remove whitespace
+						'comments' => false, // remove comments
+						//'urls' => false, // update internal URL's to be shorter
+						'attributes' => false, // remove values from boolean attributes);
+			   			'quotes' => false, // minify attribute quotes
+						'close' => false // don't write close tags where possible
+					));
+					$this->assertEquals($output, $doc->save(), 'Can minify URLs');
+				}
+			}
 		}
 	}
 

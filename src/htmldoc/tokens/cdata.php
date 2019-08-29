@@ -6,7 +6,7 @@ class cdata {
 	protected $content = null;
 
 	public function parse(array &$tokens) {
-		$this->content = substr($tokens[$i]['value'], 9, -3);
+		$this->content = mb_substr($tokens[$i]['value'], 9, -3);
 	}
 
 	/**

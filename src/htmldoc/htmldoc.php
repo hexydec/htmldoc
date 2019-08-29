@@ -91,9 +91,10 @@ class htmldoc {
 				'ie' => true
 			),
 			'urls' => Array( // update internal URL's to be shorter
-				'absolute' => true, // process absolute URLs to make them relative to the current document
+				'scheme' => true, // remove the scheme from URLs that have the same scheme as the current document
 				'host' => true, // remove the host for own domain
-				'scheme' => true // remove the scheme from URLs that have the same scheme as the current document
+				'relative' => true, // process absolute URLs to make them relative to the current document
+				'parent' => true // process relative URLs to use relative parent links where it is shorter
 			),
 			'attributes' => Array( // minify attributes
 				'default' => true, // remove default attributes
@@ -102,7 +103,7 @@ class htmldoc {
 				'style' => true, // minify the style tag
 				'class' => true, // sort classes
 				'sort' => true, // sort attributes for better gzip
-				'boolean' => true, // minify boolean attributes
+				'boolean' => true // minify boolean attributes
 			),
 			'singleton' => true, // minify singleton element by removing slash
 			'quotes' => true, // minify attribute quotes
@@ -206,8 +207,8 @@ class htmldoc {
 			$meta = stream_get_meta_data($handle);
 			if (!empty($meta['wrapper_data'])) {
 				foreach ($meta['wrapper_data'] AS $item) {
-					if (stripos($item, 'Content-Type:') === 0 && ($charset = stristr($item, 'charset=')) !== false) {
-						$charset = substr($charset, 8);
+					if (mb_stripos($item, 'Content-Type:') === 0 && ($charset = mb_stristr($item, 'charset=')) !== false) {
+						$charset = mb_substr($charset, 8);
 						break;
 					}
 				}
@@ -263,8 +264,8 @@ class htmldoc {
 	protected function getCharsetFromHtml(string $html) {
 		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
 			$obj = new htmldoc($this->config);
-			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj->eq(0)->attr('content')) !== null && ($charset = stristr($value, 'charset=')) !== false) {
-				return substr($charset, 8);
+			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj->eq(0)->attr('content')) !== null && ($charset = mb_stristr($value, 'charset=')) !== false) {
+				return mb_substr($charset, 8);
 			}
 		}
 		return false;
@@ -298,14 +299,14 @@ class htmldoc {
 				switch ($token['type']) {
 					case 'id':
 						$parts[] = Array(
-							'id' => substr($token['value'], 1),
+							'id' => mb_substr($token['value'], 1),
 							'join' => $join
 						);
 						$join = false;
 						break;
 					case 'class':
 						$parts[] = Array(
-							'class' => substr($token['value'], 1),
+							'class' => mb_substr($token['value'], 1),
 							'join' => $join
 						);
 						$join = false;
@@ -333,7 +334,7 @@ class htmldoc {
 						break;
 					case 'pseudo':
 						$parts[] = Array(
-							'pseudo' => substr($token['value'], 1),
+							'pseudo' => mb_substr($token['value'], 1),
 							'join' => $join
 						);
 						$join = false;
@@ -576,7 +577,7 @@ class htmldoc {
 			$attr = Array();
 			foreach ($this->cache['attrvalues'] AS $item => $occurences) {
 				if ($occurences > 5) {
-					$item = strstr($item, '=', true);
+					$item = mb_strstr($item, '=', true);
 					if (!in_array($item, $attr)) {
 						$attr[] = $item;
 					}

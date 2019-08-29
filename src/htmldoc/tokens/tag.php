@@ -49,8 +49,8 @@ class tag {
 				case 'attributevalue':
 					if ($attr) {
 						$value = trim($token['value'], "= \t\r\n");
-						if (strpos($value, '"') === 0 || strpos($value, "'") === 0) {
-							$value = substr($value, 1, -1);
+						if (mb_strpos($value, '"') === 0 || mb_strpos($value, "'") === 0) {
+							$value = mb_substr($value, 1, -1);
 						}
 						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 
@@ -86,7 +86,7 @@ class tag {
 
 				case 'tagclose':
 					$close = trim($token['value'], '</>');
-					if (strtolower($close) != strtolower($tag)) { // if tags not the same, go back to previous level
+					if (mb_strtolower($close) != mb_strtolower($tag)) { // if tags not the same, go back to previous level
 
 						// if the closing tag is optional then don't close the tag
 						if (in_array($tag, $config['elements']['closeoptional'])) {
@@ -194,58 +194,86 @@ class tag {
 		$config = $this->root->getConfig();
 		$attr = $config['attributes'];
 		if ($minify['lowercase']) {
-			$this->tagName = strtolower($this->tagName);
+			$this->tagName = mb_strtolower($this->tagName);
 		}
+		$folder = false;
+		$dirs = false;
 
 		// minify attributes
-		$folder = false;
 		foreach ($this->attributes AS $key => $value) {
 
 			// lowercase attribute key
 			if ($minify['lowercase']) {
 				unset($this->attributes[$key]);
-				$key = strtolower($key);
+				$key = mb_strtolower($key);
 				$this->attributes[$key] = $value;
 			}
 
 			// minify urls
 			if ($minify['urls'] && in_array($key, $attr['urls'])) {
 
-				// strip scheme from absolute URL's if the same as current scheme
-				if ($minify['urls']['scheme']) {
-					if (!isset($scheme)) {
-						$scheme = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
+				// make folder variables
+				if (!$folder && isset($_SERVER['REQUEST_URI'])) {
+					$folder = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+					if (mb_substr($folder, -1) != '/') {
+						$folder = dirname($folder).'/';
 					}
-					if (strpos($this->attributes[$key], $scheme) === 0) {
-						$this->attributes[$key] = substr($this->attributes[$key], strlen($scheme)-2);
+					$dirs = explode('/', trim($folder, '/'));
+				}
+
+				// strip scheme from absolute URL's if the same as current scheme
+				if ($minify['urls']['scheme'] && isset($_SERVER['HTTPS'])) {
+					if (!isset($scheme)) {
+						$scheme = 'http'.($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
+					}
+					if (mb_strpos($this->attributes[$key], $scheme) === 0) {
+						$this->attributes[$key] = mb_substr($this->attributes[$key], mb_strlen($scheme)-2);
 					}
 				}
 
 				// remove host for own domain
-				if ($minify['urls']['host']) {
+				if ($minify['urls']['host'] && isset($_SERVER['HTTP_HOST'])) {
 					if (!isset($host)) {
 						$host = '//'.$_SERVER['HTTP_HOST'];
-						$hostlen = strlen($host);
+						$hostlen = mb_strlen($host);
 					}
-					if (strpos($this->attributes[$key], $host) === 0 && (strlen($this->attributes[$key]) == $hostlen || strpos($this->attributes[$key], '/', 2)) == $hostlen + 1) {
-						$this->attributes[$key] = substr($this->attributes[$key], $hostlen);
+					if (mb_strpos($this->attributes[$key], $host) === 0 && (mb_strlen($this->attributes[$key]) == $hostlen || mb_strpos($this->attributes[$key], '/', 2)) == $hostlen + 1) {
+						$this->attributes[$key] = mb_substr($this->attributes[$key], $hostlen);
 					}
 				}
 
 				// make absolute URLs relative
-				if ($minify['urls']['absolute']) {
-
-					// set folder variable
-					if (!$folder) {
-						$folder = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-						if (substr($folder, -1) != '/') {
-							$folder = dirname($folder).'/';
-						}
-					}
+				if ($minify['urls']['relative'] && $folder) {
 
 					// minify
-					if (strpos($this->attributes[$key], $folder) === 0) {
-						$this->attributes[$key] = mb_substr($this->attributes[$key], mb_strlen($folder));
+					if (mb_strpos($this->attributes[$key], $folder) === 0) {
+						if ($this->attributes[$key] == $folder && $this->attributes[$key] != $_SERVER['REQUEST_URI']) {
+							$this->attributes[$key] = './';
+						} else {
+							$this->attributes[$key] = mb_substr($this->attributes[$key], mb_strlen($folder));
+						}
+					}
+				}
+
+				// use parent folders if it is shorter
+				if ($minify['urls']['parent'] && $dirs && mb_strpos($this->attributes[$key], '/') !== false) {
+
+					$compare = explode('/', trim(dirname($this->attributes[$key]), '/'));
+					$updated = false;
+					foreach ($compare AS $i => &$item) {
+						if (isset($dirs[$i]) && $item == $dirs[$i]) {
+							$item = '..';
+							$updated = true;
+						} else {
+							break;
+						}
+					}
+					unset($item);
+					if ($updated) {
+						$url = implode('/', $compare).'/'.basename($this->attributes[$key]);
+						if (strlen($url) <= strlen($this->attributes[$key])) { // compare as bytes
+							$this->attributes[$key] = $url;
+						}
 					}
 				}
 			}
@@ -269,7 +297,7 @@ class tag {
 					), '; ');
 
 				// sort classes
-				} elseif ($key == 'class' && $minify['attributes']['class'] && strpos($this->attributes[$key], ' ') !== false) {
+				} elseif ($key == 'class' && $minify['attributes']['class'] && mb_strpos($this->attributes[$key], ' ') !== false) {
 					$this->attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $this->attributes[$key])));
 
 				// minify option tag
@@ -410,21 +438,21 @@ class tag {
 
 					// match start
 					} elseif ($item['comparison'] == '^=') {
-						if (strpos($this->attributes[$item['attribute']], $item['value']) !== 0) {
+						if (mb_strpos($this->attributes[$item['attribute']], $item['value']) !== 0) {
 							$match = false;
 							break;
 						}
 
 					// match within
 					} elseif ($item['comparison'] == '*=') {
-						if (strpos($this->attributes[$item['attribute']], $item['value']) === false) {
+						if (mb_strpos($this->attributes[$item['attribute']], $item['value']) === false) {
 							$match = false;
 							break;
 						}
 
 					// match end
 					} elseif ($item['comparison'] == '$=') {
-						if (strpos($this->attributes[$item['attribute']], $item['value']) !== strlen($this->attributes[$item['attribute']]) - strlen($item['value'])) {
+						if (mb_strpos($this->attributes[$item['attribute']], $item['value']) !== mb_strlen($this->attributes[$item['attribute']]) - mb_strlen($item['value'])) {
 							$match = false;
 							break;
 						}

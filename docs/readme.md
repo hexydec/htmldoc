@@ -5,5 +5,6 @@ HTMLDoc is a PHP based HTML parser designed for extracting document contents and
 - [How it works](how-it-works.md)
 - [How to use and examples](how-to-use.md)
 - [API Reference](api/readme.md)
+- [Mitigating Side Effects of Minification](mitigating-side-effects.md)
 - [About Document Recycling](recycling.md)
 - [Object Performance](performance.md)
