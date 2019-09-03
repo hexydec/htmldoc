@@ -215,6 +215,27 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
+	public function testCanMinifyCloseTags() {
+		$html = Array(
+			'<div><p>Test</p></div>' => '<div><p>Test</div>',
+			'<a href="#"><div><p>Test</p></div><p>Don\'t close when followed by inline element</p></a>' => '<a href="#"><div><p>Test</div><p>Don\'t close when followed by inline element</p></a>',
+		);
+		$doc = new htmldoc();
+		foreach ($html AS $input => $output) {
+			if ($doc->load($input, mb_internal_encoding())) {
+				$doc->minify(Array(
+					'whitespace' => false, // remove whitespace
+					'comments' => false, // remove comments
+					'urls' => false, // update internal URL's to be shorter
+					'attributes' => false, // remove values from boolean attributes);
+					'quotes' => false, // minify attribute quotes
+					//'close' => false // don't write close tags where possible
+				));
+				$this->assertEquals($output, $doc->save(), 'Can minify URLs');
+			}
+		}
+	}
+
 	/*public function testCanMinifyCss() {
 		$html = file_get_contents(__DIR__.'/templates/css.html');
 		$minified = file_get_contents(__DIR__.'/templates/css-minified.html');
