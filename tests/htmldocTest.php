@@ -21,6 +21,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			'<section><div><h1>Wrong closing tag order</div></h1></section>' => '<section><div><h1>Wrong closing tag order</h1></div></section>',
 			'<p class=test data-test=tester>Unquoted attributes</p>' => '<p class="test" data-test="tester">Unquoted attributes</p>',
 			'<script>let test = "</script><div>Test</div>";</script>' => '<script>let test = "</script><div>Test</div>";</script>',
+			'<li>Something with a &nbsp; or one at the end like this &nbsp;</li>' => '<li>Something with a '.mb_convert_encoding('&nbsp;', 'UTF-8', 'HTML-ENTITIES').' or one at the end like this '.mb_convert_encoding('&nbsp;', 'UTF-8', 'HTML-ENTITIES').'</li>',
 			'<a
     href="https://github.com/hexydec"
     class = \'test\'

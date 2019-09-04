@@ -150,7 +150,7 @@ if (!empty($_POST['action'])) {
 				</div>
 				<div class="minify__form-url">
 					<label for="url">or External URL:</label>
-					<input type="url" name="url" name="id" value="<?= htmlspecialchars($url); ?>" class="minify__form-url-box" />
+					<input type="url" name="url" id="url" value="<?= htmlspecialchars($url); ?>" class="minify__form-url-box" />
 					<button name="action" value="url">Go</button>
 				</div>
 				<?php if ($output) { ?>
