@@ -325,7 +325,7 @@ class tag {
 		}
 
 		// work out whether to omit the closing tag
-		if ($minify['close'] && in_array($this->tagName, $config['elements']['closeoptional'])) {
+		if ($minify['close'] && in_array($this->tagName, $config['elements']['closeoptional']) && !in_array($this->parent->tagName, $config['elements']['inline'])) {
 			$tag = null;
 			$children = $this->parent->toArray();
 			$last = end($children);
