@@ -30,7 +30,9 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
         Test
 </a>' => '<a href="https://github.com/hexydec" class="test" title="test">
         Test
-</a>'
+</a>',
+			'<div><p><p>test</p></p></div>' => '<div><p><p>test</p></div>',
+			'<div><p><p>test</p></p><p>test 2</p></div>' => '<div><p><p>test</p><p>test 2</p></div>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
