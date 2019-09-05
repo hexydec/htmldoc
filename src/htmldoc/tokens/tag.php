@@ -48,7 +48,7 @@ class tag {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$value = preg_replace('/^[= \\t\\r\\n"\']++|[= \\t\\r\\n"\']++$/u', '', $token['value']);
+						$value = preg_replace('/^[= \\t\\r\\n]*+["\']?|["\']?[= \\t\\r\\n]*+$/u', '', $token['value']);
 						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 
 						// cache value for minifier
@@ -83,7 +83,7 @@ class tag {
 
 				case 'tagclose':
 					$close = trim($token['value'], '</>');
-					if (!strcasecmp($close, $tag)) { // if tags not the same, go back to previous level
+					if (strcasecmp($close, $tag) !== 0) { // if tags not the same, go back to previous level
 
 						// if the closing tag is optional then don't close the tag
 						if (in_array($tag, $config['elements']['closeoptional'])) {
