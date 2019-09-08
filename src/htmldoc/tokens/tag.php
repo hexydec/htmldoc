@@ -36,6 +36,13 @@ class tag {
 		while (($token = next($tokens)) !== false) {
 			switch ($token['type']) {
 
+				// if you end up here, you are parsing an unclosed tag
+				case 'tagopenstart':
+					$tag = trim($token['value'], '<');
+					$this->close = false;
+					prev($tokens);
+					break 2;
+
 				// remember attribute
 				case 'attribute':
 					if ($attr) {
@@ -73,25 +80,23 @@ class tag {
 					$this->singleton = $token['value'];
 					break 2;
 
-				case 'tagopenstart':
-					$tag = trim($token['value'], '<');
-					if ($tag == $tag) {
-						$this->close = false;
-					}
-					prev($tokens);
-					break 2;
-
 				case 'tagclose':
-					$close = trim($token['value'], '</>');
-					if (strcasecmp($close, $tag) !== 0) { // if tags not the same, go back to previous level
+					$close = trim($token['value'], "</ \r\n\t>");
 
-						// if the closing tag is optional then don't close the tag
-						if (in_array($tag, $config['elements']['closeoptional'])) {
-							$this->close = false;
-						}
-						prev($tokens); // close the tag on each level below until we find itself
+					// if tags same, we ar closing this tag, go back to parent
+					if (strcasecmp($close, $tag) === 0) {
+						break 2;
+
+					// same as parent tag and close optional
+					} elseif (strcasecmp($this->parent->tagName, $close) === 0 && in_array($tag, $config['elements']['closeoptional'])) {
+						$this->close = false;
+						prev($tokens); // close the tag on parent
+						break 2;
+
+					// ignore the closing tag
+					} else {
+						break;
 					}
-					break 2;
 			}
 		}
 		if ($attr) {
@@ -139,7 +144,9 @@ class tag {
 
 					case 'tagopenstart':
 						$tag = trim($token['value'], '<');
-						if ($tag == $parenttag && in_array($tag, $config['closeoptional'])) {
+
+						// unnestable tag, pass back to parent
+						if (strcasecmp($tag, $parenttag) === 0 && in_array($tag, $config['closeoptional'])) {
 							prev($tokens);
 							break 2;
 						} else {
@@ -148,15 +155,18 @@ class tag {
 							$item = new tag($this->root, $tag, $this);
 							$item->parse($tokens);
 							$children[] = $item;
-							if (in_array($tag, $config['singleton'])) {
-								$tag = null;
-							}
 						}
 						break;
 
 					case 'tagclose':
-						prev($tokens); // close the tag on each level below until we find itself
-						break 2;
+						$close = trim($token['value'], "</ \r\n\t>");
+
+						// prevent dropping down a level when tags don't match or close is optional
+						if (strcasecmp($close, $parenttag) === 0 || in_array($parenttag, $config['closeoptional'])) {
+							prev($tokens); // let the parebt parse() method handle it
+							break 2;
+						}
+						break;
 
 					case 'textnode':
 						$item = new text($this->root, $this);
