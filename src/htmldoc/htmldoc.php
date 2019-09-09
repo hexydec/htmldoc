@@ -8,12 +8,12 @@ class htmldoc {
 	 */
 	protected static $tokens = Array(
 		'doctype' => '<!(?i:DOCTYPE)',
-		'comment' => '<!--[\d\D]*?-->',
+		'comment' => '<!--[\d\D]*?(?<=--)>',
 		'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
-		'tagopenstart' => '<[^\s>\/]++',
+		'tagopenstart' => '<[a-zA-Z][a-zA-Z0-9_:.-]*+',
 		'tagselfclose' => '\s*+\/>',
 		'tagopenend' => '\s*+>',
-		'tagclose' => '<\/[^ >]++>',
+		'tagclose' => '<\/[a-zA-Z][a-zA-Z0-9_:.-]*+\s*+>',
 		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
 		'attributevalue' => '=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^\s>]*+)',
 		'attribute' => '[^<>"\'=\s]++',
@@ -170,9 +170,9 @@ class htmldoc {
 	 * @param string $key... One or more array keys indicating the configuration value to retrieve
 	 * @return mixed The value requested, or null if the value doesn't exist
 	 */
-	public function getConfig() {
+	public function getConfig(...$keys) {
 		$config = $this->config;
-		foreach (func_get_args() AS $item) {
+		foreach ($keys AS $item) {
 			if (isset($config[$item])) {
 				$config = $config[$item];
 			} else {

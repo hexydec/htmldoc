@@ -39,7 +39,7 @@ class text {
 		// collapse whitespace
 		if ($minify['whitespace']) {
 			$parent = $this->parent;
-			$this->content = preg_replace('/[\\n\\r\\t ]++/u', ' ', $this->content);
+			$this->content = preg_replace('/[\\n\\t ]++/u', ' ', str_replace("\r", '', $this->content));
 
 			if ($parent) {
 				$children = $parent->tagName ? $parent->toArray() : $this->root->toArray();
@@ -62,7 +62,7 @@ class text {
 						}
 					}
 					if ($trim) {
-						$this->content = preg_replace('/^[\\n\\r\\t ]+/u', '', $this->content);
+						$this->content = ltrim($this->content, " \t\r\n");
 					}
 
 					// if next tag is a block element, rtrim the textnode
@@ -78,7 +78,7 @@ class text {
 						}
 					}
 					if ($trim) {
-						$this->content = preg_replace('/[\\n\\r\\t ]++$/u', '', $this->content);
+						$this->content = rtrim($this->content, " \t\r\n");
 					}
 				}
 			}

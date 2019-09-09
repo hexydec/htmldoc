@@ -13,6 +13,8 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanHandleDifficultHtml() {
 		$tests = Array(
+			'<!-->' => '<!---->',
+			'<!--->' => '<!---->',
 			'<!doctype html>' => '<!DOCTYPE html>',
 			'<a href="#"">Extra quote</a>' => '<a href="#">Extra quote</a>',
 			'<p title="</p>">Closing tag in titke</p>' => '<p title="&lt;/p&gt;">Closing tag in titke</p>',
@@ -32,7 +34,10 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
         Test
 </a>',
 			'<div><p><p>test</p></p></div>' => '<div><p><p>test</p></div>',
-			'<div><p><p>test</p></p><p>test 2</p></div>' => '<div><p><p>test</p><p>test 2</p></div>'
+			'<div><p><p>test</p></p><p>test 2</p></div>' => '<div><p><p>test</p><p>test 2</p></div>',
+			'<img src="test.png"></img>' => '<img src="test.png">',
+			'<div class="test" />' => '<div class="test"></div>',
+			"<div\n\r\n\t   >Test</div\n\r\n\t    >" => '<div>Test</div>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {

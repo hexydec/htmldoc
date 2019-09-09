@@ -1,7 +1,7 @@
 <?php
 require(__DIR__.'/src/autoload.php');
 
-$url = '';
+$base = empty($_POST['base']) ? '' : $_POST['base'];
 $input = '';
 $output = '';
 $minify = Array();
@@ -17,25 +17,22 @@ $options = $doc->getConfig('minify');
 if (!empty($_POST['action'])) {
 	$timing['fetch'] = microtime(true);
 	$mem['fetch'] = memory_get_usage();
-	if (!empty($_POST['source'])) {
-		if (!$doc->load($_POST['source'], null, $error)) {
-			trigger_error('Could not parse HTML: '.$error, E_USER_WARNING);
+	if (!empty($_POST['url'])) {
+		if (($url = parse_url($_POST['url'])) === false) {
+			trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
+		} elseif (!isset($url['host'])) {
+			trigger_error('Could not parse URL: No host was supplied', E_USER_WARNING);
+		} elseif (($input = $doc->open($_POST['url'], null, $error)) === false) {
+			trigger_error('Could not load HTML: '.$error, E_USER_WARNING);
 		} else {
-			$input = $_POST['source'];
-			if (!empty($_POST['url'])) {
-				$url = $_POST['url'];
-			}
+			$base = $_POST['url'];
 		}
-	} elseif (empty($_POST['url'])) {
+	} elseif (empty($_POST['source'])) {
 		trigger_error('No URL or HTML source was posted', E_USER_WARNING);
-	} elseif (($url = parse_url($_POST['url'])) === false) {
-		trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
-	} elseif (!isset($url['host'])) {
-		trigger_error('Could not parse URL: No host was supplied', E_USER_WARNING);
-	} elseif (($input = $doc->open($_POST['url'], null, $error)) === false) {
-		trigger_error('Could not load HTML: '.$error, E_USER_WARNING);
+	} elseif (!$doc->load($_POST['source'], null, $error)) {
+		trigger_error('Could not parse HTML: '.$error, E_USER_WARNING);
 	} else {
-		$url = $_POST['url'];
+		$input = $_POST['source'];
 	}
 
 	if ($input) {
@@ -150,7 +147,7 @@ if (!empty($_POST['action'])) {
 				</div>
 				<div class="minify__form-url">
 					<label for="url">or External URL:</label>
-					<input type="url" name="url" id="url" value="<?= htmlspecialchars($url); ?>" class="minify__form-url-box" />
+					<input type="url" name="url" id="url" class="minify__form-url-box" />
 					<button name="action" value="url">Go</button>
 				</div>
 				<?php if ($output) { ?>
@@ -212,7 +209,8 @@ if (!empty($_POST['action'])) {
 				<?php } ?>
 			</div>
 			<?php if ($output) { ?>
-				<iframe class="minify__preview" srcdoc="<?= htmlspecialchars(str_replace('</title>', '</title><base href="'.htmlspecialchars($url).'">', $output)); ?>"></iframe>
+				<input type="hidden" name="base" value="<?= htmlspecialchars($base); ?>" />
+				<iframe class="minify__preview" srcdoc="<?= htmlspecialchars(str_replace('</title>', '</title><base href="'.htmlspecialchars($base).'">', $output)); ?>"></iframe>
 			<?php } ?>
 			<div class="minify__options">
 				<h3>Options</h3>

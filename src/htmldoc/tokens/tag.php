@@ -55,7 +55,10 @@ class tag {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$value = preg_replace('/^[= \\t\\r\\n]*+["\']?|["\']?[= \\t\\r\\n]*+$/u', '', $token['value']);
+						$value = trim($token['value'], "= \t\r\n");
+						if (mb_strpos($value, '"') === 0 || mb_strpos($value, "'") === 0) {
+							$value = mb_substr($value, 1, -1);
+						}
 						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 
 						// cache value for minifier
@@ -77,7 +80,9 @@ class tag {
 					}
 
 				case 'tagselfclose':
-					$this->singleton = $token['value'];
+					if (in_array($tag, $config['elements']['singleton'])) {
+						$this->singleton = $token['value'];
+					}
 					break 2;
 
 				case 'tagclose':
@@ -107,7 +112,11 @@ class tag {
 
 			// cache attribute for minifier
 			$this->root->cache('attr', array_keys($attributes));
-			$this->root->cache('attrvalues', array_map(function ($val, $key) {return $key.'='.$val;}, $attributes, array_keys($attributes)));
+			$attrvalues = [];
+			foreach ($attributes AS $key => $item) {
+				$attrvalues[] = $key.'='.$item;
+			}
+			$this->root->cache('attrvalues', $attrvalues);
 		}
 	}
 
