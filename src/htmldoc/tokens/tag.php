@@ -216,13 +216,14 @@ class tag {
 		$dirs = false;
 
 		// minify attributes
-		foreach ($this->attributes AS $key => $value) {
+		$attributes = $this->attributes;
+		foreach ($attributes AS $key => $value) {
 
 			// lowercase attribute key
 			if ($minify['lowercase']) {
-				unset($this->attributes[$key]);
+				unset($attributes[$key]);
 				$key = mb_strtolower($key);
-				$this->attributes[$key] = $value;
+				$attributes[$key] = $value;
 			}
 
 			// minify urls
@@ -243,8 +244,8 @@ class tag {
 					if (!isset($scheme)) {
 						$scheme = 'http'.($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
 					}
-					if (mb_strpos($this->attributes[$key], $scheme) === 0) {
-						$this->attributes[$key] = mb_substr($this->attributes[$key], mb_strlen($scheme)-2);
+					if (mb_strpos($attributes[$key], $scheme) === 0) {
+						$attributes[$key] = mb_substr($attributes[$key], mb_strlen($scheme)-2);
 					}
 				}
 
@@ -254,8 +255,8 @@ class tag {
 						$host = '//'.$_SERVER['HTTP_HOST'];
 						$hostlen = mb_strlen($host);
 					}
-					if (mb_strpos($this->attributes[$key], $host) === 0 && (mb_strlen($this->attributes[$key]) == $hostlen || mb_strpos($this->attributes[$key], '/', 2)) == $hostlen + 1) {
-						$this->attributes[$key] = mb_substr($this->attributes[$key], $hostlen);
+					if (mb_strpos($attributes[$key], $host) === 0 && (mb_strlen($attributes[$key]) == $hostlen || mb_strpos($attributes[$key], '/', 2)) == $hostlen + 1) {
+						$attributes[$key] = mb_substr($attributes[$key], $hostlen);
 					}
 				}
 
@@ -263,19 +264,19 @@ class tag {
 				if ($minify['urls']['relative'] && $folder) {
 
 					// minify
-					if (mb_strpos($this->attributes[$key], $folder) === 0 && ($folder != '/' || mb_strpos($this->attributes[$key], '//') !== 0)) {
-						if ($this->attributes[$key] == $folder && $this->attributes[$key] != $_SERVER['REQUEST_URI']) {
-							$this->attributes[$key] = './';
+					if (mb_strpos($attributes[$key], $folder) === 0 && ($folder != '/' || mb_strpos($attributes[$key], '//') !== 0)) {
+						if ($attributes[$key] == $folder && $attributes[$key] != $_SERVER['REQUEST_URI']) {
+							$attributes[$key] = './';
 						} else {
-							$this->attributes[$key] = mb_substr($this->attributes[$key], mb_strlen($folder));
+							$attributes[$key] = mb_substr($attributes[$key], mb_strlen($folder));
 						}
 					}
 				}
 
 				// use parent folders if it is shorter
-				if ($minify['urls']['parent'] && $dirs && mb_strpos($this->attributes[$key], '/') === 0 && mb_strpos($this->attributes[$key], '//') === false) {
+				if ($minify['urls']['parent'] && $dirs && mb_strpos($attributes[$key], '/') === 0 && mb_strpos($attributes[$key], '//') === false) {
 
-					$compare = explode('/', trim(dirname($this->attributes[$key]), '/'));
+					$compare = explode('/', trim(dirname($attributes[$key]), '/'));
 					$update = false;
 					$count = 0;
 					foreach ($compare AS $i => $item) {
@@ -289,9 +290,9 @@ class tag {
 					}
 					if ($update) {
 						$compare = array_merge(array_fill(0, count($dirs) - $count, '..'), $compare);
-						$url = implode('/', $compare).'/'.basename($this->attributes[$key]);
-						if (strlen($url) <= strlen($this->attributes[$key])) { // compare as bytes
-							$this->attributes[$key] = $url;
+						$url = implode('/', $compare).'/'.basename($attributes[$key]);
+						if (strlen($url) <= strlen($attributes[$key])) { // compare as bytes
+							$attributes[$key] = $url;
 						}
 					}
 				}
@@ -301,38 +302,38 @@ class tag {
 			if ($minify['attributes']) {
 
 				// trim attribute
-				$this->attributes[$key] = trim($this->attributes[$key]);
+				$attributes[$key] = trim($attributes[$key], " \r\n\t");
 
 				// boolean attributes
 				if ($minify['attributes']['boolean'] && in_array($key, $attr['boolean'])) {
-					$this->attributes[$key] = null;
+					$attributes[$key] = null;
 
 				// minify style tag
 				} elseif ($key == 'style' && $minify['attributes']['style']) {
-					$this->attributes[$key] = trim(str_replace(
+					$attributes[$key] = trim(str_replace(
 						Array('  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '),
 						Array(' ', ':', ':', ':', ';', ';', ';'),
-						$this->attributes[$key]
+						$attributes[$key]
 					), '; ');
 
 				// sort classes
-				} elseif ($key == 'class' && $minify['attributes']['class'] && mb_strpos($this->attributes[$key], ' ') !== false) {
-					$this->attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $this->attributes[$key])));
+				} elseif ($key == 'class' && $minify['attributes']['class'] && mb_strpos($attributes[$key], ' ') !== false) {
+					$attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $attributes[$key])));
 
 				// minify option tag
-				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $this->attributes[$key]) {
-					unset($this->attributes[$key]);
+				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $attributes[$key]) {
+					unset($attributes[$key]);
 					continue;
 
 				// remove tag specific default attribute
-				} elseif ($minify['attributes']['default'] && isset($attr['default'][$this->tagName][$key]) && ($attr['default'][$this->tagName][$key] === true || $attr['default'][$this->tagName][$key] == $this->attributes[$key])) {
-					unset($this->attributes[$key]);
+				} elseif ($minify['attributes']['default'] && isset($attr['default'][$this->tagName][$key]) && ($attr['default'][$this->tagName][$key] === true || $attr['default'][$this->tagName][$key] == $attributes[$key])) {
+					unset($attributes[$key]);
 					continue;
 				}
 
 				// remove other attributes
-				if ($this->attributes[$key] === '' && $minify['attributes']['empty'] && in_array($key, $attr['empty'])) {
-					unset($this->attributes[$key]);
+				if ($attributes[$key] === '' && $minify['attributes']['empty'] && in_array($key, $attr['empty'])) {
+					unset($attributes[$key]);
 					continue;
 				}
 			}
@@ -381,10 +382,10 @@ class tag {
 		}
 
 		// sort attributes
-		if ($minify['attributes']['sort'] && $this->attributes) {
-			$attr = $this->attributes;
-			$this->attributes = array_replace(array_intersect_key(array_fill_keys($minify['attributes']['sort'], false), $attr), $attr);
+		if ($minify['attributes']['sort'] && $attributes) {
+			$attributes = array_replace(array_intersect_key(array_fill_keys($minify['attributes']['sort'], false), $attributes), $attributes);
 		}
+		$this->attributes = $attributes;
 
 		// minify children
 		if ($this->children) {
