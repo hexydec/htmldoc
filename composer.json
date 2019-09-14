@@ -1,0 +1,20 @@
+{
+    "name": "hexydec/htmldoc",
+    "description": "A token based HTML Document parser and minifier written in PHP",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Will Earp",
+            "email": "will@hexydec.com",
+			"homepage": "https://github.com/hexydec/htmldoc"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {}
+	"autoload": {
+		"psr-4": {
+			"hexydec\\htmldoc" => "src/"
+		}
+	}
+}
