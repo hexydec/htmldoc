@@ -320,9 +320,11 @@ class tag {
 				} elseif ($key == 'class' && $minify['attributes']['class'] && mb_strpos($attributes[$key], ' ') !== false) {
 					$attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $attributes[$key])));
 
-				// minify option tag
-				} elseif ($key == 'value' && $minify['attributes']['option'] && $this->tagName == 'option' && isset($this->children[0]) && $this->children[0]->text() == $attributes[$key]) {
-					unset($attributes[$key]);
+				// minify option tag, always capture the tag to prevent it being removed as a default
+				} elseif ($key == 'value' && $this->tagName == 'option') {
+					if ($minify['attributes']['option'] && isset($this->children[0]) && $this->children[0]->text() == $attributes[$key]) {
+						unset($attributes[$key]);
+					}
 					continue;
 
 				// remove tag specific default attribute
