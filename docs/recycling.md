@@ -57,4 +57,4 @@ HTML Attribute values and Text Nodes are stored internally with any HTML encodin
 
 Any HTML entities (Except `<`, `>`, `=`, `'`, `"`) that were encoded on input, will now no longer be encoded and use the native character.
 
-*This is valid for documents that are outputted with the default UTF-8 encoding. For other encodings, especially single-byte encodings, characters that do not have a representation in the output encoding will be represented by its HTML entity. Note: Currently this is not implemented.*
+*This is valid for documents that are outputted with the default UTF-8 encoding. For other encodings, especially single-byte encodings, characters that do not have a representation in the output encoding will be represented by its HTML entity.*
