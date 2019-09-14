@@ -14,7 +14,7 @@
     "require": {},
 	"autoload": {
 		"psr-4": {
-			"hexydec\\htmldoc": "src/"
+			"hexydec\\htmldoc\\": "src/"
 		}
 	}
 }
