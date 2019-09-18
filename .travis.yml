@@ -4,3 +4,4 @@ php:
   - '7.1'
   - '7.2'
   - '7.3'
+script: phpunit --verbose --coverage-text --coverage-clover=coverage.xml tests
