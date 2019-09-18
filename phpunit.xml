@@ -1,0 +1,26 @@
+<phpunit bootstrap="src/autoload.php" backupGlobals="false" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" strict="true">
+    <testsuites>
+        <testsuite name="HTMLDoc">
+            <file>tests/htmldocTest.php</file>
+        </testsuite>
+        <testsuite name="Find">
+            <file>tests/findHtmldocTest.php</file>
+        </testsuite>
+        <testsuite name="Minify">
+            <file>tests/minifyHtmldocTest.php</file>
+        </testsuite>
+        <testsuite name="CSSMin">
+            <file>tests/cssminTest.php</file>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-clover" target="./coverage/result.xml" />
+        <log type="coverage-html" target="./coverage/result" />
+        <log type="coverage-text" target="./coverage/result.txt" />
+    </logging>
+</phpunit>
