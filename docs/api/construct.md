@@ -15,7 +15,7 @@ The options set into the object are setup for general use, but can be configured
 
 | option		| Description										| Defaults						|
 |---------------|---------------------------------------------------|-------------------------------|
-| `inline`		| HTML elements that are considered inline			| `Array('b', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span')` |
+| `inline`		| HTML elements that are considered inline			| `Array('b', 'u', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span')` |
 | `singleton`	| HTML elements that are singletons					| `Array('area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr')` |
 | `closeoptional`	| HTML elements that don't have to be closed		| `Array('head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup')` |
 | `pre`			| HTML elements that contain pre-formatted content	| `Array('textarea', 'pre', 'code')` |
