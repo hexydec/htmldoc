@@ -1,7 +1,7 @@
 language: php
+
 php:
-  - '7.0'
-  - '7.1'
   - '7.2'
   - '7.3'
-script: phpunit --bootstrap src/autoload.php --verbose --coverage-text --coverage-clover=coverage.xml tests
+
+script: phpunit --bootstrap src/autoload.php --verbose --coverage-text --coverage-clover=coverage.xml tests]
