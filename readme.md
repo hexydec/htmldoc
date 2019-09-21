@@ -4,17 +4,15 @@ A tokeniser based HTML and CSS document parser and minifier, written in PHP.
 
 ![Licence](https://img.shields.io/badge/Licence-MIT-lightgrey.svg)
 ![Project Status](https://img.shields.io/badge/Project%20Status-Beta-yellow.svg)
-![Build Status](https://api.travis-ci.org/hexydec/htmldoc.svg?branch=master)
+[![Build Status](https://api.travis-ci.org/hexydec/htmldoc.svg?branch=master)](https://travis-ci.org/hexydec/htmldoc)
 
 **This project is currently beta code, it is recommended to test your integration thoroughly before deploy this code into production**
 
 ## Description
 
-An HTML and CSS parser, primarily designed for minifying HTML documents, although the plan is to also allow the document structure to be queried so attribute values and text node values can be extracted.
+An HTML and CSS parser, primarily designed for minifying HTML documents, it also enables the document structure to be queried allowing attribute values and text node values can be extracted.
 
 Both parsers are designed around a tokeniser to make the document processing more reliable and (hopefully) faster than regex based minifiers, which are a bit blunt and can be problematic if they match patterns in the wrong places.
-
-Also because documents are read into a structured format, performing operations on specific parts of it is much easier and more reliable, and will in the future enable documents to be queried and data extracted.
 
 ## Usage
 
@@ -26,16 +24,36 @@ use hexydec\html\htmldoc;
 $doc = new htmldoc();
 
 // load from a variable
-$doc->load($html);
+if ($doc->load($html) {
 
-// load from a URL
-$doc->open($url);
+	// minify the document
+	$doc->minify();
 
-// minify the document
-$doc->minify();
+	// compile back to HTML
+	echo $doc->save();
+}
+```
 
-// compile back to HTML
-echo $doc->save();
+To extract data from an HTML document:
+
+```php
+use hexydec\html\htmldoc;
+
+$doc = new htmldoc();
+
+// load from a URL this time
+if ($doc->open($url) {
+
+	// extract text
+	$text = $doc->find('.article__body')->text();
+
+	// extract text
+	$attr = $doc->find('.article__author-image')->attr('src');
+
+	// extract HTML
+	$html = $doc->find('.article__body')->html();
+}
+
 ```
 
 ## Documentation
