@@ -47,7 +47,7 @@ if ($doc->open($url) {
 	// extract text
 	$text = $doc->find('.article__body')->text();
 
-	// extract text
+	// extract attribute
 	$attr = $doc->find('.article__author-image')->attr('src');
 
 	// extract HTML
