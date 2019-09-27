@@ -3,12 +3,26 @@ use hexydec\html\htmldoc;
 
 final class htmldocTest extends \PHPUnit\Framework\TestCase {
 
+	public function testCanOpenDocument() {
+		$doc = new htmldoc();
+		$this->assertTrue($doc->open('https://google.co.uk/') !== false, 'Can open external URL');
+		$this->assertTrue($doc->load('<html><meta charset="utf-8"></html>') !== false, 'Can open document from string');
+		$this->assertTrue($doc->load('<html><meta http-equiv="Content-Type" content="charset=utf-8"></html>') !== false, 'Can open document from string');
+	}
+
 	public function testCanParseDocument() {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/document.html')) {
 			$html = file_get_contents(__DIR__.'/templates/document.html');
 			$this->assertEquals($html, $doc->save(), 'Parsed document successfully');
 		}
+	}
+
+	public function testCanFailCorrecctly() {
+		$url = __DIR__.'/does-not-exists.html';
+		$doc = new htmldoc();
+		$this->assertEquals(false, $doc->open($url, null, $error), 'Correctly failed to open file that doesn\'t exist');
+		$this->assertEquals('Could not open file "'.$url.'"', $error, 'Correct error message generated');
 	}
 
 	public function testCanHandleDifficultHtml() {
@@ -103,6 +117,15 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			if ($doc->load($input, mb_internal_encoding())) {
 				$this->assertEquals($output, $doc->html(Array('xml' => true)));
 			}
+		}
+	}
+
+	public function testCanSaveDocument() {
+		$doc = new htmldoc();
+		if ($doc->load('<div>Hello world</div>')) {
+			$file = dirname(__DIR__).'/save.html';
+			$this->assertEquals(true, $doc->save($file), 'Can save document');
+			unlink($file);
 		}
 	}
 }

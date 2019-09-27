@@ -30,10 +30,10 @@ class cssmin {
    		'shortenhex' => true,
    		'lowerhex' => true,
    		'sortselectors' => true,
-   		'mergeselectors' => true,
-   		'removeoverwrittenproperties' => true,
-   		'sortproperties' => true,
-   		'mergeblocks' => true,
+   		// 'mergeselectors' => true,
+   		// 'removeoverwrittenproperties' => true,
+   		// 'sortproperties' => true,
+   		// 'mergeblocks' => true,
    		'email' => false,
 		'maxline' => false,
 	   	'output' => 'minify'
@@ -47,10 +47,10 @@ class cssmin {
 			$config['maxline'] = 800;
 			$config['shortenhex'] = false;
 			$config['sortselectors'] = false;
-			$config['mergeselectors'] = false;
-			$config['removeoverwrittenproperties'] = false;
+			// $config['mergeselectors'] = false;
+			// $config['removeoverwrittenproperties'] = false;
 			$config['sortproperties'] = false;
-			$config['mergeblocks'] = false;
+			// $config['mergeblocks'] = false;
 		}
 
 		// tokenise the input CSS
@@ -78,7 +78,7 @@ class cssmin {
 	protected static function parse(array &$tokens) {
 		$rules = Array();
 		$select = true;
-		$comment = false;
+		$comment = null;
 		$media = false;
 		$selectors = Array();
 		$properties = Array();
@@ -114,6 +114,7 @@ class cssmin {
 			} elseif ($token['type'] == 'string') {
 				$prop = $token['value'];
 				if (next($tokens)['type'] == 'colon') {
+					$important = false;
 					$properties[] = Array(
 						'property' => $prop,
 						'value' => self::parsePropertyValue($tokens, $important, $propcomment),
@@ -127,19 +128,19 @@ class cssmin {
 
 			// end rule
 			} elseif ($token['type'] == 'curlyclose') {
-				$rules[] = Array(
-					'selectors' => $selectors,
-					'properties' => $properties,
-					'comment' => $comment
-				);
+				if ($selectors && $properties) {
+					$rules[] = Array(
+						'selectors' => $selectors,
+						'properties' => $properties,
+						'comment' => $comment
+					);
+				}
 				$selectors = Array();
 				$properties = Array();
 				$select = true;
 				$comment = false;
 			}
 		} while (($token = next($tokens)) !== false);
-		// print_r($rules);
-		// exit();
 		return $rules;
 	}
 
@@ -259,11 +260,11 @@ class cssmin {
 		return $selector;
 	}
 
-	protected static function parsePropertyValue(&$tokens, &$important = false, &$comment = false) {
+	protected static function parsePropertyValue(array &$tokens, bool &$important = false, string &$comment = null) {
 		$properties = Array();
 		$values = Array();
 		$important = false;
-		$comment = false;
+		$comment = null;
 		while (($token = next($tokens)) !== false) {
 			if ($token['type'] == 'comma') {
 				$properties[] = $values;
@@ -314,10 +315,6 @@ class cssmin {
 				}
 				unset($prop);
 
-				// if ($config['sortproperties']) {
-				// 	ksort($item['properties']);
-				// }
-
 				// remove training semi-colon
 				if ($config['removesemicolon']) {
 					end($item['properties']);
@@ -329,7 +326,7 @@ class cssmin {
 		return $ast;
 	}
 
-	protected static function minifyValues($key, $values, $config) {
+	protected static function minifyValues(string $key, array $values, array $config) {
 		foreach ($values AS &$value) {
 
 			// value in brackets
@@ -359,22 +356,13 @@ class cssmin {
 				if ($config['lowerhex'] && preg_match('/^#[a-f0-6]{3,6}$/i', $value)) {
 					$value = mb_strtolower($value);
 				}
-				if ($config['mergeselectors']) {
-
-				}
-				if ($config['removeoverwrittenproperties']) {
-
-				}
-				if ($config['mergeblocks']) {
-
-				}
 			}
 		}
 		unset($value);
 		return $values;
 	}
 
-	protected static function compile($ast, $config, $indent = 0) {
+	protected static function compile(array $ast, array $config, int $indent = 0) {
 		$b = $config['output'] != 'minify';
 		$tabs = $b ? str_repeat("\t", $indent) : '';
 		$css = '';
@@ -408,9 +396,9 @@ class cssmin {
 				}
 				$rule .= $b ? " {\n" : '{';
 				$rule .= self::compile($item['rules'], $config, $indent + 1);
-			} else {
 
-				// build selectors
+			// build selectors
+			} else {
 				foreach ($item['selectors'] AS $i => $selector) {
 					if ($i) {
 						$rule .= $b ? ', ' : ',';
@@ -426,6 +414,7 @@ class cssmin {
 				}
 				$rule .= $b ? ' {' : '{';
 
+				// compile properties
 				foreach ($item['properties'] AS $value) {
 					$rule .= ($b ? "\n\t".$tabs : '').$value['property'].($b ? ': ' : ':');
 					$rule .= self::compileProperty($value['value'], $b);
@@ -456,7 +445,7 @@ class cssmin {
 		return rtrim($css);
 	}
 
-	protected static function compileProperty($value, $b) {
+	protected static function compileProperty(array $value, int $b) {
 		$properties = Array();
 		foreach ($value AS $group) {
 			$compiled = '';

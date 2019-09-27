@@ -150,7 +150,7 @@ class htmldoc {
 	 */
 	public function __get(string $var) : ?int {
 		if ($var == 'length') {
-			return count($this->chhildren);
+			return count($this->children);
 		}
 		return null;
 	}
@@ -192,7 +192,7 @@ class htmldoc {
 	public function open(String $url, Resource $context = null, String &$error = null) {
 
 		// open a handle to the stream
-		if (($handle = fopen($url, 'rb', $context)) === false) {
+		if (($handle = @fopen($url, 'rb', $context)) === false) {
 			$error = 'Could not open file "'.$url.'"';
 
 		// retrieve the stream contents
@@ -264,8 +264,16 @@ class htmldoc {
 	protected function getCharsetFromHtml(string $html) {
 		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
 			$obj = new htmldoc($this->config);
-			if ($obj->load($match[0], mb_internal_encoding()) && ($value = $obj->eq(0)->attr('content')) !== null && ($charset = mb_stristr($value, 'charset=')) !== false) {
-				return mb_substr($charset, 8);
+			if ($obj->load($match[0], mb_internal_encoding())) {
+
+				// <meta charset="xxx" />
+				if (($value = $obj->attr('charset')) !== null) {
+					return $value;
+
+				// <meta http-equiv="Content-Type" content="text/html; charset=xxx" />
+				} elseif (($value = $obj->eq(0)->attr('content')) !== null && ($charset = mb_stristr($value, 'charset=')) !== false) {
+					return mb_substr($charset, 8);
+				}
 			}
 		}
 		return false;

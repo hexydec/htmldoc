@@ -112,7 +112,7 @@ const obj = document.querySelector("input:not([type]),input[type=text]");
 if (obj instanceof HTMLElement) {
 	const value = obj.getAttribute("value");
 
-	if (["", null].indexOf(value) !== -1) { // attribute value will be null if it doesn't exist
+	if (value !== "" && value !== null) { // attribute value will be null if it doesn't exist
 		// do something
 	}
 }
