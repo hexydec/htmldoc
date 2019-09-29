@@ -68,8 +68,4 @@ class style {
 	public function html(array $options = null) : ?string {
 		return $options['xml'] ? '<![CDATA['.$this->content.']]>' : $this->content;
 	}
-
-	public function __get($var) {
-		return $this->$var;
-	}
 }

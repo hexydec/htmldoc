@@ -64,16 +64,12 @@ class script {
 	}
 
 	/**
-	 * Compile the styles as an HTML string
+	 * Compile the scripts as an HTML string
 	 *
 	 * @param array $options An array indicating output options
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = null) : ?string {
 		return $options['xml'] ? '<![CDATA['.$this->content.']]>' : $this->content;
-	}
-
-	public function __get($var) {
-		return $this->$var;
 	}
 }

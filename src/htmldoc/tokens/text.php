@@ -94,11 +94,13 @@ class text {
 		return false;
 	}
 
+	/**
+	 * Compile the text as an HTML string
+	 *
+	 * @param array $options An array indicating output options
+	 * @return string The compiled HTML
+	 */
 	public function html(array $options = null) : string {
 		return $this->content ? htmlspecialchars($this->content, ENT_NOQUOTES | ENT_HTML5) : '';
-	}
-
-	public function __get($var) {
-		return $this->$var;
 	}
 }

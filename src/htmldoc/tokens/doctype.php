@@ -25,11 +25,13 @@ class doctype {
 
 	}
 
-	public function html() : string {
+	/**
+	 * Compile the tag as an HTML string
+	 *
+	 * @param array $options An array indicating output options
+	 * @return string The compiled HTML
+	 */
+	public function html(array $options = null) : string {
 		return '<!DOCTYPE '.\htmlspecialchars($this->content).'>';
-	}
-
-	public function __get($var) {
-		return $this->$var;
 	}
 }
