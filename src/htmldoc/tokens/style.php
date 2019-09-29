@@ -33,7 +33,11 @@ class style {
 		$value = '';
 		$token = current($tokens);
 		while ($token !== false && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
-			$value .= $token['value'];
+			if ($token['type'] == 'cdata') {
+				$value .= mb_substr($token['value'], 9, -3);
+			} else {
+				$value .= $token['value'];
+			}
 			$token = next($tokens);
 		}
 		prev($tokens);
@@ -55,8 +59,14 @@ class style {
 		}
 	}
 
-	public function html(Array $config) {
-		return $this->content;
+	/**
+	 * Compile the styles as an HTML string
+	 *
+	 * @param array $options An array indicating output options
+	 * @return string The compiled HTML
+	 */
+	public function html(array $options = null) : ?string {
+		return $options['xml'] ? '<![CDATA['.$this->content.']]>' : $this->content;
 	}
 
 	public function __get($var) {

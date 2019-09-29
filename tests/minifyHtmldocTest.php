@@ -218,6 +218,7 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 	public function testCanMinifyCloseTags() {
 		$html = Array(
 			'<div><p>Test</p></div>' => '<div><p>Test</div>',
+			'<div><p>Test</p><p>Test 2</p></div>' => '<div><p>Test<p>Test 2</div>',
 			'<a href="#"><div><p>Test</p></div><p>Don\'t close when followed by inline element</p></a>' => '<a href="#"><div><p>Test</div><p>Don\'t close when followed by inline element</p></a>',
 		);
 		$doc = new htmldoc();
@@ -236,16 +237,21 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	/*public function testCanMinifyCss() {
-		$html = file_get_contents(__DIR__.'/templates/css.html');
-		$minified = file_get_contents(__DIR__.'/templates/css-minified.html');
-		$output = htmlmin::minify($html, Array(
-			'whitespace' => false, // remove whitespace
-			'comments' => false, // remove comments
-			'inlinestyles' => false, // minify inline CSS
-			'urls' => false, // update internal URL's to be shorter
-			'attributes' => false, // remove values from boolean attributes);
-		));
-		$this->assertEquals($minified, $output);
-	}*/
+	public function testCanMinifyCss() {
+		$doc = new htmldoc();
+		if ($doc->open(__DIR__.'/templates/css.html')) {
+			$doc->minify(Array(
+				// 'css' => false, // minify css
+				'js' => false, // minify javascript
+				'whitespace' => false, // remove whitespace
+				'comments' => false, // remove comments
+				'urls' => false, // update internal URL's to be shorter
+				'attributes' => false, // remove values from boolean attributes);
+	   			'quotes' => false, // minify attribute quotes
+				'close' => false // don't write close tags where possible
+			));
+			$minified = file_get_contents(__DIR__.'/templates/css-minified.html');
+			$this->assertEquals($minified, $doc->save(), 'Can minify CSS');
+		}
+	}
 }

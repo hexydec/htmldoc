@@ -48,6 +48,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
         Test
 </a>',
 			'<div><p><p>test</p></p></div>' => '<div><p><p>test</p></div>',
+			'<div><p>test</a></p></div>' => '<div><p>test</p></div>',
 			'<div><p><p>test</p></p><p>test 2</p></div>' => '<div><p><p>test</p><p>test 2</p></div>',
 			'<img src="test.png"></img>' => '<img src="test.png">',
 			'<div class="test" />' => '<div class="test"></div>',
@@ -68,6 +69,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			'<p title="test single quotes &#39;"></p>' => '<p title="test single quotes \'"></p>',
 			"<p title='test single quotes &#39;'></p>" => '<p title="test single quotes \'"></p>',
 			"<p disabled></p>" => '<p disabled></p>',
+			'<p disabled title="test double attribute"></p>' => '<p disabled title="test double attribute"></p>',
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
@@ -82,7 +84,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanEncodeTextNodes() {
 		$tests = Array(
-			'<p>"Test"</p>' => '<p>&quot;Test&quot;</p>',
+			'<p>"Test&"</p>' => '<p>"Test&amp;"</p>',
 			'<p>&#128512; &#128513; &#128514; &#129315;</p>' => '<p>😀 😁 😂 🤣</p>'
 		);
 		$doc = new htmldoc();

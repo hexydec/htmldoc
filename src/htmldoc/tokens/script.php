@@ -34,7 +34,11 @@ class script {
 		$token = current($tokens);
 		$quotes = 0;
 		while ($token !== false && ($quotes % 2 || $token['type'] != 'tagclose' || $token['value'] != '</script>')) {
-			$value .= $token['value'];
+			if ($token['type'] == 'cdata') {
+				$value .= mb_substr($token['value'], 9, -3);
+			} else {
+				$value .= $token['value'];
+			}
 
 			// count quotes so we don't capture a script tag in a string
 			$quotes += mb_substr_count(str_replace(['\\\\', '\\\\"', "\\\\'"], ['', '', ''], $token['value']), '"');
@@ -59,8 +63,14 @@ class script {
 		}
 	}
 
-	public function html() {
-		return $this->content;
+	/**
+	 * Compile the styles as an HTML string
+	 *
+	 * @param array $options An array indicating output options
+	 * @return string The compiled HTML
+	 */
+	public function html(array $options = null) : ?string {
+		return $options['xml'] ? '<![CDATA['.$this->content.']]>' : $this->content;
 	}
 
 	public function __get($var) {

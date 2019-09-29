@@ -95,7 +95,7 @@ class text {
 	}
 
 	public function html(array $options = null) : string {
-		return $this->content ? htmlspecialchars($this->content, ENT_COMPAT | ENT_HTML5) : '';
+		return $this->content ? htmlspecialchars($this->content, ENT_NOQUOTES | ENT_HTML5) : '';
 	}
 
 	public function __get($var) {

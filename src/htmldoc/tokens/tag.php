@@ -183,12 +183,6 @@ class tag {
 						$children[] = $item;
 						break;
 
-					case 'cdata':
-						$item = new cdata();
-						$item->parse($tokens);
-						$children[] = $item;
-						break;
-
 					case 'comment':
 						$item = new comment();
 						$item->parse($tokens);
@@ -534,6 +528,12 @@ class tag {
 		return $text;
 	}
 
+	/**
+	 * Compile the tag as an HTML string
+	 *
+	 * @param array $options An array indicating output options
+	 * @return string The compiled HTML
+	 */
 	public function html(array $options = null) : string {
 
 		// compile attributes

@@ -5,8 +5,8 @@ class cssmin {
 
    protected static $tokens = Array(
 	   'whitespace' => '\s++',
-	   'comment' => '\/\*(?!!)[\d\D]*?\*\/',
-	   'quotes' => '(?<!\\\\)("(?:[^"\\\\]++|\\\\.)*+"|\'(?:[^\'\\\\]++|\	\\\.)*+\')',
+	   'comment' => '\\/\\*[\d\D]*?\\*\\/',
+	   'quotes' => '(?<!\\\\)("(?:[^"\\\\]++|\\\\.)*+"|\'(?:[^\'\\\\]++|\\\\.)*+\')',
 	   'join' => '[>+~]',
 	   'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
 	   'curlyopen' => '{',
@@ -18,7 +18,7 @@ class cssmin {
 	   'comma' => ',',
 	   'colon' => ':',
 	   'semicolon' => ';',
-	   'string' => '!?[^\[\]{}\(\):;,>+=~\^$!" ]++'
+	   'string' => '!?[^\[\]{}\(\):;,>+=~\^$!"\/ \n\r\t]++'
    );
 
    	protected static $config = Array(
@@ -92,7 +92,7 @@ class cssmin {
 						$comment = $token['value'];
 					} elseif ($token['type'] == 'curlyclose') {
 						return $rules;
-					} elseif ($token['type'] == 'string') {
+					} elseif (in_array($token['type'], ['string', 'colon'])) {
 						if ($token['value'] == '@media') {
 							$rules[] = Array(
 								'media' => self::parseMediaQuery($tokens),
@@ -113,17 +113,18 @@ class cssmin {
 			// process properties
 			} elseif ($token['type'] == 'string') {
 				$prop = $token['value'];
-				if (next($tokens)['type'] == 'colon') {
-					$important = false;
-					$properties[] = Array(
-						'property' => $prop,
-						'value' => self::parsePropertyValue($tokens, $important, $propcomment),
-						'important' => $important,
-						'semicolon' => ';',
-						'comment' => $propcomment
-					);
-				} else {
-					prev($tokens);
+				while (($token = next($tokens)) !== false) {
+					if ($token['type'] == 'colon') {
+						$important = false;
+						$properties[] = Array(
+							'property' => $prop,
+							'value' => self::parsePropertyValue($tokens, $important, $propcomment),
+							'important' => $important,
+							'semicolon' => ';',
+							'comment' => $propcomment
+						);
+						break;
+					}
 				}
 
 			// end rule
@@ -219,14 +220,31 @@ class cssmin {
 					break;
 				case 'colon':
 					$parts = ':';
+					$brackets = false;
 					while (($token = next($tokens)) !== false) {
-						if (!in_array($token['type'], Array('whitespace', 'comma', 'curlyopen'))) {
+
+						// capture brackets
+						if ($brackets || $token['type'] == 'bracketopen') {
+							$brackets = true;
+							if ($token['type'] != 'whitespace') {
+								$parts .= $token['value'];
+								if ($token['type'] == 'bracketclose') {
+									break;
+								}
+							}
+
+						// capture selector
+						} elseif (!in_array($token['type'], Array('whitespace', 'comma', 'curlyopen'))) {
 							$parts .= $token['value'];
+
+						// stop here
 						} else {
 							prev($tokens);
 							break;
 						}
 					}
+
+					// save selector
 					$selector[] = Array(
 						'selector' => $parts,
 						'join' => $join
@@ -236,11 +254,13 @@ class cssmin {
 				case 'squareopen':
 					$parts = '';
 					while (($token = next($tokens)) !== false) {
-						if (!in_array($token['type'], Array('squareclose'))) {
-							$parts .= $token['value'];
-						} elseif ($token['type'] != 'whitespace') {
-							prev($tokens);
-							break;
+						if ($token['type'] != 'whitespace') {
+							if ($token['type'] != 'squareclose') {
+								$parts .= $token['value'];
+							} else {
+								prev($tokens);
+								break;
+							}
 						}
 					}
 					$selector[] = Array(
@@ -379,16 +399,19 @@ class cssmin {
 			if (isset($item['media'])) {
 				$rule .= '@media';
 				foreach ($item['media'] AS $i => $media) {
+					$join = $b ? ' ' : '';
 					if ($media['only']) {
 						$rule .= ' only';
+						$join = ' and ';
 					}
 					if ($media['media']) {
 						$rule .= ' '.$media['media'];
+						$join = ' and ';
 					}
 					if ($media['not']) {
 						$rule .= ' not';
+						$join = ' and ';
 					}
-					$join = $b ? ' ' : '';
 					foreach ($media['properties'] AS $prop => $value) {
 						$rule .= $join.'('.$prop.':'.($b ? ' ' : '').$value.')';
 						$join = ' and ';
@@ -445,15 +468,15 @@ class cssmin {
 		return rtrim($css);
 	}
 
-	protected static function compileProperty(array $value, int $b) {
+	protected static function compileProperty(array $value, int $b, string $join = ' ') {
 		$properties = Array();
 		foreach ($value AS $group) {
 			$compiled = '';
 			foreach ($group AS $item) {
 				if (is_array($item)) {
-					$compiled .= '('.self::compileProperty($item, $b).')';
+					$compiled .= '('.self::compileProperty($item, $b, $group[0] == 'calc' ? '' : $join).')';
 				} else {
-					$compiled .= ($compiled !== '' ? ' ' : '').$item;
+					$compiled .= ($compiled !== '' ? $join : '').$item;
 				}
 			}
 			$properties[] = $compiled;

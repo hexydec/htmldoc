@@ -55,9 +55,10 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanRemoveLastSemicolon() {
 		$input = '#id {
+			font-family: Arial, sans-serif;
 			font-size: 3em;
 		}';
-		$output = '#id{font-size:3em}';
+		$output = '#id{font-family:Arial,sans-serif;font-size:3em}';
 		$config = $this->config;
 		$config['removesemicolon'] = true;
 		$this->assertEquals($output, cssmin::minify($input, $config));
