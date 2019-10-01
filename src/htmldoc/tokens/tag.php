@@ -357,7 +357,7 @@ class tag {
 					$type = get_class($item);
 
 					// if type is not text or the text content is empty
-					if ($type != 'hexydec\\html\\text' || !$item->content) {
+					if ($type != 'hexydec\\html\\text' || !$item->text()) {
 
 						// if the next tag is optinally closable too, then we can remove the closing tag of this
 						if ($type == 'hexydec\\html\\tag' && in_array($item->tagName, $config['elements']['closeoptional'])) {
