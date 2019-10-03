@@ -560,11 +560,11 @@ class htmldoc {
 		}
 
 		// email minification
-		if (!empty($options['email'])) {
+		if ($minify['email']) {
 			if ($minify['comments'] !== false) {
 				$minify['comments']['ie'] = true;
 			}
-			$minify['url'] = false;
+			$minify['urls'] = false;
 			if ($minify['attributes'] !== false) {
 				$minify['attributes']['empty'] = false;
 			}

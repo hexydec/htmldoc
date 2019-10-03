@@ -208,6 +208,7 @@ class tag {
 		}
 		$folder = false;
 		$dirs = false;
+		$scheme = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
 
 		// minify attributes
 		$attributes = $this->attributes;
@@ -234,23 +235,20 @@ class tag {
 				}
 
 				// strip scheme from absolute URL's if the same as current scheme
-				if ($minify['urls']['scheme'] && isset($_SERVER['HTTPS'])) {
-					if (!isset($scheme)) {
-						$scheme = 'http'.($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != 'off' ? 's' : '').'://';
-					}
-					if (mb_strpos($attributes[$key], $scheme) === 0) {
-						$attributes[$key] = mb_substr($attributes[$key], mb_strlen($scheme)-2);
-					}
+				if ($minify['urls']['scheme'] && mb_strpos($attributes[$key], $scheme) === 0) {
+					$attributes[$key] = mb_substr($attributes[$key], mb_strlen($scheme)-2);
 				}
 
 				// remove host for own domain
 				if ($minify['urls']['host'] && isset($_SERVER['HTTP_HOST'])) {
 					if (!isset($host)) {
-						$host = '//'.$_SERVER['HTTP_HOST'];
-						$hostlen = mb_strlen($host);
+						$host = [$scheme.$_SERVER['HTTP_HOST'], '//'.$_SERVER['HTTP_HOST']];
 					}
-					if (mb_strpos($attributes[$key], $host) === 0 && (mb_strlen($attributes[$key]) == $hostlen || mb_strpos($attributes[$key], '/', 2)) == $hostlen + 1) {
-						$attributes[$key] = mb_substr($attributes[$key], $hostlen);
+					foreach ($host AS $item) {
+						$len = mb_strlen($item);
+						if (mb_stripos($attributes[$key], $item) === 0 && (mb_strlen($attributes[$key]) == $len || mb_strpos($attributes[$key], '/', 2) == $len)) {
+							$attributes[$key] = mb_substr($attributes[$key], $len);
+						}
 					}
 				}
 
