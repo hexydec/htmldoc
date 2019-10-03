@@ -29,11 +29,6 @@ class cssmin {
    		'removequotes' => true,
    		'shortenhex' => true,
    		'lowerhex' => true,
-   		'sortselectors' => true,
-   		// 'mergeselectors' => true,
-   		// 'removeoverwrittenproperties' => true,
-   		// 'sortproperties' => true,
-   		// 'mergeblocks' => true,
    		'email' => false,
 		'maxline' => false,
 	   	'output' => 'minify'
@@ -46,11 +41,6 @@ class cssmin {
 		if ($config['email']) {
 			$config['maxline'] = 800;
 			$config['shortenhex'] = false;
-			$config['sortselectors'] = false;
-			// $config['mergeselectors'] = false;
-			// $config['removeoverwrittenproperties'] = false;
-			$config['sortproperties'] = false;
-			// $config['mergeblocks'] = false;
 		}
 
 		// tokenise the input CSS
