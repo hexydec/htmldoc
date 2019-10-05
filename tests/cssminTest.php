@@ -140,7 +140,7 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		.class {
 			transition: all 500ms;
 		}';
-		$output = '#id{margin:0 0 20px 0;}.class{transition: all 0.5s;}';
+		$output = '#id{margin:0 0 20px 0;}.class{transition:all 500ms;}';
 		$config = $this->config;
 		$config['removezerounits'] = true;
 		$this->assertEquals($output, cssmin::minify($input, $config));

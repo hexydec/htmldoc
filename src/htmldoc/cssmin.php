@@ -138,7 +138,7 @@ class cssmin {
 	protected static function parseMediaQuery(array &$tokens) {
 		$media = Array();
 		$default = $rule = Array(
-			'media' => 'all',
+			'media' => false,
 			'only' => false,
 			'not' => false,
 			'properties' => Array()
@@ -162,6 +162,7 @@ class cssmin {
 								$prop = $token['value'];
 							} elseif ($compare == ':') {
 								$rule['properties'][$prop] = $token['value'];
+								$prop = false;
 								$compare = false;
 							} else {
 								if (intval($prop)) {
@@ -170,12 +171,17 @@ class cssmin {
 								} else {
 									$rule['properties'][$prop] = $token['value'];
 								}
+								$prop = false;
+								$compare = false;
 							}
 						} elseif ($token['type'] == 'colon') {
 							$compare = ':';
 						} elseif ($token['type'] == 'comparison' && $token['value'] == '<=') {
 							$compare = '<=';
 						}
+					}
+					if ($prop) {
+						$rule['properties'][$prop] = null;
 					}
 					break;
 				case 'comma':
@@ -387,26 +393,22 @@ class cssmin {
 
 			// build properties
 			if (isset($item['media'])) {
-				$rule .= '@media';
-				foreach ($item['media'] AS $i => $media) {
-					$join = $b ? ' ' : '';
-					if ($media['only']) {
-						$rule .= ' only';
+				$rule .= '@media ';
+				$media = [];
+				foreach ($item['media'] AS $i => $value) {
+					$query = '';
+					$join = '';
+					if ($value['media']) {
+						$query .= trim(($value['only'] ? ' only' : '').($value['not'] ? ' not' : '').($value['media'] ? ' '.$value['media'] : ''));
 						$join = ' and ';
 					}
-					if ($media['media']) {
-						$rule .= ' '.$media['media'];
+					foreach ($value['properties'] AS $key => $prop) {
+						$query .= $join.'('.$key.($prop === null ? '' : ':'.($b ? ' ' : '').$prop).')';
 						$join = ' and ';
 					}
-					if ($media['not']) {
-						$rule .= ' not';
-						$join = ' and ';
-					}
-					foreach ($media['properties'] AS $prop => $value) {
-						$rule .= $join.'('.$prop.':'.($b ? ' ' : '').$value.')';
-						$join = ' and ';
-					}
+					$media[] = $query;
 				}
+				$rule .= implode($b ? ', ' : ',', $media);
 				$rule .= $b ? " {\n" : '{';
 				$rule .= self::compile($item['rules'], $config, $indent + 1);
 
