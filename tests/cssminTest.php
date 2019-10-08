@@ -4,20 +4,17 @@ use hexydec\html\cssmin;
 final class cssminTest extends \PHPUnit\Framework\TestCase {
 
 	protected $config = Array(
-		'removesemicolon' => false,
-		'removezerounits' => false,
-		'removeleadingzero' => false,
-		'removequotes' => false,
-		'convertquotes' => false,
-		'shortenhex' => false,
-		'lowerhex' => false,
-		'sortselectors' => false,
-		'mergeselectors' => false,
-		'removeoverwrittenproperties' => false,
-		'sortproperties' => false,
-		'mergeblocks' => false,
-		'report' => false,
-		'output' => 'minify'
+   		'removesemicolon' => false,
+   		'removezerounits' => false,
+   		'removeleadingzero' => false,
+   		'convertquotes' => false,
+   		'removequotes' => false,
+   		'shortenhex' => false,
+   		'lowerhex' => false,
+   		'sortselectors' => false,
+   		'email' => false,
+		'maxline' => false,
+	   	'output' => 'minify'
 	);
 
 	public function testCanMinifyCss() {
@@ -46,6 +43,78 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 				}
 				',
 				'output' => '#id{font-size:3em;}#id,.class,.class .class__item,.class>.class__item{font-size:3em;display:flex;}'
+			),
+			Array(
+				'input' => '@media screen {
+					#id {
+						font-size: 3em;
+					}
+				}
+
+				#id, .class, .class .class__item, .class > .class__item {
+					font-size: 3em;
+					display: flex;
+				}
+				',
+				'output' => '@media screen{#id{font-size:3em;}}#id,.class,.class .class__item,.class>.class__item{font-size:3em;display:flex;}'
+			)
+		);
+		foreach ($test AS $item) {
+			$this->assertEquals($item['output'], cssmin::minify($item['input'], $this->config));
+		}
+	}
+
+	public function testCanMinifyMediaQueries() {
+		$test = Array(
+			Array(
+				'input' => '@media screen {
+					#id {
+						font-size: 3em;
+					}
+				}
+
+				#id, .class, .class .class__item, .class > .class__item {
+					font-size: 3em;
+					display: flex;
+				}
+				',
+				'output' => '@media screen{#id{font-size:3em;}}#id,.class,.class .class__item,.class>.class__item{font-size:3em;display:flex;}'
+			),
+			Array(
+				'input' => '@media screen and ( max-width : 800px ) {
+					#id {
+						font-size: 3em;
+					}
+				}
+				',
+				'output' => '@media screen and (max-width:800px){#id{font-size:3em;}}'
+			),
+			Array(
+				'input' => '@media screen and ( max-width : 800px ) {
+					#id {
+						font-size: 3em;
+					}
+				}
+				',
+				'output' => '@media screen and (max-width:800px){#id{font-size:3em;}}'
+			),
+			Array(
+				'input' => '@media screen, print and ( max-width : 800px ) {
+					#id {
+						font-size: 3em;
+					}
+				}
+				',
+				'output' => '@media screen,print and (max-width:800px){#id{font-size:3em;}}'
+			),
+			Array(
+				'input' => '@media ( color ) {
+					#id {
+						font-size: 3em;
+					}
+				}
+				',
+				'output' => '@media (color){#id{font-size:3em;}}'
 			)
 		);
 		foreach ($test AS $item) {
@@ -67,8 +136,11 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 	public function testCanRemoveZeroUnits() {
 		$input = '#id {
 			margin: 0px 0% 20px 0em;
+		}
+		.class {
+			transition: all 500ms;
 		}';
-		$output = '#id{margin:0 0 20px 0;}';
+		$output = '#id{margin:0 0 20px 0;}.class{transition:all 500ms;}';
 		$config = $this->config;
 		$config['removezerounits'] = true;
 		$this->assertEquals($output, cssmin::minify($input, $config));
@@ -203,6 +275,39 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		);
 		$config = $this->config;
 		$config['lowerhex'] = true;
+		foreach ($test AS $item) {
+			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
+		}
+	}
+
+	public function testCanMinifyEmailCss() {
+		$test = Array(
+			Array(
+				'input' => "#id {
+					color: #000000;
+				}",
+				'output' => '#id{color:#000000}'
+			),
+			Array(
+				'input' => "#id::before {
+					color: #FFCCAA;
+				}",
+				'output' => '#id::before{color:#ffccaa}'
+			),
+			Array(
+				'input' => "#id::before {
+					color: #ffccaa;
+				}",
+				'output' => '#id::before{color:#ffccaa}'
+			),
+			Array(
+				'input' => "#id::before {
+					color: #ffccab;
+				}",
+				'output' => '#id::before{color:#ffccab}'
+			)
+		);
+		$config = ['email' => true];
 		foreach ($test AS $item) {
 			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
 		}
