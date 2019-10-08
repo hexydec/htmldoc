@@ -79,6 +79,11 @@ class htmldoc {
 			),
 			'empty' => Array('id', 'class', 'style', 'title', 'action', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
 			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
+			'urlsmatch' => Array(
+				'link' => Array(
+					'rel' => Array('stylesheet', 'icon', 'shortcut icon', 'apple-touch-icon-precomposed', 'apple-touch-icon', 'preload', 'prefetch', 'author', 'help')
+				)
+			)
 		),
 		'css' => 'hexydec\\html\\cssmin::minify', // specify the CSS minifier
 		'js' => false, // specify the javascript minifier

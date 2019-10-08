@@ -221,8 +221,8 @@ class tag {
 				$attributes[$key] = $value;
 			}
 
-			// minify urls
-			if ($minify['urls'] && in_array($key, $attr['urls'])) {
+			// minify url attributes when not in list or match attribute
+			if ($minify['urls'] && in_array($key, $attr['urls']) && (!in_array($this->tagName, array_keys($attr['urlsmatch'])) || $this->hasAttribute($attributes, $attr['urlsmatch'][$this->tagName]))) {
 
 				// make folder variables
 				if ($folder === false && isset($_SERVER['REQUEST_URI'])) {
@@ -390,6 +390,15 @@ class tag {
 				$item->minify($minify);
 			}
 		}
+	}
+
+	protected function hasAttribute(array $attr, array $items) {
+		foreach ($items AS $key => $item) {
+			if (isset($attr[$key]) && !in_array($attr[$key], $item)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public function find(Array $selector) : Array {
