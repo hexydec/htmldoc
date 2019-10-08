@@ -394,7 +394,7 @@ class tag {
 
 	protected function hasAttribute(array $attr, array $items) {
 		foreach ($items AS $key => $item) {
-			if (isset($attr[$key]) && !in_array($attr[$key], $item)) {
+			if (!isset($attr[$key]) || !in_array($attr[$key], $item)) {
 				return false;
 			}
 		}

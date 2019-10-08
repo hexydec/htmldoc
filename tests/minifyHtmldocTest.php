@@ -141,7 +141,7 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 			),
 			'https://test.com/' => Array(
 				'<link rel="stylesheet" href="https://test.com/alotof/css/build/file.css?_12345">' => '<link rel="stylesheet" href="alotof/css/build/file.css?_12345">',
-				'<link rel="url" href="https://test.com/">' => '<link rel="url" href="https://test.com/">',
+				'<link itemtype="url" href="https://test.com/">' => '<link itemtype="url" href="https://test.com/">',
 			)
 		);
 		$doc = new htmldoc();
