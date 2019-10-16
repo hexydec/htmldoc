@@ -336,7 +336,10 @@ class htmldoc {
 						while (($token = next($tokens)) !== false) {
 							if ($token['type'] == 'squareclose') {
 								break;
-							} elseif ($token['type'] == 'string') {
+							} elseif (in_array($token['type'], ['string', 'quotes'])) {
+								if ($token['type'] == 'quotes') {
+									$token['value'] = stripslashes(mb_substr($token['value'], 1, -1));
+								}
 								$item[isset($item['attribute']) ? 'value' : 'attribute'] = $token['value'];
 							} elseif ($token['type'] == 'comparison') {
 								$item['comparison'] = $token['value'];
