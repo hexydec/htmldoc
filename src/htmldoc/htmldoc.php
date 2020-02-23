@@ -79,6 +79,11 @@ class htmldoc {
 			],
 			'empty' => ['id', 'class', 'style', 'title', 'action', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'], // attributes to remove if empty
 			'urls' => ['href', 'src', 'action', 'poster'], // attributes to minify URLs in
+			'urlsmatch' => [
+				'link' => [
+					'rel' => ['stylesheet', 'icon', 'shortcut icon', 'apple-touch-icon-precomposed', 'apple-touch-icon', 'preload', 'prefetch', 'author', 'help']
+				]
+			]
 		],
 		'css' => 'hexydec\\html\\cssmin::minify', // specify the CSS minifier
 		'js' => null, // specify the javascript minifier
@@ -339,7 +344,10 @@ class htmldoc {
 						while (($token = next($tokens)) !== false) {
 							if ($token['type'] == 'squareclose') {
 								break;
-							} elseif ($token['type'] == 'string') {
+							} elseif (in_array($token['type'], ['string', 'quotes'])) {
+								if ($token['type'] == 'quotes') {
+									$token['value'] = stripslashes(mb_substr($token['value'], 1, -1));
+								}
 								$item[isset($item['attribute']) ? 'value' : 'attribute'] = $token['value'];
 							} elseif ($token['type'] == 'comparison') {
 								$item['comparison'] = $token['value'];

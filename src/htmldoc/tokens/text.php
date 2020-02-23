@@ -118,6 +118,6 @@ class text implements token {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		return $this->content ? htmlspecialchars($this->content, ENT_NOQUOTES | ENT_HTML5) : '';
+		return $this->content !== '' ? htmlspecialchars($this->content, ENT_NOQUOTES | ENT_HTML5) : '';
 	}
 }

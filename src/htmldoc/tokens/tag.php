@@ -254,8 +254,8 @@ class tag implements token {
 				$attributes[$key] = $value;
 			}
 
-			// minify urls
-			if ($minify['urls'] && in_array($key, $attr['urls'])) {
+			// minify url attributes when not in list or match attribute
+			if ($minify['urls'] && in_array($key, $attr['urls']) && (!in_array($this->tagName, array_keys($attr['urlsmatch'])) || $this->hasAttribute($attributes, $attr['urlsmatch'][$this->tagName]))) {
 
 				// make folder variables
 				if ($folder === null && isset($_SERVER['REQUEST_URI'])) {
@@ -425,6 +425,14 @@ class tag implements token {
 		}
 	}
 
+	protected function hasAttribute(array $attr, array $items) {
+		foreach ($items AS $key => $item) {
+			if (!isset($attr[$key]) || !in_array($attr[$key], $item)) {
+				return false;
+			}
+		}
+		return true;
+	}
 	/**
 	 * Determine whether this tag or any of its child tokens match a selector
 	 *
