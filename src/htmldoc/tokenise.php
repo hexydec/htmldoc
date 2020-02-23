@@ -6,11 +6,11 @@ class tokenise {
 	/**
 	 * Tokenises the input using the supplied patterns
 	 *
-	 * @param String $input The string to be tokenised
-	 * @param Array $tokens An associative array of regexp patterns, keyed by their token name
-	 * @return Array An array of tokens, each token is an array containing the keys 'type' and 'value'
+	 * @param string $input The string to be tokenised
+	 * @param array $tokens An associative array of regexp patterns, keyed by their token name
+	 * @return array An array of tokens, each token is an array containing the keys 'type' and 'value'
 	 */
-	public static function tokenise(String $input, Array $tokens) {
+	public static function tokenise(string $input, array $tokens) {
 
 		// prepare regexp and extract strings
 		$patterns = Array();

@@ -1,8 +1,10 @@
 <?php
-spl_autoload_register(function ($class) {
+spl_autoload_register(function (string $class) : bool {
 	$dir = __DIR__.'/htmldoc';
-	$classes = Array(
+	$classes = [
 		'hexydec\\html\\htmldoc' => $dir.'/htmldoc.php',
+		'hexydec\\html\\tokenise' => $dir.'/tokenise.php',
+		'hexydec\\html\\token' => $dir.'/tokens/interfaces/token.php',
 		'hexydec\\html\\comment' => $dir.'/tokens/comment.php',
 		'hexydec\\html\\doctype' => $dir.'/tokens/doctype.php',
 		'hexydec\\html\\pre' => $dir.'/tokens/pre.php',
@@ -10,9 +12,8 @@ spl_autoload_register(function ($class) {
 		'hexydec\\html\\style' => $dir.'/tokens/style.php',
 		'hexydec\\html\\tag' => $dir.'/tokens/tag.php',
 		'hexydec\\html\\text' => $dir.'/tokens/text.php',
-		'hexydec\\html\\cssmin' => $dir.'/cssmin.php',
-		'hexydec\\html\\tokenise' => $dir.'/tokens/tokenise.php'
-	);
+		'hexydec\\html\\cssmin' => $dir.'/cssmin.php'
+	];
 	if (isset($classes[$class])) {
 		return require($classes[$class]);
 	}

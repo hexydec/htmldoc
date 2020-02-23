@@ -4,9 +4,9 @@ namespace hexydec\html;
 class htmldoc {
 
 	/**
-	 * @var Array $token Regexp components keyed by their corresponding codename for tokenising HTML
+	 * @var array $tokens Regexp components keyed by their corresponding codename for tokenising HTML
 	 */
-	protected static $tokens = Array(
+	protected static $tokens = [
 		'doctype' => '<!(?i:DOCTYPE)',
 		'comment' => '<!--[\d\D]*?(?<=--)>',
 		'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
@@ -19,12 +19,12 @@ class htmldoc {
 		'attribute' => '[^<>"\'=\s]++',
 		'whitespace' => '\s++',
 		'other' => '.'
-	);
+	];
 
 	/**
-	 * @var Array $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
+	 * @var array $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
-	protected static $selectors = Array(
+	protected static $selectors = [
 		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
 		'join' => '\s*[>+~]\s*',
 		'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
@@ -38,65 +38,65 @@ class htmldoc {
 		'class' => '\.[^ +>\.#{\[,]++',
 		'string' => '\*|[^\[\]{}\(\):;,>+=~\^$!" #\.*]++',
 		'whitespace' => '\s++',
-	);
+	];
 
 	/**
-	 * @var Array $config Object configuration array
+	 * @var array $config Object configuration array
 	 */
-	protected $config = Array(
-		'elements' => Array(
-			'inline' => Array(
+	protected $config = [
+		'elements' => [
+			'inline' => [
 				'b', 'u', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span'
-			),
-			'singleton' => Array(
+			],
+			'singleton' => [
 				'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
-			),
-			'closeoptional' => Array(
+			],
+			'closeoptional' => [
 				'html', 'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup'
-			),
-			'pre' => Array('textarea', 'pre', 'code'), // which elements not to strip whitespace from
-			'custom' => Array('script', 'style'), // which elements have their own plugins
-		),
-		'attributes' => Array(
-			'boolean' => Array(
+			],
+			'pre' => ['textarea', 'pre', 'code'], // which elements not to strip whitespace from
+			'custom' => ['script', 'style'], // which elements have their own plugins
+		],
+		'attributes' => [
+			'boolean' => [
 				'allowfullscreen', 'allowpaymentrequest', 'async', 'autofocus', 'autoplay', 'checked', 'contenteditable', 'controls', 'default', 'defer', 'disabled', 'formnovalidate', 'hidden', 'indeterminate', 'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nomodule', 'novalidate', 'open', 'readonly', 'required', 'reversed', 'scoped', 'selected', 'typemustmatch'
-			),
-			'default' => Array( // default attributes that can be removed
-				'style' => Array(
+			],
+			'default' => [ // default attributes that can be removed
+				'style' => [
 					'type' => 'text/css',
 					'media' => 'all'
-				),
-				'script' => Array(
+				],
+				'script' => [
 					'type' => 'text/javascript',
 					'language' => true
-				),
-				'form' => Array(
+				],
+				'form' => [
 					'method' => 'get'
-				),
-				'input' => Array(
+				],
+				'input' => [
 					'type' => 'text'
-				)
-			),
-			'empty' => Array('id', 'class', 'style', 'title', 'action', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'), // attributes to remove if empty
-			'urls' => Array('href', 'src', 'action', 'poster'), // attributes to minify URLs in
-		),
+				]
+			],
+			'empty' => ['id', 'class', 'style', 'title', 'action', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'], // attributes to remove if empty
+			'urls' => ['href', 'src', 'action', 'poster'], // attributes to minify URLs in
+		],
 		'css' => 'hexydec\\html\\cssmin::minify', // specify the CSS minifier
-		'js' => false, // specify the javascript minifier
-		'minify' => Array(
-			'css' => Array(), // specify CSS minifier options
-			'js' => Array(), // specify CSS javascript options
+		'js' => null, // specify the javascript minifier
+		'minify' => [
+			'css' => [], // specify CSS minifier options
+			'js' => [], // specify CSS javascript options
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes
-			'comments' => Array( // remove comments
+			'comments' => [ // remove comments
 				'ie' => true
-			),
-			'urls' => Array( // update internal URL's to be shorter
+			],
+			'urls' => [ // update internal URL's to be shorter
 				'scheme' => true, // remove the scheme from URLs that have the same scheme as the current document
 				'host' => true, // remove the host for own domain
 				'relative' => true, // process absolute URLs to make them relative to the current document
 				'parent' => true // process relative URLs to use relative parent links where it is shorter
-			),
-			'attributes' => Array( // minify attributes
+			],
+			'attributes' => [ // minify attributes
 				'default' => true, // remove default attributes
 				'empty' => true, // remove these attributes if empty
 				'option' => true, // remove value attribute from option where the text node has the same value
@@ -104,53 +104,55 @@ class htmldoc {
 				'class' => true, // sort classes
 				'sort' => true, // sort attributes for better gzip
 				'boolean' => true // minify boolean attributes
-			),
+			],
 			'singleton' => true, // minify singleton element by removing slash
 			'quotes' => true, // minify attribute quotes
 			'close' => true, // don't write close tags where possible
 			'email' => false // sets the minification presets to email safe options
-		)
-	);
+		]
+	];
 
 	/**
-	 * @var Array Contains the output settings
+	 * @var array Contains the output settings
 	 */
-	protected $output = Array(
+	protected $output = [
 		'charset' => null, // set the output charset
 		'quotestyle' => 'double', // double, single, minimal
 		'singletonclose' => false, // string to close singleton tags, or false to leave as is
 		'closetags' => false, // whether to force tags to have a closing tag (true) or follow tag::close
 		'xml' => false // sets the output presets to produce XML valid code
-	);
+	];
 
 	/**
-	 * @var Array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
+	 * @var array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
-	protected $children = Array();
+	protected $children = [];
 
 	/**
-	 * @var Array A cache of attribute and class names for sorting
+	 * @var array A cache of attribute and class names for sorting
 	 */
-	protected $cache = Array();
+	protected $cache = [];
 
 	/**
 	 * Constructs the object
 	 *
-	 * @param Array $config An array of configuration parameters that is recursively merged with the default config
+	 * @param array $config An array of configuration parameters that is recursively merged with the default config
 	 */
-	public function __construct(array $config = Array()) {
+	public function __construct(array $config = []) {
 		$this->config = array_replace_recursive($this->config, $config);
 	}
 
 	/**
 	 * Calculates the length property
 	 *
-	 * @param string $var The name of the property to retrieve, currently only 'length'
-	 * @return int The number of children in the object, or null if the parameter doesn't exist
+	 * @param string $var The name of the property to retrieve, currently 'length' and output
+	 * @return mixed The number of children in the object for length, the output config, or null if the parameter doesn't exist
 	 */
-	public function __get(string $var) : ?int {
+	public function __get(string $var) {
 		if ($var == 'length') {
 			return count($this->children);
+		} elseif ($var == 'output') {
+			return $this->output;
 		}
 		return null;
 	}
@@ -158,9 +160,9 @@ class htmldoc {
 	/**
 	 * Retrieves the children of the document as an array
 	 *
-	 * @return Array An array of child nodes
+	 * @return array An array of child nodes
 	 */
-	public function toArray() {
+	public function toArray() : array {
 		return $this->children;
 	}
 
@@ -186,10 +188,11 @@ class htmldoc {
 	 * Open an HTML file from a URL
 	 *
 	 * @param string $url The address of the HTML file to retrieve
-	 * @param string $context An optional array of context parameters
+	 * @param resource $context An optional array of context parameters
+	 * @param string &$error A reference to any user error that is generated
 	 * @return mixed The loaded HTML, or false on error
 	 */
-	public function open(String $url, Resource $context = null, String &$error = null) {
+	public function open(string $url, resource $context = null, string &$error = null) {
 
 		// open a handle to the stream
 		if (($handle = @fopen($url, 'rb', $context)) === false) {
@@ -227,17 +230,18 @@ class htmldoc {
 	 *
 	 * @param string $html A string containing valid HTML
 	 * @param string $charset The charset of the document
+	 * @param string &$error A reference to any user error that is generated
 	 * @return bool Whether the input HTML was parsed
 	 */
 	public function load(string $html, string $charset = null, &$error = null) : bool {
 
 		// detect the charset
-		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== false || ($charset = mb_detect_encoding($html)) !== false) {
+		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== null || ($charset = mb_detect_encoding($html)) !== false) {
 			$html = mb_convert_encoding($html, mb_internal_encoding(), $charset);
 		}
 
 		// reset the document
-		$this->children = Array();
+		$this->children = [];
 
 		// tokenise the input HTML
 		if (($tokens = tokenise::tokenise($html, self::$tokens)) === false) {
@@ -259,9 +263,9 @@ class htmldoc {
 	 * Reads the charset defined in the Content-Type meta tag, or detects the charset from the HTML content
 	 *
 	 * @param string $html A string containing valid HTML
-	 * @return string The defined or detected charset or false if the charset is not defined
+	 * @return string The defined or detected charset or null if the charset is not defined
 	 */
-	protected function getCharsetFromHtml(string $html) {
+	protected function getCharsetFromHtml(string $html) : ?string {
 		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
 			$obj = new htmldoc($this->config);
 			if ($obj->load($match[0], mb_internal_encoding())) {
@@ -276,7 +280,7 @@ class htmldoc {
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/**
@@ -285,7 +289,7 @@ class htmldoc {
 	 * @param array &$tokens An array of tokens generated by tokenise()
 	 * @return bool Whether the parser was able to capture any objects
 	 */
-	protected function parse(array &$tokens) {
+	protected function parse(array &$tokens) : bool {
 		$tag = new tag($this);
 		$this->children = $tag->parseChildren($tokens);
 		return !!$this->children;
@@ -300,34 +304,38 @@ class htmldoc {
 	protected static function parseSelector(string $selector) {
 		$selector = trim($selector);
 		if (($tokens = tokenise::tokenise($selector, self::$selectors)) !== false) {
-			$selectors = $parts = Array();
-			$join = false;
+			$selectors = $parts = [];
+			$join = null;
 			$token = current($tokens);
 			do {
 				switch ($token['type']) {
+
 					case 'id':
-						$parts[] = Array(
+						$parts[] = [
 							'id' => mb_substr($token['value'], 1),
 							'join' => $join
-						);
-						$join = false;
+						];
+						$join = null;
 						break;
+
 					case 'class':
-						$parts[] = Array(
+						$parts[] = [
 							'class' => mb_substr($token['value'], 1),
 							'join' => $join
-						);
-						$join = false;
+						];
+						$join = null;
 						break;
+
 					case 'string':
-						$parts[] = Array(
+						$parts[] = [
 							'tag' => $token['value'],
 							'join' => $join
-						);
-						$join = false;
+						];
+						$join = null;
 						break;
+
 					case 'squareopen':
-						$item = Array('join' => $join);
+						$item = ['join' => $join];
 						while (($token = next($tokens)) !== false) {
 							if ($token['type'] == 'squareclose') {
 								break;
@@ -338,26 +346,30 @@ class htmldoc {
 							}
 						}
 						$parts[] = $item;
-						$join = false;
+						$join = null;
 						break;
+
 					case 'pseudo':
-						$parts[] = Array(
+						$parts[] = [
 							'pseudo' => mb_substr($token['value'], 1),
 							'join' => $join
-						);
-						$join = false;
+						];
+						$join = null;
 						break;
+
 					case 'join':
 						$join = trim($token['value']);
 						break;
+
 					case 'whitespace':
 						if ($parts) {
 							$join = ' ';
 						}
 						break;
+
 					case 'comma':
 						$selectors[] = $parts;
-						$parts = Array();
+						$parts = [];
 						break;
 				}
 			} while (($token = next($tokens)) !== false);
@@ -380,7 +392,7 @@ class htmldoc {
 
 		// initialise cache
 		if (!isset($this->cache[$key])) {
-			$this->cache[$key] = Array();
+			$this->cache[$key] = [];
 		}
 
 		// count values
@@ -402,7 +414,7 @@ class htmldoc {
 	public function get(int $index = null) {
 
 		// build children that are tags
-		$children = Array();
+		$children = [];
 		foreach ($this->children AS $item) {
 			if (get_class($item) == 'hexydec\\html\\tag') {
 				$children[] = $item;
@@ -433,7 +445,7 @@ class htmldoc {
 	 * @return htmldoc A new htmldoc object containing the found tag items
 	 */
 	public function find(string $selector) : htmldoc {
-		$found = Array();
+		$found = [];
 
 		// parse selector and find tags
 		if (is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
@@ -486,7 +498,7 @@ class htmldoc {
 			$index = count($this->children) + $index;
 		}
 		if (isset($this->children[$index])) {
-			$doc->collection(Array($this->children[$index]));
+			$doc->collection([$this->children[$index]]);
 		}
 		return $doc;
 	}
@@ -521,13 +533,13 @@ class htmldoc {
 	 * @return string The value of the contained text nodes concatenated together with spaces
 	 */
 	public function text() : string {
-		$text = Array();
+		$text = [];
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text'))) {
+			if (in_array(get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
 				$value = $item->text();
-				$text = array_merge($text, is_array($value) ? $value : Array($value));
+				$text = array_merge($text, is_array($value) ? $value : [$value]);
 			}
 		}
 		return implode(' ', $text);
@@ -549,7 +561,7 @@ class htmldoc {
 	 * @param array $minify An array indicating which minification operations to perform, this is merged with htmldoc::$config['minify']
 	 * @return void
 	 */
-	public function minify(array $minify = Array()) : void {
+	public function minify(array $minify = []) : void {
 
 		// merge config
 		$minify = array_replace_recursive($this->config['minify'], $minify);
@@ -572,28 +584,30 @@ class htmldoc {
 		}
 
 		// sort classes by occurence, then by string
-		if ($minify['attributes']['class'] && !empty($this->cache['class'])) {
-			$minify['attributes']['class'] = array_keys($this->cache['class']);
-			$occurences = array_values($this->cache['class']);
-			array_multisort($occurences, SORT_DESC, SORT_NUMERIC, $minify['attributes']['class'], SORT_STRING);
-		}
-
-		// sort attribute values by most frequent
-		if ($minify['attributes']['sort'] && !empty($this->cache['attr'])) {
-			arsort($this->cache['attr']);
-			arsort($this->cache['attrvalues']);
-			$attr = Array();
-			foreach ($this->cache['attrvalues'] AS $item => $occurences) {
-				if ($occurences > 5) {
-					$item = mb_strstr($item, '=', true);
-					if (!in_array($item, $attr)) {
-						$attr[] = $item;
-					}
-				} else {
-					break;
-				}
+		if (is_array($minify['attributes'])) {
+			if ($minify['attributes']['class'] && !empty($this->cache['class'])) {
+				$minify['attributes']['class'] = array_keys($this->cache['class']);
+				$occurences = array_values($this->cache['class']);
+				array_multisort($occurences, SORT_DESC, SORT_NUMERIC, $minify['attributes']['class'], SORT_STRING);
 			}
-			$minify['attributes']['sort'] = array_unique(array_merge($attr, array_keys($this->cache['attr'])));
+
+			// sort attribute values by most frequent
+			if ($minify['attributes']['sort'] && !empty($this->cache['attr'])) {
+				arsort($this->cache['attr']);
+				arsort($this->cache['attrvalues']);
+				$attr = [];
+				foreach ($this->cache['attrvalues'] AS $item => $occurences) {
+					if ($occurences > 5) {
+						$item = mb_strstr($item, '=', true);
+						if (!in_array($item, $attr)) {
+							$attr[] = $item;
+						}
+					} else {
+						break;
+					}
+				}
+				$minify['attributes']['sort'] = array_unique(array_merge($attr, array_keys($this->cache['attr'])));
+			}
 		}
 
 		// minify children
@@ -608,7 +622,7 @@ class htmldoc {
 	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
 	 * @return string The compiled HTML
 	 */
-	public function html(array $options = null) : string {
+	public function html(array $options = []) : string {
 		$options = $options ? array_merge($this->output, $options) : $this->output;
 
 		// presets
@@ -632,7 +646,7 @@ class htmldoc {
 	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
 	 * @return string The compiled HTML
 	 */
-	public function save(string $file = null, Array $options = Array()) {
+	public function save(string $file = null, array $options = []) {
 
 		// compile html
 		$html = $this->html($options);
@@ -667,9 +681,9 @@ class htmldoc {
 	 *
 	 * @param string $html A UTF-8 encoded HTML string
 	 * @param string $charset The target charset
-	 * @return string The input HTML with the out of range characters in the selected cahrset converted to HTML entities
+	 * @return string The input HTML with the out of range characters in the selected charset converted to HTML entities
 	 */
-	protected function htmlentities(string $html, string $charset) {
+	protected function htmlentities(string $html, string $charset) : string {
 
 		// generate single-byte characters
 		$str = '';
@@ -679,7 +693,7 @@ class htmldoc {
 		$str = mb_convert_encoding($str, mb_internal_encoding(), $charset);
 
 		// build html entities conversion map
-		$replace = Array();
+		$replace = [];
 		foreach (preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY) AS $chr) {
 			$ent = mb_convert_encoding($chr, 'HTML-ENTITIES');
 			if ($ent != $chr) {
@@ -693,11 +707,11 @@ class htmldoc {
 	}
 
 	// public function debug() {
-	// 	$output = Array();
+	// 	$output = [];
 	// 	foreach ($this->children AS $item) {
-	// 		$node = Array(
+	// 		$node = [
 	// 			'type' => get_class($item)
-	// 		);
+	// 		];
 	// 		switch ($node['type']) {
 	// 			case 'hexydec\\html\\tag':
 	// 				$node['tag'] = $item->tagName;
