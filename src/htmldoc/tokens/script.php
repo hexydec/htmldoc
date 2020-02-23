@@ -59,7 +59,7 @@ class script implements token {
 	public function minify(array $minify) : void {
 		if ($minify['js'] !== false && $this->content) {
 			$func = $this->root->getConfig('js');
-			$this->content = $func === false ? trim($this->content) : call_user_func($func, $this->content, $minify['js']);
+			$this->content = $func === null ? trim($this->content) : call_user_func($func, $this->content, $minify['js']);
 		}
 	}
 
