@@ -6,13 +6,11 @@ A tokeniser based HTML and CSS document parser and minifier, written in PHP.
 ![Project Status](https://img.shields.io/badge/Project%20Status-Beta-yellow.svg)
 [![Build Status](https://api.travis-ci.org/hexydec/htmldoc.svg?branch=master)](https://travis-ci.org/hexydec/htmldoc)
 
-**This project is currently beta code, it is recommended to test your integration thoroughly before deploy this code into production**
-
 ## Description
 
-An HTML and CSS parser, primarily designed for minifying HTML documents, it also enables the document structure to be queried allowing attribute values and text node values can be extracted.
+An HTML and CSS parser, primarily designed for minifying HTML documents, it also enables the document structure to be queried allowing attribute and textnode values to be extracted.
 
-Both parsers are designed around a tokeniser to make the document processing more reliable and (hopefully) faster than regex based minifiers, which are a bit blunt and can be problematic if they match patterns in the wrong places.
+Both parsers are designed around a tokeniser to make the document processing more reliable than regex based minifiers, which are a bit blunt and can be problematic if they match patterns in the wrong places.
 
 ## Usage
 
@@ -67,7 +65,7 @@ if ($doc->open($url) {
 
 ## Contributing
 
-If you find an issue with HTMLDoc, please create an issue in the tracker.
+If you find an issue with HTMLdoc, please create an issue in the tracker.
 
 If you wish to fix an issues yourself, please fork the code, fix the issue, then create a pull request, and I will evaluate your submission.
 

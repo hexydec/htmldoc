@@ -64,7 +64,7 @@ class text implements token {
 					$keys = array_keys($children);
 					$i = array_search($index, $keys, true);
 					$inline = $this->root->getConfig('elements', 'inline');
-					$min = Array('hexydec\\html\\comment', 'hexydec\\html\\doctype');
+					$min = ['hexydec\\html\\comment', 'hexydec\\html\\doctype'];
 
 					// if previous tag is a block element, ltrim the textnode
 					$trim = false;

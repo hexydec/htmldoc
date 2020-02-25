@@ -63,7 +63,7 @@ class tag implements token {
 		// cache vars
 		$config = $this->root->getConfig();
 		$tag = $this->tagName;
-		$attributes = Array();
+		$attributes = [];
 
 		// parse tokens
 		$attr = null;
@@ -163,7 +163,7 @@ class tag implements token {
 	public function parseChildren(array &$tokens) : array {
 		$parenttag = $this->tagName;
 		$config = $this->root->getConfig('elements');
-		$children = Array();
+		$children = [];
 
 		// process custom tags
 		if (in_array($parenttag, $config['custom'])) {
@@ -255,7 +255,7 @@ class tag implements token {
 			}
 
 			// minify url attributes when not in list or match attribute
-			if ($minify['urls'] && in_array($key, $attr['urls']) && (!in_array($this->tagName, array_keys($attr['urlsmatch'])) || $this->hasAttribute($attributes, $attr['urlsmatch'][$this->tagName]))) {
+			if ($minify['urls'] && in_array($key, $attr['urls']) && (!in_array($this->tagName, array_keys($attr['urlskip'])) || $this->hasAttribute($attributes, $attr['urlskip'][$this->tagName]))) {
 
 				// make folder variables
 				if ($folder === null && isset($_SERVER['REQUEST_URI'])) {
@@ -336,8 +336,8 @@ class tag implements token {
 				// minify style tag
 				} elseif ($key == 'style' && $minify['attributes']['style']) {
 					$attributes[$key] = trim(str_replace(
-						Array('  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '),
-						Array(' ', ':', ':', ':', ';', ';', ';'),
+						['  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '],
+						[' ', ':', ':', ':', ';', ';', ';'],
 						$attributes[$key]
 					), '; ');
 
@@ -440,7 +440,7 @@ class tag implements token {
 	 * @return array An array of tag objects that match $selector
 	 */
 	public function find(array $selector) : array {
-		$found = Array();
+		$found = [];
 		$match = true;
 		$searchChildren = true;
 		foreach ($selector AS $i => $item) {
@@ -576,7 +576,7 @@ class tag implements token {
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (in_array(get_class($item), Array('hexydec\\html\\tag', 'hexydec\\html\\text'))) {
+			if (in_array(get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
 				$value = $item->text();
 				$text = array_merge($text, is_array($value) ? $value : [$value]);
 			}

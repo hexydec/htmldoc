@@ -1,6 +1,6 @@
-# HTMLDoc: Performance
+# HTMLdoc: Performance
 
-HTMLDoc has been written with performance in mind, as its main purpose is for the minification of HTML. Since PHP is widely used to generate HTML, it is expected and designed for the use case that minification will happen on the fly.
+HTMLdoc has been written with performance in mind, as its main purpose is for the minification of HTML. Since PHP is widely used to generate HTML, it is expected and designed for the use case that minification will happen on the fly.
 
 For most HTML documents the speed and memory usage will be well within acceptable boundaries, although if you put large complex documents into it with a large amount of nodes, the speed will suffer.
 

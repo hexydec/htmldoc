@@ -1,6 +1,6 @@
-# HTMLDoc
+# HTMLdoc
 
-HTMLDoc is a PHP based HTML parser designed for extracting document contents and minification. It has been built as a replacement for simple_html_dom, with a minification process.
+HTMLdoc is a PHP based HTML parser designed for extracting document contents and minification. It has been built as a replacement for simple_html_dom, with a minification process.
 
 - [How it works](how-it-works.md)
 - [How to use and examples](how-to-use.md)

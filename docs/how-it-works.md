@@ -1,4 +1,4 @@
-# HTMLDoc: How it works
+# HTMLdoc: How it works
 
 Under the hood, the software processes are split into a number of stages:
 

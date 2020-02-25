@@ -1,6 +1,6 @@
 # attr()
 
-Retrieves the value of the requested attribute from the first item in an HTMLDoc collection.
+Retrieves the value of the requested attribute from the first item in an HTMLdoc collection.
 
 ```php
 $doc = new \hexydec\html\htmldoc();

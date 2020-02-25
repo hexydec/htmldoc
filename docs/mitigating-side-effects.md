@@ -1,4 +1,4 @@
-# HTMLDoc: Mitigating Side Effects of Minification
+# HTMLdoc: Mitigating Side Effects of Minification
 
 Whilst all transformations performed on the input HTML will produce valid HTML, some side effects may be present as a result of the transformed code.
 
@@ -6,7 +6,7 @@ Whilst all transformations performed on the input HTML will produce valid HTML, 
 
 ### Absolute Values in Attribute Selectors
 
-Selectors that reference an absolute value may no longer work after minification of an HTMLDoc document if the attribute in question is transformed into a shorter form. Consider the following HTML:
+Selectors that reference an absolute value may no longer work after minification of an HTMLdoc document if the attribute in question is transformed into a shorter form. Consider the following HTML:
 
 ```html
 <a href="https://github.com/hexydec">Go to my GitHub Page</a>
@@ -38,13 +38,13 @@ Depending on your specific case you may need to change any CSS that uses match v
 
 ### Testing attributes that may have been removed
 
-Depending on the attribute you are selecting, if it is empty, the HTMLDoc minification operation may remove the attribute altogether. Consider the following HTML:
+Depending on the attribute you are selecting, if it is empty, the HTMLdoc minification operation may remove the attribute altogether. Consider the following HTML:
 
 ```html
 <input type="text" name="test" value="" />
 ```
 
-You may wish to have it look different depending on whether the `value` attribute is empty or target it by its `type` attribute:
+You may wish to apply different styles depending on whether the `value` attribute is empty or target it by its `type` attribute:
 
 ```css
 input[type=text] {
@@ -76,7 +76,7 @@ input[value]:not([value='']) {
 
 ### Reading Attributes
 
-If your javascript code expects an attribute to exist, you may need to update your code to take into account that the attribute might not exist at all. Consider the following HTML:
+If your Javascript code expects an attribute to exist, you may need to update your code to take into account that the attribute might not exist at all. Consider the following HTML:
 
 ```html
 <input type="text" name="test" value="" />
@@ -120,6 +120,6 @@ if (obj instanceof HTMLElement) {
 
 ## Other Side-Effects
 
-There may be other side-effects associated with the transformations performed by HTMLDoc, this page will be updated with more examples where appropriate.
+There may be other side-effects associated with the transformations performed by HTMLdoc, this page will be updated with more examples where appropriate.
 
 If you discover a side-effect which you think needs documenting, please [create an issue in the tracker](https://github.com/hexydec/htmldoc/issues).

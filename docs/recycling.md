@@ -1,6 +1,6 @@
-# HTMLDoc: About Recycling Documents
+# HTMLdoc: About Recycling Documents
 
-HTMLDoc has been designed to represent the input document as closely as possible, but if you recycle a document, you will notice differences between the input and output. This section is here to explain what those differences will be.
+HTMLdoc has been designed to represent the input document as closely as possible, but if you recycle a document, you will notice differences between the input and output. This section is here to explain what those differences will be.
 
 ```php
 // recycle the document
@@ -30,7 +30,7 @@ Whilst tag names are parsed with the inputted case, the case of the matched clos
 
 ## HTML Attributes
 
-The whitespace and delimiting of attributes is not recorded when HTML documents or snippets are parsed into the HTMLDoc object, therefor if you recycle a document, the resulting HTML will have its attribute structure normalised:
+The whitespace and delimiting of attributes is not recorded when HTML documents or snippets are parsed into the HTMLdoc object, therefor if you recycle a document, the resulting HTML will have its attribute structure normalised:
 
 ```html
 
@@ -49,11 +49,11 @@ The whitespace and delimiting of attributes is not recorded when HTML documents 
 </a>
 ```
 
-The above assumes the default output setting of `'quotestyle' => 'double'`. Note that whitespace within textnodes will be preserved.
+The above assumes the default output setting of `'quotestyle' => 'double'`. Note that whitespace within Textnodes will be preserved.
 
 ## HTML Encoding
 
-HTML Attribute values and Text Nodes are stored internally with any HTML encoding removed. On output the contents of the attribute or text node is then encoded with the `htmlspecialchars()` function, this will result in any special characters that were not encoded correctly on input being encoded on output.
+HTML Attribute values and Textnodes are stored internally with any HTML encoding removed. On output the contents of the attribute or text node is then encoded with the `htmlspecialchars()` function, this will result in any special characters that were not encoded correctly on input being encoded on output.
 
 Any HTML entities (Except `<`, `>`, `=`, `'`, `"`) that were encoded on input, will now no longer be encoded and use the native character.
 

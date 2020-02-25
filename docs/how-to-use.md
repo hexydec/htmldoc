@@ -1,19 +1,19 @@
-# HTMLDoc: How to Use
+# HTMLdoc: How to Use
 
-HTMLDoc has been designed to be as simple to use as possible, but with enough configuration options to control the output more closely.
+HTMLdoc has been designed to be as simple to use as possible, but with enough configuration options to control the output more closely.
 
-## Configuring HTMLDoc
+## Configuring HTMLdoc
 
 The default configuration has been setup to give the best options for most needs. If you do need to change the configuration, the configuration options can be passed to the object upon creation:
 
 ```php
-$config = Array(
-	'elements' => Array(
-		'pre' => Array(
+$config = [
+	'elements' => [
+		'pre' => [
 			'span' // treat spans as pre formattted
-		)
-	)
-);
+		]
+	]
+];
 $doc = new \hexydec\html\htmldoc($config);
 ```
 
@@ -24,6 +24,7 @@ To see all of the configuration options, see the [API documentation for the `__c
 HTML can be loaded in two ways, either from a string, or from a stream:
 
 ### From a String
+
 ```php
 $html = '<div>Hello World</div>'; // can be a snippet
 $charset = mb_internal_encoding(); // UTF-8?
@@ -35,14 +36,15 @@ if ($doc->load($html, $charset)) {
 ```
 
 ### From a Stream
+
 ```php
 $url = 'https://github.com/hexydec'; // of course you want to parse this page
-$context = stream_context_create(Array(
-	'http' => Array(
+$context = stream_context_create([
+	'http' => [
 		'user-agent' => 'My HTML Bot 1.0 (Mozilla Compatible)',
 		'timeout' => 10
-	)
-));
+	]
+]);
 
 $doc = new \hexydec\html\htmldoc();
 if ($doc->open($url, $context, $error)) {
@@ -56,7 +58,7 @@ For more information, see the API documentation for the [`load()` method](api/lo
 
 ## Finding Elements and Extracting Information
 
-You can use standard CSS selectors to query an HTMLDoc object after you have loaded some HTML:
+You can use standard CSS selectors to query an HTMLdoc object after you have loaded some HTML:
 
 ```php
 $url = 'https://github.com/hexydec';
@@ -64,7 +66,7 @@ $url = 'https://github.com/hexydec';
 $doc = new \hexydec\html\htmldoc();
 if ($doc->open($url, $context, $error)) {
 
-	// make a new HTMLDoc containg just this node
+	// make a new HTMLdoc containg just this node
 	$name = $doc->find(".vcard-fullname");
 
 	// echo my name
@@ -84,7 +86,7 @@ For more information, [see the API documentation](api/readme.md).
 
 ## Minifying Documents
 
-When minifying documents, HTMLDoc updates the internal representation of the document and some of the output settings. When the document is saved, the generated code will then be smaller.
+When minifying documents, HTMLdoc updates the internal representation of the document and some of the output settings. When the document is saved, the generated code will then be smaller.
 
 ```php
 $doc = new \hexydec\html\htmldoc();
@@ -94,13 +96,13 @@ if ($doc->load($html)) {
 }
 ```
 
-The `minify()` method can also accept an array of minification options to change what is minifed and what is not, this can be useful for example for minification of HTML for emails.
+The `minify()` method can also accept an array of minification options to change what is minified and what is not, this can be useful for example for minification of HTML for emails.
 
 To see all the available options [see the API documentation](api/minify.md).
 
 ## Outputting Documents
 
-HTML can be rendered in the following ways from your HTMLDoc object:
+HTML can be rendered in the following ways from your HTMLdoc object:
 
 ```php
 $doc = new \hexydec\html\htmldoc();

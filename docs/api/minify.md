@@ -29,14 +29,14 @@ An optional array contains a list of configuration parameters to configure the m
 			<td>Boolean</td>
 			<td></td>
 			<td>Lowercase tag and attribute names</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>whitespace</code></td>
 			<td>Boolean</td>
 			<td></td>
 			<td>Strip whitespace from text nodes (Preserves whitespace between inline items defined in <code>htmldoc::$config['elements']['inline']</code>)</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td rowspan="2"><code>comments</code></td>
@@ -47,7 +47,7 @@ An optional array contains a list of configuration parameters to configure the m
 		<tr>
 			<td><code>ie</code></td>
 			<td>Whether to preserve Internet Explorer specific comments</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td rowspan="5"><code>urls</code></td>
@@ -58,22 +58,22 @@ An optional array contains a list of configuration parameters to configure the m
 		<tr>
 			<td><code>scheme</code></td>
 			<td>Remove the scheme from URLs that have the same scheme as the current document</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>host</code></td>
 			<td>Remove the host for own domain</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>relative</code></td>
 			<td>Process absolute URLs to make them relative to the current document</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>parent</code></td>
 			<td>Process relative URLs to use parent folders (<code>../</code>) where it is shorter</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td rowspan="8"><code>attributes</code></td>
@@ -84,65 +84,65 @@ An optional array contains a list of configuration parameters to configure the m
 		<tr>
 			<td><code>default</code></td>
 			<td>Remove default attributes as defined in <code>htmldoc::$config['attributes']['default']</code></td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>empty</code></td>
 			<td>Remove attributes with empty values, the attributes processed are defined in <code>htmldoc::$config['attributes']['empty']</code></td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>option</code></td>
 			<td>Remove the <code>value</code> attribute from <code>option</code> tags where the text node has the same value</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>style</code></td>
 			<td>Remove whitespace and last semi-colon from the <code>style</code> attribute</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>class</code></td>
-			<td>Sort class names</td>
-			<td>true</td>
+			<td>Sort class names for better gzip compression</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>sort</code></td>
-			<td>Sort attributes</td>
-			<td>true</td>
+			<td>Sort attributes for better gzip compression</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>boolean</code></td>
 			<td>Minify boolean attributes to render only the attribute name and not the value. Boolean attributes are defined in <code>htmldoc::$config['attributes']['boolean']</code></td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>singleton</code></td>
 			<td>Boolean</td>
 			<td></td>
 			<td>Removes spaces and slash in singleton attributes, e.g. <code>&lt;br /&gt;</code> becomes <code>&lt;br&gt;</code></td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>quotes</code></td>
 			<td>Boolean</td>
 			<td></td>
 			<td>Removes quotes from attribute values where possible</td>
-			<td>true</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>close</code></td>
 			<td>Boolean</td>
 			<td></td>
-			<td>Removes closing tags for elements defined in `htmldoc::$config['elements']['closeoptional']` where possible</td>
-			<td>true</td>
+			<td>Removes closing tags for elements defined in <code>htmldoc::$config['elements']['closeoptional']</code> where possible</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>email</code></td>
 			<td>Boolean</td>
 			<td></td>
 			<td>Sets the minification presets to email safe options</td>
-			<td>false</td>
+			<td><code>false</code></td>
 		</tr>
 	</tbody>
 </table>

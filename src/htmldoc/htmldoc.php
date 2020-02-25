@@ -79,7 +79,7 @@ class htmldoc {
 			],
 			'empty' => ['id', 'class', 'style', 'title', 'action', 'value', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'], // attributes to remove if empty
 			'urls' => ['href', 'src', 'action', 'poster'], // attributes to minify URLs in
-			'urlsmatch' => [
+			'urlskip' => [
 				'link' => [
 					'rel' => ['stylesheet', 'icon', 'shortcut icon', 'apple-touch-icon-precomposed', 'apple-touch-icon', 'preload', 'prefetch', 'author', 'help']
 				]

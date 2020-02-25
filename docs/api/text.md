@@ -11,4 +11,4 @@ if ($doc->load($html)) {
 
 ## Returns
 
-A string containing the combined contents of the text nodes in an HTMLDoc collection. 
+A string containing the combined contents of the text nodes in an HTMLdoc collection. 
