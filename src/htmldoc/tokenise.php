@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 namespace hexydec\html;
 
 class tokenise {
@@ -13,7 +14,7 @@ class tokenise {
 	public static function tokenise(string $input, array $tokens) {
 
 		// prepare regexp and extract strings
-		$patterns = Array();
+		$patterns = [];
 		foreach ($tokens AS $key => $item) {
 			$patterns[] = '(?<'.$key.'>'.$item.')';
 		}
@@ -26,10 +27,10 @@ class tokenise {
 			// go through tokens and find which one matched
 			foreach ($keys AS $key) {
 				if ($match[$key] !== '') {
-					$output[] = Array(
+					$output[] = [
 						'type' => $key,
 						'value' => $match[$key]
-					);
+					];
 					break;
 				}
 			}

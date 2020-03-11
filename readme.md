@@ -3,7 +3,6 @@
 A tokeniser based HTML and CSS document parser and minifier, written in PHP.
 
 ![Licence](https://img.shields.io/badge/Licence-MIT-lightgrey.svg)
-![Project Status](https://img.shields.io/badge/Project%20Status-Beta-yellow.svg)
 [![Build Status](https://api.travis-ci.org/hexydec/htmldoc.svg?branch=master)](https://travis-ci.org/hexydec/htmldoc)
 
 ## Description

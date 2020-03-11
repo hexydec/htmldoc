@@ -1,7 +1,8 @@
 <?php
+declare(strict_types = 1);
 namespace hexydec\html;
 
-class comment {
+class comment implements token {
 
 	/**
 	 * @var string The text content of this object
@@ -35,7 +36,7 @@ class comment {
 	 * @param array $minify An array of minification options controlling which operations are performed
 	 * @return void
 	 */
-	public function minify(array $minify) {
+	public function minify(array $minify) : void {
 		if ($minify['comments'] && (empty($minify['comments']['ie']) || (mb_strpos($this->content, '[if ') !== 0 && $this->content != '<![endif]'))) {
 			$this->content = null;
 		}

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 namespace hexydec\html;
 
 class tag implements token {
@@ -188,7 +189,7 @@ class tag implements token {
 						$tag = trim($token['value'], '<');
 
 						// unnestable tag, pass back to parent
-						if (strcasecmp($tag, $parenttag) === 0 && in_array($tag, $config['closeoptional'])) {
+						if ($parenttag && strcasecmp($tag, $parenttag) === 0 && in_array($tag, $config['closeoptional'])) {
 							prev($tokens);
 							break 2;
 						} else {
@@ -204,7 +205,7 @@ class tag implements token {
 						$close = trim($token['value'], "</ \r\n\t>");
 
 						// prevent dropping down a level when tags don't match or close is optional
-						if (strcasecmp($close, $parenttag) === 0 || in_array($parenttag, $config['closeoptional'])) {
+						if ($parenttag && strcasecmp($close, $parenttag) === 0 || in_array($parenttag, $config['closeoptional'])) {
 							prev($tokens); // let the parebt parse() method handle it
 							break 2;
 						}
@@ -327,7 +328,9 @@ class tag implements token {
 			if ($minify['attributes']) {
 
 				// trim attribute
-				$attributes[$key] = trim($attributes[$key], " \r\n\t");
+				if ($attributes[$key]) {
+					$attributes[$key] = trim($attributes[$key], " \r\n\t");
+				}
 
 				// boolean attributes
 				if ($minify['attributes']['boolean'] && in_array($key, $attr['boolean'])) {

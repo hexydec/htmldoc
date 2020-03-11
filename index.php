@@ -12,35 +12,57 @@ $mem = Array(
 	'start' => memory_get_usage()
 );
 
+// create object and retrieve config
 $doc = new hexydec\html\htmldoc();
 $options = $doc->getConfig('minify');
+
+// process form submmission
 if (!empty($_POST['action'])) {
 	$timing['fetch'] = microtime(true);
 	$mem['fetch'] = memory_get_usage();
+
+	// handle a URL
 	if (!empty($_POST['url'])) {
+
+		// parse the URL
 		if (($url = parse_url($_POST['url'])) === false) {
 			trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
+
+		// check the host name
 		} elseif (!isset($url['host'])) {
 			trigger_error('Could not parse URL: No host was supplied', E_USER_WARNING);
+
+		// open the document
 		} elseif (($input = $doc->open($_POST['url'], null, $error)) === false) {
 			trigger_error('Could not load HTML: '.$error, E_USER_WARNING);
+
+		// save base URL
 		} else {
 			$base = $_POST['url'];
 		}
+
+	// handle directly entered source code
 	} elseif (empty($_POST['source'])) {
 		trigger_error('No URL or HTML source was posted', E_USER_WARNING);
+
+	// load the source code
 	} elseif (!$doc->load($_POST['source'], null, $error)) {
 		trigger_error('Could not parse HTML: '.$error, E_USER_WARNING);
+
+	// record the HTML
 	} else {
 		$input = $_POST['source'];
 	}
 
+	// if there is some input
 	if ($input) {
 		$timing['parse'] = microtime(true);
 		$mem['parse'] = memory_get_usage();
+
+		// retrieve the user posted options
 		$isset = isset($_POST['minify']) && is_array($_POST['minify']);
 		foreach ($options AS $key => $item) {
-			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? Array() : (is_bool($options[$key]) ? true : $options[$key])) : false;
+			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? [] : (is_bool($options[$key]) ? true : $options[$key])) : false;
 			if (is_array($item)) {
 				foreach ($item AS $sub => $value) {
 					if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
@@ -51,9 +73,13 @@ if (!empty($_POST['action'])) {
 				}
 			}
 		}
+
+		// minify the input
 		if ($minify) {
 			$doc->minify($minify);
 		}
+
+		// record timings
 		$timing['minify'] = microtime(true);
 		$mem['minify'] = memory_get_usage();
 		$output = $doc->save();

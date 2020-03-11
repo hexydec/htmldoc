@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 namespace hexydec\html;
 
 class htmldoc {
@@ -123,7 +124,7 @@ class htmldoc {
 	protected $output = [
 		'charset' => null, // set the output charset
 		'quotestyle' => 'double', // double, single, minimal
-		'singletonclose' => false, // string to close singleton tags, or false to leave as is
+		'singletonclose' => null, // string to close singleton tags, or false to leave as is
 		'closetags' => false, // whether to force tags to have a closing tag (true) or follow tag::close
 		'xml' => false // sets the output presets to produce XML valid code
 	];
@@ -177,7 +178,7 @@ class htmldoc {
 	 * @param string $key... One or more array keys indicating the configuration value to retrieve
 	 * @return mixed The value requested, or null if the value doesn't exist
 	 */
-	public function getConfig(...$keys) {
+	public function getConfig(string ...$keys) {
 		$config = $this->config;
 		foreach ($keys AS $item) {
 			if (isset($config[$item])) {
@@ -200,7 +201,7 @@ class htmldoc {
 	public function open(string $url, resource $context = null, string &$error = null) {
 
 		// open a handle to the stream
-		if (($handle = @fopen($url, 'rb', $context)) === false) {
+		if (($handle = @fopen($url, 'rb', false, $context)) === false) {
 			$error = 'Could not open file "'.$url.'"';
 
 		// retrieve the stream contents
@@ -702,7 +703,7 @@ class htmldoc {
 
 		// build html entities conversion map
 		$replace = [];
-		foreach (preg_split('//u', $str, null, PREG_SPLIT_NO_EMPTY) AS $chr) {
+		foreach (preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY) AS $chr) {
 			$ent = mb_convert_encoding($chr, 'HTML-ENTITIES');
 			if ($ent != $chr) {
 				$replace[$chr] = $ent;
