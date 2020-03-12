@@ -62,6 +62,10 @@ if ($doc->open($url) {
 - [About Document Recycling](docs/recycling.md)
 - [Object Performance](docs/performance.md)
 
+## Support
+
+HTMLdoc supports PHP version 7.3+.
+
 ## Contributing
 
 If you find an issue with HTMLdoc, please create an issue in the tracker.
