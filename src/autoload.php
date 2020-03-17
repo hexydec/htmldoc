@@ -12,7 +12,12 @@ spl_autoload_register(function (string $class) : bool {
 		'hexydec\\html\\style' => $dir.'/tokens/style.php',
 		'hexydec\\html\\tag' => $dir.'/tokens/tag.php',
 		'hexydec\\html\\text' => $dir.'/tokens/text.php',
-		'hexydec\\html\\cssmin' => $dir.'/cssmin.php'
+		'hexydec\\html\\cssmin' => $dir.'/cssmin.php',
+		'hexydec\\css\\cssdoc' => __DIR__.'/cssdoc/cssdoc.php',
+		'hexydec\\css\\mediaquery' => __DIR__.'/cssdoc/tokens/mediaquery.php',
+		'hexydec\\css\\rule' => __DIR__.'/cssdoc/tokens/rule.php',
+		'hexydec\\css\\selector' => __DIR__.'/cssdoc/tokens/selector.php',
+		'hexydec\\css\\property' => __DIR__.'/cssdoc/tokens/property.php'
 	];
 	if (isset($classes[$class])) {
 		return require($classes[$class]);
