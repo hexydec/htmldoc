@@ -10,6 +10,11 @@ class mediaquery {
 	protected $root;
 
 	/**
+	 * @var array An array of media query parameters
+	 */
+	protected $media = [];
+
+	/**
 	 * @var array An array of child token objects
 	 */
 	protected $rules = [];
@@ -19,8 +24,9 @@ class mediaquery {
 	 *
 	 * @param cssdoc $root The parent htmldoc object
 	 */
-	public function __construct(cssdoc $root) {
+	public function __construct(cssdoc $root, array $media = null) {
 		$this->root = $root;
+		$this->media = $media;
 	}
 
 	/**
@@ -31,24 +37,94 @@ class mediaquery {
 	 * @return void
 	 */
 	public function parse(array &$tokens) : bool {
+		$default = $rule = [
+			'media' => false,
+			'only' => false,
+			'not' => false,
+			'properties' => []
+		];
 
 		// parse tokens
-		while (($token = next($tokens)) !== false) {
+		$token = current($tokens);
+		do {
 			switch ($token['type']) {
-				case 'string':
+				case 'directive':
+
+					// parse media query
 					if ($token['value'] == '@media') {
-						$item = new mediaquery($this->root);
+						$media = [];
+						$rule = $default;
+						while (($token = next($tokens)) !== false) {
+							switch ($token['type']) {
+								case 'string':
+									if ($token['value'] == 'only') {
+										$rule['only'] = true;
+									} elseif ($token['value'] == 'not') {
+										$rule['not'] = true;
+									} elseif ($token['value'] != 'and') {
+										$rule['media'] = $token['value'];
+									}
+									break;
+								case 'bracketopen':
+									$compare = false;
+									while (($token = next($tokens)) !== false && $token['type'] != 'bracketclose') {
+										if ($token['type'] == 'string') {
+											if (!$compare) {
+												$prop = $token['value'];
+											} elseif ($compare == ':') {
+												$rule['properties'][$prop] = $token['value'];
+												$prop = false;
+												$compare = false;
+											} else {
+												if (intval($prop)) {
+													$rule['properties']['min-'.$token['value']] = $prop;
+													$prop = 'max'.$token['value'];
+												} else {
+													$rule['properties'][$prop] = $token['value'];
+												}
+												$prop = false;
+												$compare = false;
+											}
+										} elseif ($token['type'] == 'colon') {
+											$compare = ':';
+										} elseif ($token['type'] == 'comparison' && $token['value'] == '<=') {
+											$compare = '<=';
+										}
+									}
+									if ($prop) {
+										$rule['properties'][$prop] = null;
+									}
+									break;
+								case 'comma':
+									$media[] = $rule;
+									$rule = $default;
+									break;
+								case 'curlyopen':
+									break 2;
+							}
+						}
+						$media[] = $rule;
+							// var_dump($media);
+
+						// create media query object
+						$item = new mediaquery($this->root, $media);
 						$item->parse($tokens);
 						$this->rules[] = $item;
 					} else {
-						prev($tokens);
-						$item = new rule($this);
+						$item = new directive($this);
 						$item->parse($tokens);
 						$this->rules[] = $item;
 					}
 					break;
+				case 'string':
+					$item = new rule($this);
+					$item->parse($tokens);
+					$this->rules[] = $item;
+					break;
+				case 'curlyclose':
+					break 2;
 			}
-		}
+		} while (($token = next($tokens)) !== false);
 		return !!$this->rules;
 	}
 
@@ -59,6 +135,9 @@ class mediaquery {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
+		foreach ($this->rules AS $item) {
+			$item->minify($minify);
+		}
 	}
 
 	/**
@@ -70,12 +149,37 @@ class mediaquery {
 	public function compile(array $options) : string {
 		$b = $options['output'] != 'minify';
 		$css = '';
+		if ($this->media) {
+			$css .= '@media ';
+			$media = [];
+			foreach ($this->media AS $item) {
+				$query = '';
+				$join = '';
+				if ($item['media']) {
+					$query .= trim(($item['only'] ? ' only' : '').($item['not'] ? ' not' : '').($item['media'] ? ' '.$item['media'] : ''));
+					$join = ' and ';
+				}
+				foreach ($item['properties'] AS $key => $prop) {
+					$query .= $join.'('.$key.($prop === null ? '' : ':'.($b ? ' ' : '').$prop).')';
+					$join = ' and ';
+				}
+				$media[] = $query;
+			}
+			$css .= implode($b ? ', ' : ',', $media);
+			$css .= $b ? " {\n" : '{';
+			if ($b) {
+				$options['prefix'] = "\t";
+			}
+		}
 
 		// compile selectors
 		$join = '';
 		foreach ($this->rules AS $item) {
 			$css .= $join.$item->compile($options);
 			$join = $b ? "\n\n" : '';
+		}
+		if ($this->media) {
+			$css .= '}';
 		}
 		return $css;
 	}

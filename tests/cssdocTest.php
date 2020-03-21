@@ -1,7 +1,7 @@
 <?php
-use hexydec\html\cssmin;
+use hexydec\css\cssdoc;
 
-final class cssminTest extends \PHPUnit\Framework\TestCase {
+final class cssdocTest extends \PHPUnit\Framework\TestCase {
 
 	protected $config = Array(
    		'removesemicolon' => false,
@@ -59,8 +59,13 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 				'output' => '@media screen{#id{font-size:3em;}}#id,.class,.class .class__item,.class>.class__item{font-size:3em;display:flex;}'
 			)
 		);
+		$config = $this->config;
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $this->config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 
@@ -117,8 +122,13 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 				'output' => '@media (color){#id{font-size:3em;}}'
 			)
 		);
+		$config = $this->config;
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $this->config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 
@@ -130,7 +140,11 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		$output = '#id{font-family:Arial,sans-serif;font-size:3em}';
 		$config = $this->config;
 		$config['removesemicolon'] = true;
-		$this->assertEquals($output, cssmin::minify($input, $config));
+		$obj = new cssdoc();
+		if ($obj->load($input)) {
+			$obj->minify($config);
+			$this->assertEquals($output, $obj->compile());
+		}
 	}
 
 	public function testCanRemoveZeroUnits() {
@@ -143,7 +157,11 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		$output = '#id{margin:0 0 20px 0;}.class{transition:all 500ms;}';
 		$config = $this->config;
 		$config['removezerounits'] = true;
-		$this->assertEquals($output, cssmin::minify($input, $config));
+		$obj = new cssdoc();
+		if ($obj->load($input)) {
+			$obj->minify($config);
+			$this->assertEquals($output, $obj->compile());
+		}
 	}
 
 	public function testCanRemoveLeadingZeros() {
@@ -153,7 +171,11 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		$output = '#id{font-size:.9em;}';
 		$config = $this->config;
 		$config['removeleadingzero'] = true;
-		$this->assertEquals($output, cssmin::minify($input, $config));
+		$obj = new cssdoc();
+		if ($obj->load($input)) {
+			$obj->minify($config);
+			$this->assertEquals($output, $obj->compile());
+		}
 	}
 
 	public function testCanRemoveUnnecessaryQuotes() {
@@ -185,8 +207,12 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		);
 		$config = $this->config;
 		$config['removequotes'] = true;
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 
@@ -213,8 +239,12 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		);
 		$config = $this->config;
 		$config['convertquotes'] = true;
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 
@@ -247,8 +277,12 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		);
 		$config = $this->config;
 		$config['shortenhex'] = true;
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 
@@ -275,8 +309,12 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 		);
 		$config = $this->config;
 		$config['lowerhex'] = true;
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 
@@ -308,8 +346,12 @@ final class cssminTest extends \PHPUnit\Framework\TestCase {
 			)
 		);
 		$config = ['email' => true];
+		$obj = new cssdoc();
 		foreach ($test AS $item) {
-			$this->assertEquals($item['output'], cssmin::minify($item['input'], $config));
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
 		}
 	}
 }

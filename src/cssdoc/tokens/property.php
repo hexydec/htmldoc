@@ -24,7 +24,7 @@ class property {
 	 */
 	protected $important = false;
 
-	protected $semicolon = true;
+	public $semicolon = true;
 
 	protected $comment = null;
 
@@ -33,7 +33,7 @@ class property {
 	 *
 	 * @param cssdoc $root The parent htmldoc object
 	 */
-	public function __construct(rule $root) {
+	public function __construct($root) {
 		$this->root = $root;
 	}
 
@@ -45,7 +45,8 @@ class property {
 	 * @return void
 	 */
 	public function parse(array &$tokens) : void {
-		while (($token = next($tokens)) !== false) {
+		$token = current($tokens);
+		do {
 			if ($token['type'] == 'string') {
 				$prop = $token['value'];
 				while (($token = next($tokens)) !== false) {
@@ -72,7 +73,7 @@ class property {
 				prev($tokens);
 				break;
 			}
-		}
+		} while (($token = next($tokens)) !== false);
 	}
 
 	protected function parsePropertyValue(array &$tokens, bool &$important = false, string &$comment = null) : ?array {
@@ -82,12 +83,8 @@ class property {
 		$comment = null;
 		while (($token = next($tokens)) !== false) {
 			switch ($token['type']) {
-				case 'string':
-					if ($token['value'] == '!important') {
-						$important = true;
-					} else {
-						$values[] = $token['value'];
-					}
+				case 'quotes':
+					$values[] = $token['value'];
 					break;
 				case 'comma':
 					$properties[] = $values;
@@ -99,11 +96,29 @@ class property {
 				case 'comment':
 					$comment = $token['value'];
 					break;
-				case 'bracketclose':
+				case 'whitespace':
+					break;
 				case 'semicolon':
 				case 'curlyclose':
 					prev($tokens);
+				case 'bracketclose':
 					break 2;
+				default:
+					if ($token['value'] == '!important') {
+						$important = true;
+					} else {
+						$value = $token['value'];
+						while (($token = next($tokens)) !== false) {
+							if (!in_array($token['type'], ['semicolon', 'bracketopen', 'bracketclose', 'whitespace', 'curlyclose', 'comma', 'comment'])) {
+								$value .= $token['value'];
+							} else {
+								prev($tokens);
+								break;
+							}
+						}
+						$values[] = $value;
+					}
+					break;
 			}
 		}
 		if ($values) {
@@ -119,6 +134,43 @@ class property {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
+		 $this->value = $this->minifyValues($this->name, $this->value, $minify);
+	}
+
+	protected function minifyValues(string $key, array $values, array $minify) : array {
+		foreach ($values AS &$item) {
+
+			// value in brackets
+			if (is_array($item)) {
+				$item = $this->minifyValues($key, $item, $minify);
+			} else {
+				if ($minify['removezerounits'] && preg_match('/^0(?:\.0*)?([a-z%]++)$/i', $item, $match)) {
+					$item = '0';
+					if ($match[1] == 'ms') {
+						$match[1] = 's';
+					}
+					if ($match[1] == 's') {
+						$item .= 's';
+					}
+				}
+				if ($minify['removeleadingzero'] && preg_match('/^0++(\.0*+[1-9][0-9%a-z]*+)$/', $item, $match)) {
+					$item = $match[1];
+				}
+				if ($minify['removequotes'] && $key != 'content' && preg_match('/^("|\')([^ \'"()]++)\\1$/i', $item, $match)) {
+					$item = $match[2];
+				} elseif ($minify['convertquotes'] && mb_strpos($item, "'") === 0) {
+					$item = '"'.addcslashes(stripslashes(trim($item, "'")), "'").'"';
+				}
+				if ($minify['shortenhex'] && preg_match('/^#(([a-f0-6])\\2)(([a-f0-6])\\4)(([a-f0-6])\\6)/i', $item, $match)) {
+					$item = '#'.$match[2].$match[4].$match[6];
+				}
+				if ($minify['lowerhex'] && preg_match('/^#[a-f0-6]{3,6}$/i', $item)) {
+					$item = mb_strtolower($item);
+				}
+			}
+		}
+		unset($item);
+		return $values;
 	}
 
 	/**
@@ -129,19 +181,30 @@ class property {
 	 */
 	public function compile(array $options) : string {
 		$b = $options['output'] != 'minify';
-		$css = $this->name.':'.($b ? ' ' : '');
+		$css = $options['prefix'].$this->name.':'.($b ? ' ' : '');
 		$join = '';
 		foreach ($this->value AS $value) {
+			$css .= $join;
 			$space = '';
 			foreach ($value AS $item) {
 				if (is_array($item)) {
-
+					$css .= '(';
+					$bjoin = '';
+					foreach ($item AS $bracket) {
+						$bspace = '';
+						foreach ($bracket AS $val) {
+							$css .= $bspace.$val;
+							$bspace = ' ';
+						}
+						$css .= $bjoin;
+						$bjoin = $b ? ', ' : ',';
+					}
+					$css .= ')';
 				} else {
 					$css .= $space.$item;
 				}
 				$space = ' ';
 			}
-			$css .= $join;
 			$join = $b ? ', ' : ',';
 		}
 		if ($this->semicolon) {

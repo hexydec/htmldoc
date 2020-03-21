@@ -2,17 +2,22 @@
 declare(strict_types = 1);
 namespace hexydec\css;
 
-class rule {
+class directive {
 
 	/**
-	 * @var mediaquery The parent htmldoc object
+	 * @var rule The parent rule object
 	 */
 	protected $root;
 
 	/**
-	 * @var array An array of selectors
+	 * @var string The name of the directive
 	 */
-	protected $selectors = [];
+	protected $directive;
+
+	/**
+	 * @var string The value of the directive
+	 */
+	protected $content = null;
 
 	/**
 	 * @var array An array of properties
@@ -36,17 +41,17 @@ class rule {
 	 * @return void
 	 */
 	public function parse(array &$tokens) : void {
-
-		// parse tokens
-		$selector = true;
+		$directive = true;
 		$token = current($tokens);
 		do {
 			switch ($token['type']) {
+				case 'directive':
+					$this->directive = $token['value'];
+					break;
 				case 'string':
-					if ($selector) {
-						$item = new selector($this);
-						$item->parse($tokens);
-						$this->selectors[] = $item;
+				case 'quotes':
+					if ($directive) {
+						$this->content = $token['value'];
 					} else {
 						$item = new property($this);
 						$item->parse($tokens);
@@ -54,10 +59,10 @@ class rule {
 					}
 					break;
 				case 'curlyopen':
-					$selector = false;
+					$directive = false;
 					break;
+				case 'semicolon':
 				case 'curlyclose':
-					$selector = true;
 					break 2;
 			}
 		} while (($token = next($tokens)) !== false);
@@ -70,20 +75,6 @@ class rule {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-
-		// minify selectors
-		foreach ($this->selectors AS $item) {
-			$item->minify($minify);
-		}
-
-		// minify properties
-		foreach ($this->properties AS $item) {
-			$item->minify($minify);
-		}
-
-		if ($minify['removesemicolon']) {
-			$this->properties[count($this->properties)-1]->semicolon = false;
-		}
 	}
 
 	/**
@@ -94,22 +85,22 @@ class rule {
 	 */
 	public function compile(array $options) : string {
 		$b = $options['output'] != 'minify';
-		$css = $options['prefix'];
-
-		// compile selectors
-		$join = '';
-		foreach ($this->selectors AS $item) {
-			$css .= $join.$item->compile($options);
-			$join = $b ? ', ' : ',';
+		$css = $this->directive;
+		if ($this->content) {
+			$css .= ' '.$this->content;
 		}
-		$css .= $b ? ' {' : '{';
+		if ($this->properties) {
+			$css .= $b ? ' {' : '{';
 
-		// compile properties
-		$tab = $b ? "\n\t" : '';
-		foreach ($this->properties AS $item) {
-			$css .= $tab.$item->compile($options);
+			// compile properties
+			$tab = $b ? "\n\t" : '';
+			foreach ($this->properties AS $item) {
+				$css .= $tab.$item->compile($options);
+			}
+			$css .= $b ? "\n".$options['prefix'].'}' : '}';
+		} else {
+			$css .= ';';
 		}
-		$css .= $b ? "\n".$options['prefix'].'}' : '}';
 		return $css;
 	}
 }

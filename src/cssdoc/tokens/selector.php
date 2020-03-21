@@ -32,7 +32,8 @@ class selector {
 	 */
 	public function parse(array &$tokens) : void {
 		$join = null;
-		while (($token = next($tokens)) !== false) {
+		$token = current($tokens);
+		do {
 			switch ($token['type']) {
 				case 'whitespace':
 					if (!$join) {
@@ -77,7 +78,7 @@ class selector {
 						'selector' => $parts,
 						'join' => $join
 					];
-					$join = false;
+					$join = null;
 					break;
 				case 'squareopen':
 					$parts = '';
@@ -95,7 +96,7 @@ class selector {
 						'selector' => '['.$parts.']',
 						'join' => $join
 					];
-					$join = false;
+					$join = null;
 					break;
 				case 'curlyopen':
 				case 'comma':
@@ -105,7 +106,7 @@ class selector {
 					$join = $token['value'];
 					break;
 			}
-		}
+		} while (($token = next($tokens)) !== false);
 	}
 
 	/**
@@ -127,7 +128,14 @@ class selector {
 		$space = $options['output'] != 'minify' ? ' ' : '';
 		$css = '';
 		foreach ($this->selectors AS $item) {
-			$css .= $item['selector'].($item['join'] ? $space.$item['join'].$space : '');
+			if ($item['join']) {
+				if ($item['join'] == ' ') {
+					$css .= $item['join'];
+				} else {
+					$css .= $space.$item['join'].$space;
+				}
+			}
+			$css .= $item['selector'];
 		}
 		return $css;
 	}

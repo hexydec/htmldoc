@@ -22,7 +22,8 @@ class cssdoc {
 	   'comma' => ',',
 	   'colon' => ':',
 	   'semicolon' => ';',
-	   'string' => '!?[^\[\]{}\(\):;,>+=~\^$!"\/ \n\r\t]++'
+	   'directive' => '@[a-z-]++',
+	   'string' => '!?[^\[\]{}\(\):;,>+~\^$!" \n\r\t]++'
 	];
 
 	/**
@@ -42,7 +43,8 @@ class cssdoc {
 	];
 
 	protected $output = [
-		'output' => 'beautify'
+		'output' => 'minify',
+		'prefix' => ''
 	];
 
 	protected $document;
@@ -188,6 +190,14 @@ class cssdoc {
 	 * @return void
 	 */
 	public function minify(array $minify = []) : void {
+		$minify = array_merge($this->config, $minify);
+
+		// set email options
+		if ($minify['email']) {
+			$minify['maxline'] = 800;
+			$minify['shortenhex'] = false;
+		}
+		$this->document->minify($minify);
 	}
 
 	/**
