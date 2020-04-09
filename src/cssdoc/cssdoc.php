@@ -36,9 +36,10 @@ class cssdoc {
 		'convertquotes' => true,
 		'removequotes' => true,
 		'shortenhex' => true,
-		'lowerhex' => true,
 		'email' => false,
 		'maxline' => false,
+		'lowerproperties' => true,
+		'lowervalues' => true,
 		'output' => 'minify'
 	];
 
@@ -179,7 +180,7 @@ class cssdoc {
 	 * @return bool Whether the parser was able to capture any objects
 	 */
 	protected function parse(array &$tokens) : bool {
-		$this->document = new mediaquery($this);
+		$this->document = new document($this);
 		return $this->document->parse($tokens);
 	}
 

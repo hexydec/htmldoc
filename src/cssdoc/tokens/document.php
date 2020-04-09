@@ -2,30 +2,31 @@
 declare(strict_types = 1);
 namespace hexydec\css;
 
-class rule {
+class document {
 
 	/**
-	 * @var mediaquery The parent htmldoc object
+	 * @var cssdoc The parent htmldoc object
 	 */
 	protected $root;
 
 	/**
-	 * @var array An array of selectors
+	 * @var array An array of media query parameters
 	 */
-	protected $selectors = [];
+	protected $media = [];
 
 	/**
-	 * @var array An array of properties
+	 * @var array An array of child token objects
 	 */
-	protected $properties = [];
+	protected $rules = [];
 
 	/**
 	 * Constructs the comment object
 	 *
 	 * @param cssdoc $root The parent htmldoc object
 	 */
-	public function __construct(document $root) {
+	public function __construct($root, array $media = null) {
 		$this->root = $root;
+		$this->media = $media;
 	}
 
 	/**
@@ -38,31 +39,25 @@ class rule {
 	public function parse(array &$tokens) : bool {
 
 		// parse tokens
-		$selector = true;
 		$token = current($tokens);
 		do {
 			switch ($token['type']) {
-				case 'string':
-					if ($selector) {
-						$item = new selector($this);
-						if ($item->parse($tokens)) {
-							$this->selectors[] = $item;
-						}
-					} else {
-						$item = new property($this);
-						if ($item->parse($tokens)) {
-							$this->properties[] = $item;
-						}
-					}
+				case 'directive':
+					$item = new directive($this);
+					$item->parse($tokens);
+					$this->rules[] = $item;
 					break;
-				case 'curlyopen':
-					$selector = false;
+				case 'string':
+					$item = new rule($this);
+					$item->parse($tokens);
+					$this->rules[] = $item;
 					break;
 				case 'curlyclose':
+					prev($tokens);
 					break 2;
 			}
 		} while (($token = next($tokens)) !== false);
-		return !empty($this->selectors) && !empty($this->properties);
+		return !!$this->rules;
 	}
 
 	/**
@@ -72,19 +67,8 @@ class rule {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-
-		// minify selectors
-		foreach ($this->selectors AS $item) {
+		foreach ($this->rules AS $item) {
 			$item->minify($minify);
-		}
-
-		// minify properties
-		foreach ($this->properties AS $item) {
-			$item->minify($minify);
-		}
-
-		if ($this->properties && $minify['removesemicolon']) {
-			$this->properties[count($this->properties)-1]->semicolon = false;
 		}
 	}
 
@@ -96,22 +80,17 @@ class rule {
 	 */
 	public function compile(array $options) : string {
 		$b = $options['output'] != 'minify';
-		$css = $options['prefix'];
+		$css = '';
 
 		// compile selectors
 		$join = '';
-		foreach ($this->selectors AS $item) {
+		foreach ($this->rules AS $item) {
 			$css .= $join.$item->compile($options);
-			$join = $b ? ', ' : ',';
+			$join = $b ? "\n\n" : '';
 		}
-		$css .= $b ? ' {' : '{';
-
-		// compile properties
-		$tab = $b ? "\n\t" : '';
-		foreach ($this->properties AS $item) {
-			$css .= $tab.$item->compile($options);
+		if ($this->media) {
+			$css .= '}';
 		}
-		$css .= $b ? "\n".$options['prefix'].'}' : '}';
 		return $css;
 	}
 }

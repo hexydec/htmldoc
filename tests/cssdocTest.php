@@ -10,7 +10,8 @@ final class cssdocTest extends \PHPUnit\Framework\TestCase {
    		'convertquotes' => false,
    		'removequotes' => false,
    		'shortenhex' => false,
-   		'lowerhex' => false,
+		'lowerproperties' => false,
+		'lowervalues' => false,
    		'sortselectors' => false,
    		'email' => false,
 		'maxline' => false,
@@ -45,18 +46,12 @@ final class cssdocTest extends \PHPUnit\Framework\TestCase {
 				'output' => '#id{font-size:3em;}#id,.class,.class .class__item,.class>.class__item{font-size:3em;display:flex;}'
 			),
 			Array(
-				'input' => '@media screen {
+				'input' => '
 					#id {
-						font-size: 3em;
+						font-size: 3em !important;
 					}
-				}
-
-				#id, .class, .class .class__item, .class > .class__item {
-					font-size: 3em;
-					display: flex;
-				}
 				',
-				'output' => '@media screen{#id{font-size:3em;}}#id,.class,.class .class__item,.class>.class__item{font-size:3em;display:flex;}'
+				'output' => '#id{font-size:3em!important;}'
 			)
 		);
 		$config = $this->config;
@@ -120,6 +115,67 @@ final class cssdocTest extends \PHPUnit\Framework\TestCase {
 				}
 				',
 				'output' => '@media (color){#id{font-size:3em;}}'
+			)
+		);
+		$config = $this->config;
+		$obj = new cssdoc();
+		foreach ($test AS $item) {
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
+		}
+	}
+
+	public function testCanMinifyDirectives() {
+		$test = Array(
+			Array(
+				'input' => '@charset   "utf-8"   ;',
+				'output' => '@charset "utf-8";'
+			),
+			Array(
+				'input' => '@font-face {
+					font-family: "gotham";
+					src: url(".../css/gotham-medium.woff2") format("woff2"),
+						url("../css/gotham/gotham-medium.woff") format("woff");
+					font-display: block;
+				}
+				',
+				'output' => '@font-face{font-family:"gotham";src:url(".../css/gotham-medium.woff2") format("woff2"),url("../css/gotham/gotham-medium.woff") format("woff");font-display:block;}'
+			),
+			Array(
+				'input' => '@import url("fineprint.css") print;
+					@import url("bluish.css") speech;
+					@import \'custom.css\';
+					@import url("chrome://communicator/skin/");
+					@import "common.css" screen;
+					@import url(\'landscape.css\') screen and (orientation: landscape);
+				',
+				'output' => '@import url("fineprint.css") print;@import url("bluish.css") speech;@import \'custom.css\';@import url("chrome://communicator/skin/");@import "common.css" screen;@import url(\'landscape.css\') screen and (orientation:landscape);'
+			),
+			Array(
+				'input' => '@page {
+						margin: 1cm;
+					}
+
+					@page :first {
+						margin: 2cm;
+					}
+				',
+				'output' => '@page{margin:1cm;}@page :first{margin:2cm;}'
+			),
+			Array(
+				'input' => '@keyframes slidein {
+					from {
+				    	transform: translateX(0%);
+					}
+
+				  	to {
+					  	transform: translateX(100%);
+					}
+				}
+				',
+				'output' => '@keyframes slidein{from{transform:translateX(0%);}to{transform:translateX(100%);}}'
 			)
 		);
 		$config = $this->config;
@@ -203,6 +259,16 @@ final class cssdocTest extends \PHPUnit\Framework\TestCase {
 					content: "Foo";
 				}',
 				'output' => '#id::before{content:"Foo";}'
+			),
+			Array(
+				'input' => '@font-face {
+					font-family: "gotham";
+					src: url(".../css/gotham-medium.woff2") format("woff2"),
+						url("../css/gotham/gotham-medium.woff") format("woff");
+					font-display: block;
+				}
+				',
+				'output' => '@font-face{font-family:gotham;src:url(.../css/gotham-medium.woff2) format("woff2"),url(../css/gotham/gotham-medium.woff) format("woff");font-display:block;}'
 			)
 		);
 		$config = $this->config;
@@ -286,7 +352,7 @@ final class cssdocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanLowerHexValues() {
+	public function testCanLowerValues() {
 		$test = Array(
 			Array(
 				'input' => "#id::before {
@@ -305,10 +371,76 @@ final class cssdocTest extends \PHPUnit\Framework\TestCase {
 					color: #FFCCAB;
 				}",
 				'output' => '#id::before{color:#ffccab;}'
+			),
+			Array(
+				'input' => '#id::before {
+					background: #FFCCAB URL("TEST.PNG") NO-REPEAT 50% TOP;
+				}',
+				'output' => '#id::before{background:#ffccab url("TEST.PNG") no-repeat 50% top;}'
+			),
+			Array(
+				'input' => '@media screen and ( max-width : 800px ) {
+					#id {
+						FONT-WEIGHT: BOLD;
+						background: #FFCCAB URL("TEST.PNG") NO-REPEAT 50% TOP;
+					}
+				}
+				',
+				'output' => '@media screen and (max-width:800px){#id{FONT-WEIGHT:bold;background:#ffccab url("TEST.PNG") no-repeat 50% top;}}'
 			)
 		);
 		$config = $this->config;
-		$config['lowerhex'] = true;
+		$config['lowervalues'] = true;
+		$obj = new cssdoc();
+		foreach ($test AS $item) {
+			if ($obj->load($item['input'])) {
+				$obj->minify($config);
+				$this->assertEquals($item['output'], $obj->compile());
+			}
+		}
+	}
+
+	public function testCanLowerProperties() {
+		$test = Array(
+			Array(
+				'input' => "#id {
+					COLOR: #FFCCAA;
+				}",
+				'output' => '#id{color:#FFCCAA;}'
+			),
+			Array(
+				'input' => ".camelClass {
+					COLOR: #FcA;
+					Font-Weight: BOLD;
+					Font-STYLE: Italic;
+				}",
+				'output' => '.camelClass{color:#FcA;font-weight:BOLD;font-style:Italic;}'
+			),
+			Array(
+				'input' => "@font-face {
+					FONT-FAMILY: GOTHAM;
+				}",
+				'output' => '@font-face{font-family:GOTHAM;}'
+			),
+			Array(
+				'input' => '#id::before {
+					background: #FFCCAB URL("TEST.PNG") NO-REPEAT 50% TOP;
+				}',
+				'output' => '#id::before{background:#FFCCAB URL("TEST.PNG") NO-REPEAT 50% TOP;}'
+			),
+			Array(
+				'input' => '@media screen and ( max-width : 800px ) {
+					#id {
+						FONT-WEIGHT: BOLD;
+						BACKGROUND: #FFCCAB URL("TEST.PNG") NO-REPEAT 50% TOP;
+					}
+				}
+				',
+				'output' => '@media screen and (max-width:800px){#id{font-weight:BOLD;background:#FFCCAB URL("TEST.PNG") NO-REPEAT 50% TOP;}}'
+			)
+		);
+		$config = $this->config;
+		$config['lowerproperties'] = true;
 		$obj = new cssdoc();
 		foreach ($test AS $item) {
 			if ($obj->load($item['input'])) {

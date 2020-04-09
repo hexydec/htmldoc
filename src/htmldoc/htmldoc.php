@@ -150,7 +150,7 @@ class htmldoc {
 				$obj = new \hexydec\css\cssdoc();
 				if ($obj->load($css)) {
 					$obj->minify();
-					return $obj->compile(['output' => 'minify']);
+					return $obj->compile();
 				}
 				return $css;
 			}
@@ -207,7 +207,7 @@ class htmldoc {
 	 * @param string &$error A reference to any user error that is generated
 	 * @return mixed The loaded HTML, or false on error
 	 */
-	public function open(string $url, resource $context = null, string &$error = null) {
+	public function open(string $url, $context = null, string &$error = null) {
 
 		// open a handle to the stream
 		if (($handle = @fopen($url, 'rb', false, $context)) === false) {
