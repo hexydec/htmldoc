@@ -40,6 +40,11 @@ class selector {
 						$join = ' ';
 					}
 					break;
+				case 'join':
+					if ($token['value'] != '*') {
+						$join = $token['value'];
+						break;
+					}
 				case 'string':
 					$this->selectors[] = [
 						'selector' => $token['value'],
@@ -102,9 +107,6 @@ class selector {
 				case 'comma':
 					prev($tokens);
 					break 2;
-				case 'join':
-					$join = $token['value'];
-					break;
 			}
 		} while (($token = next($tokens)) !== false);
 		return !empty($this->selectors);

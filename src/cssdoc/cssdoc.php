@@ -11,8 +11,8 @@ class cssdoc {
 	   'whitespace' => '\s++',
 	   'comment' => '\\/\\*[\d\D]*?\\*\\/',
 	   'quotes' => '(?<!\\\\)("(?:[^"\\\\]++|\\\\.)*+"|\'(?:[^\'\\\\]++|\\\\.)*+\')',
-	   'join' => '[>+~]',
 	   'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
+	   'join' => '[>+~*\\/-]',
 	   'curlyopen' => '{',
 	   'curlyclose' => '}',
 	   'squareopen' => '\[',
@@ -23,7 +23,7 @@ class cssdoc {
 	   'colon' => ':',
 	   'semicolon' => ';',
 	   'directive' => '@[a-z-]++',
-	   'string' => '!?[^\[\]{}\(\):;,>+~\^$!" \n\r\t]++'
+	   'string' => '!?[^\[\]{}\(\):;,>+~\^$!" \n\r\t\/]++'
 	];
 
 	/**

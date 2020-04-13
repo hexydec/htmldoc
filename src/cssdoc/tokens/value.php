@@ -36,6 +36,7 @@ class value {
 		do {
 			switch ($token['type']) {
 				case 'string':
+				case 'join':
 					if ($token['value'] == '!important') {
 						prev($tokens);
 						break 2;
@@ -130,7 +131,7 @@ class value {
 				}
 				$css .= '('.$item->compile($options).')';
 				$join = ' ';
-			} elseif ($item == ':') {
+			} elseif (in_array($item, [':', '-', '+'])) {
 				$css .= $item;
 				$join = '';
 			} else {
