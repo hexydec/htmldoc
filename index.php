@@ -1,5 +1,5 @@
 <?php
-require(__DIR__.'/src/autoload.php');
+require(__DIR__.'/vendor/autoload.php');
 
 $base = empty($_POST['base']) ? '' : $_POST['base'];
 $input = '';
@@ -62,15 +62,19 @@ if (!empty($_POST['action'])) {
 		// retrieve the user posted options
 		$isset = isset($_POST['minify']) && is_array($_POST['minify']);
 		foreach ($options AS $key => $item) {
-			$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? [] : (is_bool($options[$key]) ? true : $options[$key])) : false;
-			if (is_array($item)) {
-				foreach ($item AS $sub => $value) {
-					if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
-						$minify[$key][$sub] = true;
-					} elseif ($minify[$key]) {
-						$minify[$key][$sub] = false;
+			if ($key != 'elements') {
+				$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? [] : (is_bool($options[$key]) ? true : $options[$key])) : false;
+				if (is_array($item)) {
+					foreach ($item AS $sub => $value) {
+						if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
+							$minify[$key][$sub] = true;
+						} elseif ($minify[$key]) {
+							$minify[$key][$sub] = false;
+						}
 					}
 				}
+			} else {
+				unset($options[$key]);
 			}
 		}
 

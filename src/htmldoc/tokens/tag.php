@@ -167,9 +167,8 @@ class tag implements token {
 		$children = [];
 
 		// process custom tags
-		if (in_array($parenttag, $config['custom'])) {
-			$class = '\\hexydec\\html\\'.$parenttag;
-			$item = new $class($this->root);
+		if ($parenttag && ($custom = $this->root->getConfig('custom', $parenttag)) !== null) {
+			$item = new $custom['class']($this->root);
 			$item->parse($tokens);
 			$children[] = $item;
 
@@ -419,8 +418,8 @@ class tag implements token {
 
 		// minify children
 		if ($this->children) {
-			if (in_array($this->tagName, $config['elements']['pre'])) {
-				$minify['whitespace'] = false;
+			if (isset($minify['elements'][$this->tagName])) {
+				$minify = array_replace_recursive($minify, $minify['elements'][$this->tagName]);
 			}
 			foreach ($this->children AS $item) {
 				$item->minify($minify);
@@ -594,7 +593,9 @@ class tag implements token {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		$options = $options ? array_merge($this->root->output, $options) : $this->root->output;
+
+		// merge output options + custom
+		$options = array_merge($this->root->output, $options, $this->root->output['elements'][$this->tagName] ?? []);
 
 		// compile attributes
 		$html = '<'.$this->tagName;

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Hexydec uGraph</title>
+   </head>
+   <body>
+      <svg width="100%" height="200">
+         <defs>
+            <linearGradient id="c0" x1="0" x2="0" y1="0" y2="1">
+               <stop stop-color="blue" offset="0%" stop-opacity="0.2"/>
+               <stop stop-color="blue" offset="100%" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="c1" x1="0" x2="0" y1="0" y2="1">
+               <stop stop-color="red" offset="0%" stop-opacity="0.2"/>
+               <stop stop-color="red" offset="100%" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="box">
+               <rect x="0" y="0" width="100" height="100"/>
+            </clipPath>
+         </defs>
+         <svg width="100%" height="20px" viewBox="0 0 236 20" preserveAspectRatio="xMidYMid meet">
+            <rect x="2" y="2" width="16" height="16" stroke="blue" stroke-width="2" fill="url(#c0)"/>
+            <text x="30" y="0" dominant-baseline="hanging">Views</text>
+            <rect x="112" y="2" width="16" height="16" stroke="red" stroke-width="2" fill="url(#c1)"/>
+            <text x="140" y="0" dominant-baseline="hanging">bounce</text>
+         </svg>
+         <foreignObject width="100%" height="100%" xmlns="http://www.w3.org/1999/xhtml">
+            <div style="height:100%;box-sizing:border-box;padding:30px 0px 8px 92px;">
+               <svg x="0" y="0" width="100%" height="100%" style="overflow:visible;">
+                  <g stroke="#DDD" stroke-width="1" vector-effect="non-scaling-stroke">
+                     <line x1="0" y1="0%" x2="100%" y2="0%"/>
+                     <line x1="0" y1="12.5%" x2="100%" y2="12.5%"/>
+                     <line x1="0" y1="25%" x2="100%" y2="25%"/>
+                     <line x1="0" y1="37.5%" x2="100%" y2="37.5%"/>
+                     <line x1="0" y1="50%" x2="100%" y2="50%"/>
+                     <line x1="0" y1="62.5%" x2="100%" y2="62.5%"/>
+                     <line x1="0" y1="75%" x2="100%" y2="75%"/>
+                     <line x1="0" y1="87.5%" x2="100%" y2="87.5%"/>
+                     <line x1="0" y1="100%" x2="100%" y2="100%"/>
+                  </g>
+                  <g stroke="#333" stroke-width="1" vector-effect="non-scaling-stroke">
+                     <line x1="-5" y1="0%" x2="0" y2="0%"/>
+                     <line x1="-5" y1="12.5%" x2="0" y2="12.5%"/>
+                     <line x1="-5" y1="25%" x2="0" y2="25%"/>
+                     <line x1="-5" y1="37.5%" x2="0" y2="37.5%"/>
+                     <line x1="-5" y1="50%" x2="0" y2="50%"/>
+                     <line x1="-5" y1="62.5%" x2="0" y2="62.5%"/>
+                     <line x1="-5" y1="75%" x2="0" y2="75%"/>
+                     <line x1="-5" y1="87.5%" x2="0" y2="87.5%"/>
+                     <line x1="-5" y1="100%" x2="0" y2="100%"/>
+                  </g>
+                  <g text-anchor="end" dominant-baseline="middle">
+                     <text x="-10" y="100%">20</text>
+                     <text x="-10" y="87.5%">30</text>
+                     <text x="-10" y="75%">40</text>
+                     <text x="-10" y="62.5%">50</text>
+                     <text x="-10" y="50%">60</text>
+                     <text x="-10" y="37.5%">70</text>
+                     <text x="-10" y="25%">80</text>
+                     <text x="-10" y="12.5%">90</text>
+                     <text x="-10" y="0%">100</text>
+                  </g>
+                  <text x="-68" y="50%" style="writing-mode:vertical-lr;text-anchor:middle;" font-size="24">Test</text>
+                  <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                     <path d="M-10,61.3L0,63.8L2,35L4.1,7.5L6.1,55L8.2,30L10.2,51.3L12.2,66.3L14.3,52.5L16.3,18.8L18.4,32.5L20.4,95L22.4,58.8L24.5,66.3L26.5,86.3L28.6,50L30.6,86.3L32.7,13.8L34.7,25L36.7,35L38.8,46.3L40.8,75L42.9,60L44.9,82.5L46.9,15L49,55L51,22.5L53.1,67.5L55.1,23.8L57.1,67.5L59.2,11.3L61.2,90L63.3,80L65.3,91.3L67.3,46.3L69.4,55L71.4,28.8L73.5,31.3L75.5,25L77.6,43.8L79.6,95L81.6,10L83.7,50L85.7,17.5L87.8,16.3L89.8,90L91.8,78.8L93.9,67.5L95.9,65L98,82.5L100,12.5h10V110H-10Z" stroke="blue" stroke-width="2" fill="url(#c0)" clip-path="url(#box)" vector-effect="non-scaling-stroke"/>
+                     <path d="M-10,31.3L0,93.8L2,73.8L4.1,76.3L6.1,96.3L8.2,75L10.2,68.8L12.2,65L14.3,75L16.3,87.5L18.4,82.5L20.4,85L22.4,93.8L24.5,96.3L26.5,86.3L28.6,86.3L30.6,100L32.7,95L34.7,85L36.7,65L38.8,100L40.8,82.5L42.9,96.3L44.9,91.3L46.9,85L49,63.8L51,85L53.1,73.8L55.1,72.5L57.1,86.3L59.2,85L61.2,100L63.3,81.3L65.3,67.5L67.3,76.3L69.4,71.3L71.4,80L73.5,70L75.5,88.8L77.6,83.8L79.6,66.3L81.6,70L83.7,90L85.7,85L87.8,70L89.8,88.8L91.8,98.8L93.9,75L95.9,77.5L98,66.3L100,92.5h10V110H-10Z" stroke="red" stroke-width="2" fill="url(#c1)" clip-path="url(#box)" vector-effect="non-scaling-stroke"/>
+                  </svg>
+               </svg>
+            </div>
+         </foreignObject>
+      </svg>
+   </body>
+</html>

@@ -54,7 +54,7 @@ if ($doc->open($url, $context, $error)) {
 }
 ```
 
-For more information, see the API documentation for the [`load()` method](api/load.md) and the [`open()` method](api/load.md).
+For more information, see the API documentation for the [`load()` method](api/load.md) and the [`open()` method](api/open.md).
 
 ## Finding Elements and Extracting Information
 

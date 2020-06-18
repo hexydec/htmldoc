@@ -11,10 +11,10 @@
         }
     ],
     "minimum-stability": "beta",
-    "require": {},
+    "require": {
+		"hexydec/cssdoc": "@dev"
+	},
 	"autoload": {
-		"psr-4": {
-			"hexydec\\htmldoc\\": "src/"
-		}
+		"classmap": ["src/"]
 	}
 }

@@ -11,15 +11,7 @@ spl_autoload_register(function (string $class) : bool {
 		'hexydec\\html\\script' => $dir.'/tokens/script.php',
 		'hexydec\\html\\style' => $dir.'/tokens/style.php',
 		'hexydec\\html\\tag' => $dir.'/tokens/tag.php',
-		'hexydec\\html\\text' => $dir.'/tokens/text.php',
-		'hexydec\\html\\cssmin' => $dir.'/cssmin.php',
-		'hexydec\\css\\cssdoc' => __DIR__.'/cssdoc/cssdoc.php',
-		'hexydec\\css\\document' => __DIR__.'/cssdoc/tokens/document.php',
-		'hexydec\\css\\directive' => __DIR__.'/cssdoc/tokens/directive.php',
-		'hexydec\\css\\rule' => __DIR__.'/cssdoc/tokens/rule.php',
-		'hexydec\\css\\selector' => __DIR__.'/cssdoc/tokens/selector.php',
-		'hexydec\\css\\property' => __DIR__.'/cssdoc/tokens/property.php',
-		'hexydec\\css\\value' => __DIR__.'/cssdoc/tokens/value.php'
+		'hexydec\\html\\text' => $dir.'/tokens/text.php'
 	];
 	if (isset($classes[$class])) {
 		return require($classes[$class]);

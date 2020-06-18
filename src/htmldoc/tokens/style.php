@@ -54,9 +54,9 @@ class style implements token {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-		if ($minify['css'] !== false && $this->content) {
-			$func = $this->root->getConfig('css');
-			$this->content = $func === false ? trim($this->content) : call_user_func($func, $this->content, $minify['css']);
+		$func = $this->root->getConfig('custom', 'style', 'config', 'minifier');
+		if ($func) {
+			$this->content = call_user_func($func, $this->content, $minify['style']);
 		}
 	}
 

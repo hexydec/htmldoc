@@ -21,10 +21,10 @@ if ($doc->load($html)) {
 	</thead>
 	<tbody>
 		<tr>
-			<td rowspan="5"><code>$options</code></td>
-			<td rowspan="5">Array</td>
+			<td rowspan="6"><code>$options</code></td>
+			<td rowspan="6">Array</td>
 			<td colspan="2">An array of output options, the input is merged with `htmldoc::$config['output']`. <em>Note that for most scenarios, specifying this argument is not required</em></td>
-			<td><code>Array()</code</td>
+			<td><code>[]</code></td>
 		</tr>
 		<tr>
 			<td><code>quotestyle</code></td>
@@ -45,6 +45,17 @@ if ($doc->load($html)) {
 			<td><code>xml</code></td>
 			<td>A boolean specifying whether to render XML compliant output. Setting this to <code>true</code> automatically sets <code>quotestyle = &quot;double&quot;</code>, <code>singletonclose = &quot;/&gt;&quot;</code>, and <code>closetag = true</code></td>
 			<td><code>false</code></td>
+		</tr>
+		<tr>
+			<td><code>elements</code></td>
+			<td>An array specifying output options for specific tags</td>
+			<td><code>[<br>
+				&nbsp; 'svg' => [<br>
+				&nbsp; &nbsp; 'xml' => true,<br>
+				&nbsp; &nbsp; 'quotestyle' => 'double',<br>
+				&nbsp; &nbsp; 'singletonclose' => '/>',<br>
+				&nbsp; &nbsp; 'closetags' => true<br>
+				&nbsp; ]</code></td>
 		</tr>
 	</tbody>
 </table>

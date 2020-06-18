@@ -54,9 +54,7 @@ class htmldoc {
 			],
 			'closeoptional' => [
 				'html', 'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup'
-			],
-			'pre' => ['textarea', 'pre', 'code'], // which elements not to strip whitespace from
-			'custom' => ['script', 'style'], // which elements have their own plugins
+			]
 		],
 		'attributes' => [
 			'boolean' => [
@@ -86,11 +84,21 @@ class htmldoc {
 				]
 			]
 		],
-		'css' => null, // specify the CSS minifier
-		'js' => null, // specify the javascript minifier
+		'custom' => [ // specify custom handlers
+			'style' => [
+				'class' => '\\hexydec\\html\\style',
+				'config' => [
+					'minifier' => null
+				]
+			],
+			'script' => [
+				'class' => '\\hexydec\\html\\script',
+				'config' => [
+					'minifier' => null
+				]
+			]
+		],
 		'minify' => [
-			'css' => [], // specify CSS minifier options
-			'js' => [], // specify CSS javascript options
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes
 			'comments' => [ // remove comments
@@ -102,6 +110,22 @@ class htmldoc {
 				'relative' => true, // process absolute URLs to make them relative to the current document
 				'parent' => true // process relative URLs to use relative parent links where it is shorter
 			],
+			'elements' => [ // apply specific minifier options to certain tag trees
+				'textarea' => ['whitespace' => false],
+				'pre' => ['whitespace' => false],
+				'code' => ['whitespace' => false],
+				'svg' => [
+					'lowercase' => false,
+					'attributes' => [
+						'default' => false,
+						'empty' => false,
+						'option' => false,
+						'boolean' => false
+					],
+					'singleton' => false,
+					'close' => false
+				]
+			],
 			'attributes' => [ // minify attributes
 				'default' => true, // remove default attributes
 				'empty' => true, // remove these attributes if empty
@@ -112,9 +136,11 @@ class htmldoc {
 				'boolean' => true // minify boolean attributes
 			],
 			'singleton' => true, // minify singleton element by removing slash
-			'quotes' => true, // minify attribute quotes
+			'quotes' => true, // sets the output option 'quotestyle' to 'minimal'
 			'close' => true, // don't write close tags where possible
-			'email' => false // sets the minification presets to email safe options
+			'email' => false, // sets the minification presets to email safe options
+			'style' => [], // specify CSS minifier options
+			'script' => [] // specify CSS javascript options
 		]
 	];
 
@@ -126,7 +152,15 @@ class htmldoc {
 		'quotestyle' => 'double', // double, single, minimal
 		'singletonclose' => null, // string to close singleton tags, or false to leave as is
 		'closetags' => false, // whether to force tags to have a closing tag (true) or follow tag::close
-		'xml' => false // sets the output presets to produce XML valid code
+		'xml' => false, // sets the output presets to produce XML valid code
+		'elements' => [ // output options for particular tags elements
+			'svg' => [
+				'xml' => true,
+				'quotestyle' => 'double', // double, single, minimal
+				'singletonclose' => '/>', // string to close singleton tags, or false to leave as is
+				'closetags' => true, // whether to force tags to have a closing tag (true) or follow tag::close
+			]
+		]
 	];
 
 	/**
@@ -146,14 +180,20 @@ class htmldoc {
 	 */
 	public function __construct(array $config = []) {
 		$this->config = array_replace_recursive($this->config, [
-			'css' => function (string $css) : string {
-				$obj = new \hexydec\css\cssdoc();
-				if ($obj->load($css)) {
-					$obj->minify();
-					return $obj->compile();
-				}
-				return $css;
-			}
+			'custom' => [ /// default to CSSdoc if available
+				'style' => [
+					'config' => [
+						'minifier' => class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
+							$obj = new \hexydec\css\cssdoc();
+							if ($obj->load($css)) {
+								$obj->minify($minify);
+								return $obj->compile();
+							}
+							return $css;
+						} : null
+					]
+				]
+			]
 		], $config);
 	}
 
@@ -184,7 +224,7 @@ class htmldoc {
 	/**
 	 * Retrieves the requested value of the object configuration
 	 *
-	 * @param string $key... One or more array keys indicating the configuration value to retrieve
+	 * @param string ...$key One or more array keys indicating the configuration value to retrieve
 	 * @return mixed The value requested, or null if the value doesn't exist
 	 */
 	public function getConfig(string ...$keys) {
