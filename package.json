@@ -1,6 +1,6 @@
 {
-  "name": "minify",
-  "version": "0.8.6",
+  "name": "HTMLdoc",
+  "version": "0.9.0",
   "description": "A token based HTML Document parser and minifier written in PHP",
   "main": "index.js",
   "directories": {
@@ -12,10 +12,12 @@
   "keywords": [
     "PHP",
     "minify",
+    "tokenizer",
     "html",
-    "css"
+    "svg"
   ],
   "author": "Will Earp <will@hexydec.com>",
+  "repository": "https://github.com/hexydec/htmldoc",
   "license": "MIT",
   "dependencies": {
     "grunt-cli": "^1.3.2",
