@@ -73,7 +73,7 @@ HTMLdoc supports PHP version 7.3+.
 
 If you find an issue with HTMLdoc, please create an issue in the tracker.
 
-If you wish to fix an issues yourself, please fork the code, fix the issue, then create a pull request, and I will evaluate your submission.
+If you wish to fix an issue yourself, please fork the code, fix the issue, then create a pull request, and I will evaluate your submission.
 
 ## Licence
 

@@ -18,7 +18,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanFailCorrecctly() {
+	public function testCanFailCorrectly() {
 		$url = __DIR__.'/does-not-exists.html';
 		$doc = new htmldoc();
 		$this->assertEquals(false, $doc->open($url, null, $error), 'Correctly failed to open file that doesn\'t exist');
