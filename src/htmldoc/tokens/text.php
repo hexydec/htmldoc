@@ -37,9 +37,10 @@ class text implements token {
 	 * @param array $config An array of configuration options
 	 * @return void
 	 */
-	public function parse(array &$tokens) : void {
-		$token = current($tokens);
-		$this->content = html_entity_decode($token['value'], ENT_QUOTES);
+	public function parse(tokenise $tokens) : void {
+		if (($token = $tokens->current()) !== null) {
+			$this->content = html_entity_decode($token['value'], ENT_QUOTES);
+		}
 	}
 
 	public function text() : string {

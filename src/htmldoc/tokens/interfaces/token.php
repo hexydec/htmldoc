@@ -21,7 +21,7 @@ interface token {
 	 * @param array $config An array of configuration options
 	 * @return void
 	 */
-	public function parse(array &$tokens) : void;
+	public function parse(tokenise $tokens) : void;
 
 	/**
 	 * Minifies the internal representation of the object

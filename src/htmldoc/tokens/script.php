@@ -30,24 +30,25 @@ class script implements token {
 	 * @param array $config An array of configuration options
 	 * @return void
 	 */
-	public function parse(array &$tokens) : void {
-		$value = '';
-		$token = current($tokens);
-		$quotes = 0;
-		while ($token !== false && ($quotes % 2 || $token['type'] != 'tagclose' || $token['value'] != '</script>')) {
-			if ($token['type'] == 'cdata') {
-				$value .= mb_substr($token['value'], 9, -3);
-			} else {
-				$value .= $token['value'];
-			}
+	public function parse(tokenise $tokens) : void {
+		if (($token = $tokens->current()) !== null) {
+			$value = '';
+			$quotes = 0;
+			while ($token !== null && ($quotes % 2 || $token['type'] != 'tagclose' || $token['value'] != '</script>')) {
+				if ($token['type'] == 'cdata') {
+					$value .= mb_substr($token['value'], 9, -3);
+				} else {
+					$value .= $token['value'];
+				}
 
-			// count quotes so we don't capture a script tag in a string
-			$quotes += mb_substr_count(str_replace(['\\\\', '\\\\"', "\\\\'"], ['', '', ''], $token['value']), '"');
-			$token = next($tokens);
-		}
-		prev($tokens);
-		if ($value) {
-			$this->content = $value;
+				// count quotes so we don't capture a script tag in a string
+				$quotes += mb_substr_count(str_replace(['\\\\', '\\\\"', "\\\\'"], ['', '', ''], $token['value']), '"');
+				$token = $tokens->next();
+			}
+			$tokens->prev();
+			if ($value) {
+				$this->content = $value;
+			}
 		}
 	}
 

@@ -25,9 +25,10 @@ class comment implements token {
 	 * @param array $config An array of configuration options
 	 * @return void
 	 */
-	public function parse(array &$tokens) : void {
-		$token = current($tokens);
-		$this->content = mb_substr($token['value'], 4, -3);
+	public function parse(tokenise $tokens) : void {
+		if (($token = $tokens->current()) !== null) {
+			$this->content = mb_substr($token['value'], 4, -3);
+		}
 	}
 
 	/**

@@ -30,20 +30,21 @@ class style implements token {
 	 * @param array $config An array of configuration options
 	 * @return void
 	 */
-	public function parse(array &$tokens) : void {
-		$value = '';
-		$token = current($tokens);
-		while ($token !== false && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
-			if ($token['type'] == 'cdata') {
-				$value .= mb_substr($token['value'], 9, -3);
-			} else {
-				$value .= $token['value'];
+	public function parse(tokenise $tokens) : void {
+		if (($token = $tokens->current()) !== null) {
+			$value = '';
+			while ($token !== null && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
+				if ($token['type'] == 'cdata') {
+					$value .= mb_substr($token['value'], 9, -3);
+				} else {
+					$value .= $token['value'];
+				}
+				$token = $tokens->next();
 			}
-			$token = next($tokens);
-		}
-		prev($tokens);
-		if ($value) {
-			$this->content = $value;
+			$tokens->prev();
+			if ($value) {
+				$this->content = $value;
+			}
 		}
 	}
 

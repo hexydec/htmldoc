@@ -25,9 +25,9 @@ class doctype implements token {
 	 * @param array $config An array of configuration options
 	 * @return void
 	 */
-	public function parse(array &$tokens) : void {
+	public function parse(tokenise $tokens) : void {
 		$content = '';
-		while (($token = next($tokens)) !== false && $token['type'] != 'tagopenend') {
+		while (($token = $tokens->next()) !== null && $token['type'] != 'tagopenend') {
 			if ($token['type'] == 'attribute') {
 				$content .= ($content ? ' ' : '').$token['value'];
 			}
