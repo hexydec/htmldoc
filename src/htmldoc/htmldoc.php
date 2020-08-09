@@ -8,17 +8,16 @@ class htmldoc {
 	 * @var array $tokens Regexp components keyed by their corresponding codename for tokenising HTML
 	 */
 	protected static $tokens = [
-		'doctype' => '<!(?i:DOCTYPE)',
-		'comment' => '<!--[\d\D]*?(?<=--)>',
-		'cdata' => '<!\[CDATA\[[\d\D]*?\]\]>',
-		'tagopenstart' => '<[a-zA-Z][a-zA-Z0-9_:.-]*+',
-		'tagselfclose' => '\s*+\/>',
-		'tagopenend' => '\s*+>',
-		'tagclose' => '<\/[a-zA-Z][a-zA-Z0-9_:.-]*+\s*+>',
 		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
-		'attributevalue' => '=\s*+(?:"[^"]*+"|\'[^\']*+\'|[^\s>]*+)',
-		'attribute' => '[^<>"\'=\s]++',
-		'whitespace' => '\s++',
+		'attributevalue' => '\\s*+=\\s*+(?:"[^"]*+"|\'[^\']*+\'|[^\\s>]*+)',
+		'attribute' => '\\s*+[^<>"\'\\/=\\s]++',
+		'tagopenend' => '\\s*+>',
+		'tagselfclose' => '\\s*+\\/>',
+		'tagopenstart' => '<[a-zA-Z][a-zA-Z0-9_:.-]*+',
+		'tagclose' => '<\\/[a-zA-Z][a-zA-Z0-9_:.-]*+\\s*+>',
+		'doctype' => '<!(?i:DOCTYPE)',
+		'comment' => '<!--[\\d\\D]*?(?<=--)>',
+		'cdata' => '<!\\[CDATA\\[[\\d\\D]*?\\]\\]>',
 		'other' => '.'
 	];
 

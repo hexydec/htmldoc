@@ -9,7 +9,7 @@ $timing = Array(
 	'start' => microtime(true)
 );
 $mem = Array(
-	'start' => memory_get_usage()
+	'start' => memory_get_peak_usage()
 );
 
 // create object and retrieve config
@@ -19,7 +19,7 @@ $options = $doc->getConfig('minify');
 // process form submmission
 if (!empty($_POST['action'])) {
 	$timing['fetch'] = microtime(true);
-	$mem['fetch'] = memory_get_usage();
+	$mem['fetch'] = memory_get_peak_usage();
 
 	// handle a URL
 	if (!empty($_POST['url'])) {
@@ -57,7 +57,7 @@ if (!empty($_POST['action'])) {
 	// if there is some input
 	if ($input) {
 		$timing['parse'] = microtime(true);
-		$mem['parse'] = memory_get_usage();
+		$mem['parse'] = memory_get_peak_usage();
 
 		// retrieve the user posted options
 		$isset = isset($_POST['minify']) && is_array($_POST['minify']);
@@ -85,10 +85,10 @@ if (!empty($_POST['action'])) {
 
 		// record timings
 		$timing['minify'] = microtime(true);
-		$mem['minify'] = memory_get_usage();
+		$mem['minify'] = memory_get_peak_usage();
 		$output = $doc->save();
 		$timing['output'] = microtime(true);
-		$mem['output'] = memory_get_usage();
+		$mem['output'] = memory_get_peak_usage();
 	}
 } else {
 	$minify = $options;
@@ -227,7 +227,7 @@ if (!empty($_POST['action'])) {
 								<td><?= htmlspecialchars(number_format($golen)); ?></td>
 								<td><?= htmlspecialchars(number_format($gilen - $golen)); ?></td>
 								<td><?= htmlspecialchars(number_format((100 / $gilen) * $golen)); ?>%</td>
-								<td style="font-weight:bold;">Memory (kb)</td>
+								<td style="font-weight:bold;">Peak (kb)</td>
 								<td><?= htmlspecialchars(number_format($mem['fetch'] / 1024, 0)); ?>kb</td>
 								<td><?= htmlspecialchars(number_format($mem['parse'] / 1024, 0)); ?>kb</td>
 								<td><?= htmlspecialchars(number_format($mem['minify'] / 1024, 0)); ?>kb</td>

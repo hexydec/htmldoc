@@ -84,7 +84,7 @@ class tag implements token {
 						$attributes[$attr] = null;
 						$attr = null;
 					}
-					$attr = $token['value'];
+					$attr = ltrim($token['value']);
 					break;
 
 				// record attribute and value
