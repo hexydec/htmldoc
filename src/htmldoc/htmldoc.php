@@ -100,8 +100,9 @@ class htmldoc {
 		'minify' => [
 			'lowercase' => true, // lowercase tag and attribute names
 			'whitespace' => true, // strip whitespace from text nodes
-			'comments' => [ // remove comments
-				'ie' => true
+			'comments' => [
+				'remove' => true, // remove comments
+				'ie' => true // preserve IE comments
 			],
 			'urls' => [ // update internal URL's to be shorter
 				'scheme' => true, // remove the scheme from URLs that have the same scheme as the current document
@@ -735,7 +736,7 @@ class htmldoc {
 	}
 
 	/**
-	 * Converts out of tange characters into HTML entities within the selected charset
+	 * Converts out of range characters into HTML entities within the selected charset
 	 *
 	 * @param string $html A UTF-8 encoded HTML string
 	 * @param string $charset The target charset
@@ -763,32 +764,4 @@ class htmldoc {
 		$html = mb_convert_encoding($html, 'HTML-ENTITIES');
 		return str_replace(array_values($replace), array_keys($replace), $html);
 	}
-
-	// public function debug() {
-	// 	$output = [];
-	// 	foreach ($this->children AS $item) {
-	// 		$node = [
-	// 			'type' => get_class($item)
-	// 		];
-	// 		switch ($node['type']) {
-	// 			case 'hexydec\\html\\tag':
-	// 				$node['tag'] = $item->tagName;
-	// 				$node['attributes'] = $item->attributes;
-	// 				$node['singleton'] = $item->singleton;
-	// 				$node['close'] = $item->close;
-	// 				if ($item->children) {
-	// 					$node['children'] = $item->children->debug();
-	// 				}
-	// 				break;
-	// 			case 'hexydec\\html\\doctype':
-	// 				$node['doctype'] = $item->content;
-	// 				break;
-	// 			default:
-	// 				$node['content'] = $item->content;
-	// 				break;
-	// 		}
-	// 		$output[] = $node;
-	// 	}
-	// 	return $output;
-	// }
 }
