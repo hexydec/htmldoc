@@ -251,7 +251,7 @@ class tag implements token {
 			// lowercase attribute key
 			if ($minify['lowercase']) {
 				unset($attributes[$key]);
-				$key = mb_strtolower($key);
+				$key = mb_strtolower(strval($key));
 				$attributes[$key] = $value;
 			}
 
