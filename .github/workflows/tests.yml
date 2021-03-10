@@ -16,8 +16,6 @@ jobs:
           php_extensions: mbstring xdebug
           bootstrap: src/autoload.php
           args: --coverage-text --coverage-clover=coverage.xml tests
-          env:
-            XDEBUG_MODE: coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
