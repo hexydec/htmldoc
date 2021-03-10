@@ -12,6 +12,8 @@ jobs:
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
         with:
+          php_version: 7.4
+          php_extensions: mbstring
           bootstrap: src/autoload.php
           args: --coverage-text --coverage-clover=coverage.xml tests
 
