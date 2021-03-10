@@ -9,10 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: php-actions/composer@v5
-
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
         with:
           bootstrap: src/autoload.php
-          args: --coverage-text --coverage-clover=coverage.xml
+          args: --coverage-text --coverage-clover=coverage.xml tests
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
