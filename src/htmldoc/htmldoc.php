@@ -180,11 +180,27 @@ class htmldoc {
 	 */
 	public function __construct(array $config = []) {
 		$this->config = array_replace_recursive($this->config, [
-			'custom' => [ /// default to CSSdoc if available
+			'custom' => [
+
+				// default to CSSdoc if available
 				'style' => [
 					'config' => [
 						'minifier' => class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
 							$obj = new \hexydec\css\cssdoc();
+							if ($obj->load($css)) {
+								$obj->minify($minify);
+								return $obj->compile();
+							}
+							return $css;
+						} : null
+					]
+				],
+
+				// default to JSLite if available
+				'script' => [
+					'config' => [
+						'minifier' => class_exists('\\hexydec\\jslite\\jslite') ? function (string $css, array $minify) {
+							$obj = new \hexydec\jslite\jslite();
 							if ($obj->load($css)) {
 								$obj->minify($minify);
 								return $obj->compile();

@@ -12,7 +12,8 @@
     ],
     "minimum-stability": "beta",
     "require": {
-		"hexydec/cssdoc": "@dev"
+		"hexydec/cssdoc": "@dev",
+		"hexydec/jslite": "@dev"
 	},
 	"autoload": {
 		"classmap": ["src/"]

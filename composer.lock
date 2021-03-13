@@ -4,22 +4,23 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5cb7669d2b6af0db5aab86754134a1dd",
+    "content-hash": "06c5263bd1203be5b3efeee1e80895d6",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "dev-master",
+            "version": "dev-Development",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "1690477ff7b805a245380480215c6b12b3f6b833"
+                "reference": "62805af536f6e14666e85f597811ce05a8b72bb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/1690477ff7b805a245380480215c6b12b3f6b833",
-                "reference": "1690477ff7b805a245380480215c6b12b3f6b833",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/62805af536f6e14666e85f597811ce05a8b72bb1",
+                "reference": "62805af536f6e14666e85f597811ce05a8b72bb1",
                 "shasum": ""
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -38,18 +39,62 @@
                 }
             ],
             "description": "A token based CSS Document parser and minifier written in PHP",
-            "time": "2020-07-11T22:43:06+00:00"
+            "support": {
+                "issues": "https://github.com/hexydec/cssdoc/issues",
+                "source": "https://github.com/hexydec/cssdoc/tree/Development"
+            },
+            "time": "2020-11-15T22:51:48+00:00"
+        },
+        {
+            "name": "hexydec/jslite",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hexydec/jslite.git",
+                "reference": "71f63334519aad0a7c272dc789dcda1c9aecb997"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/71f63334519aad0a7c272dc789dcda1c9aecb997",
+                "reference": "71f63334519aad0a7c272dc789dcda1c9aecb997",
+                "shasum": ""
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Earp",
+                    "email": "will@hexydec.com",
+                    "homepage": "https://github.com/hexydec/jslite"
+                }
+            ],
+            "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
+            "support": {
+                "issues": "https://github.com/hexydec/jslite/issues",
+                "source": "https://github.com/hexydec/jslite/tree/master"
+            },
+            "time": "2021-03-13T15:11:35+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "beta",
     "stability-flags": {
-        "hexydec/cssdoc": 20
+        "hexydec/cssdoc": 20,
+        "hexydec/jslite": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.0.0"
 }
