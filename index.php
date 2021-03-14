@@ -1,6 +1,11 @@
 <?php
 require(__DIR__.'/vendor/autoload.php');
 
+$error = null;
+set_error_handler(function (int $type, string $msg) use (&$error) {
+	$error = $msg;
+});
+
 $base = empty($_POST['base']) ? '' : $_POST['base'];
 $input = '';
 $output = '';
@@ -18,8 +23,6 @@ $options = $doc->getConfig('minify');
 
 // process form submmission
 if (!empty($_POST['action'])) {
-	$timing['fetch'] = microtime(true);
-	$mem['fetch'] = memory_get_peak_usage();
 
 	// handle a URL
 	if (!empty($_POST['url'])) {
@@ -31,6 +34,10 @@ if (!empty($_POST['action'])) {
 		// check the host name
 		} elseif (!isset($url['host'])) {
 			trigger_error('Could not parse URL: No host was supplied', E_USER_WARNING);
+
+		// open the document manually so we can time it
+		} elseif (($input = file_get_contents($_POST['url'])) === false) {
+			trigger_error('Could not load HTML: The file could not be accessed'.$error, E_USER_WARNING);
 
 		// open the document
 		} elseif (($input = $doc->open($_POST['url'], null, $error)) === false) {
@@ -45,50 +52,54 @@ if (!empty($_POST['action'])) {
 	} elseif (empty($_POST['source'])) {
 		trigger_error('No URL or HTML source was posted', E_USER_WARNING);
 
-	// load the source code
-	} elseif (!$doc->load($_POST['source'], null, $error)) {
-		trigger_error('Could not parse HTML: '.$error, E_USER_WARNING);
-
 	// record the HTML
 	} else {
 		$input = $_POST['source'];
 	}
+	$timing['fetch'] = microtime(true);
+	$mem['fetch'] = memory_get_peak_usage();
 
-	// if there is some input
+	// load the source code
 	if ($input) {
-		$timing['parse'] = microtime(true);
-		$mem['parse'] = memory_get_peak_usage();
+		if (!$doc->load($input, null, $error)) {
+			trigger_error('Could not parse HTML: '.$error, E_USER_WARNING);
 
-		// retrieve the user posted options
-		$isset = isset($_POST['minify']) && is_array($_POST['minify']);
-		foreach ($options AS $key => $item) {
-			if ($key != 'elements') {
-				$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? [] : (is_bool($options[$key]) ? true : $options[$key])) : false;
-				if (is_array($item)) {
-					foreach ($item AS $sub => $value) {
-						if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
-							$minify[$key][$sub] = true;
-						} elseif ($minify[$key]) {
-							$minify[$key][$sub] = false;
+		// minify the output
+		} else {
+			$timing['parse'] = microtime(true);
+			$mem['parse'] = memory_get_peak_usage();
+
+			// retrieve the user posted options
+			$isset = isset($_POST['minify']) && is_array($_POST['minify']);
+			foreach ($options AS $key => $item) {
+				if ($key != 'elements') {
+					$minify[$key] = $isset && in_array($key, $_POST['minify']) ? (is_array($item) ? [] : (is_bool($options[$key]) ? true : $options[$key])) : false;
+					if (is_array($item)) {
+						foreach ($item AS $sub => $value) {
+							if ($minify[$key] !== false && isset($_POST['minify'][$key]) && is_array($_POST['minify'][$key]) && in_array($sub, $_POST['minify'][$key])) {
+								$minify[$key][$sub] = true;
+							} elseif ($minify[$key]) {
+								$minify[$key][$sub] = false;
+							}
 						}
 					}
+				} else {
+					unset($options[$key]);
 				}
-			} else {
-				unset($options[$key]);
 			}
-		}
 
-		// minify the input
-		if ($minify) {
-			$doc->minify($minify);
-		}
+			// minify the input
+			if ($minify) {
+				$doc->minify($minify);
+			}
 
-		// record timings
-		$timing['minify'] = microtime(true);
-		$mem['minify'] = memory_get_peak_usage();
-		$output = $doc->save();
-		$timing['output'] = microtime(true);
-		$mem['output'] = memory_get_peak_usage();
+			// record timings
+			$timing['minify'] = microtime(true);
+			$mem['minify'] = memory_get_peak_usage();
+			$output = $doc->save();
+			$timing['output'] = microtime(true);
+			$mem['output'] = memory_get_peak_usage();
+		}
 	}
 } else {
 	$minify = $options;
@@ -111,10 +122,18 @@ if (!empty($_POST['action'])) {
 				display: flex;
 				flex-direction: column;
 				flex: 1 1 auto;
+				margin-bottom: 10px;
 			}
 			.minify__form-heading {
 				margin: 10px 10px 0 10px;
 				flex: 0 0 auto;
+			}
+			.minify__form-error {
+				padding: 10px;
+				background: red;
+				font-weight bold;
+				color: #FFF;
+				margin: 10px 10px 0 10px;
 			}
 			.minify__form-input {
 				flex: 1 1 auto;
@@ -171,6 +190,9 @@ if (!empty($_POST['action'])) {
 		<form action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" accept-charset="<?= mb_internal_encoding(); ?>" class="minify__form">
 			<div class="minify__form-wrap">
 				<h1 class="minify__form-heading">HTML Minifier</h1>
+				<?php if ($error) { ?>
+					<div class="minify__form-error"><?= htmlspecialchars($error); ?></div>
+				<?php } ?>
 				<div class="minify__form-input">
 					<label for="source">Paste HTML:</label>
 					<textarea name="source" id="source" class="minify__form-input-box"><?= htmlspecialchars($input); ?></textarea>
