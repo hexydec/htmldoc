@@ -39,10 +39,6 @@ if (!empty($_POST['action'])) {
 		} elseif (($input = file_get_contents($_POST['url'])) === false) {
 			trigger_error('Could not load HTML: The file could not be accessed'.$error, E_USER_WARNING);
 
-		// open the document
-		} elseif (($input = $doc->open($_POST['url'], null, $error)) === false) {
-			trigger_error('Could not load HTML: '.$error, E_USER_WARNING);
-
 		// save base URL
 		} else {
 			$base = $_POST['url'];

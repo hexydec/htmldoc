@@ -2,7 +2,7 @@
 declare(strict_types = 1);
 namespace hexydec\html;
 
-class htmldoc {
+class htmldoc implements \ArrayAccess, \Iterator {
 
 	/**
 	 * @var array $tokens Regexp components keyed by their corresponding codename for tokenising HTML
@@ -169,6 +169,11 @@ class htmldoc {
 	protected $children = [];
 
 	/**
+	 * @var int $pointer The current pointer position for the array iterator
+	 */
+	protected $pointer = 0;
+
+	/**
 	 * @var array A cache of attribute and class names for sorting
 	 */
 	protected $cache = [];
@@ -235,6 +240,66 @@ class htmldoc {
 	 */
 	public function toArray() : array {
 		return $this->children;
+	}
+
+	/**
+	 * Array access method allows you to set the object's configuration as properties
+	 *
+	 * @param string|integer $i The key to be updated, can be a string or integer
+	 * @param mixed $value The value of the array key in the children array to be updated
+	 */
+	public function offsetSet($i, $value) : void {
+		if (is_null($i)) $this->children[] = $value;
+		else $this->children[$i] = $value;
+	}
+
+	/**
+	 * Array access method allows you to check that a key exists in the configuration array
+	 *
+	 * @param string|integer $i The key to be checked, can be a string or integer
+	 * @return bool Whether the key exists in the config array
+	 */
+	public function offsetExists($i) : bool {
+		return isset($this->children[$i]);
+	}
+
+	/**
+	 * Removes a key from the configuration array
+	 *
+	 * @param string|integer $i The key to be removed, can be a string or integer
+	 */
+	public function offsetUnset($i) : void {
+		unset($this->children[$i]);
+	}
+
+	/**
+	 * Retrieves a value from the configuration array with the specified key
+	 *
+	 * @param string|integer $i The key to be accessed, can be a string or integer
+	 * @return mixed The requested value or null if the key doesn't exist
+	 */
+	public function offsetGet($i) { // return reference so you can set it like an array
+		return $this->children[$i] ?? null;
+	}
+
+	public function current() {
+		return $this->children[$this->pointer] ?? null;
+	}
+
+	public function key() : scalar {
+		return $this->pointer;
+	}
+
+	public function next() : void {
+		$this->pointer++;
+	}
+
+	public function rewind() : void {
+		$this->pointer = 0;
+	}
+
+	public function valid() : bool {
+		return isset($this->children[$this->pointer]);
 	}
 
 	/**

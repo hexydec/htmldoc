@@ -33,16 +33,16 @@ class script implements token {
 	public function parse(tokenise $tokens) : void {
 		if (($token = $tokens->current()) !== null) {
 			$value = '';
-			$quotes = 0;
-			while ($token !== null && ($quotes % 2 || $token['type'] != 'tagclose' || $token['value'] != '</script>')) {
+
+			// note that if you have a Javascript string with </script> in it, this will incorrectly close the capture
+			// the only way to mitigate this would be to correctly parse the javascript, which would be too complex and slow
+			// the input javascript can be changed to "</scr" + "ipt>"
+			while ($token !== null && ($token['type'] != 'tagclose' || $token['value'] != '</script>')) {
 				if ($token['type'] == 'cdata') {
 					$value .= mb_substr($token['value'], 9, -3);
 				} else {
 					$value .= $token['value'];
 				}
-
-				// count quotes so we don't capture a script tag in a string
-				$quotes += mb_substr_count(str_replace(['\\\\', '\\\\"', "\\\\'"], ['', '', ''], $token['value']), '"');
 				$token = $tokens->next();
 			}
 			$tokens->prev();
@@ -60,9 +60,12 @@ class script implements token {
 	 */
 	public function minify(array $minify) : void {
 		if (!isset($minify['script']) || $minify['script'] !== false) {
-			$func = $this->root->getConfig('custom', 'script', 'config', 'minifier');
-			if ($func) {
-				$this->content = call_user_func($func, $this->content, $minify['script']);
+			$this->content = trim($this->content);
+			if ($this->content) {
+				$func = $this->root->getConfig('custom', 'script', 'config', 'minifier');
+				if ($func) {
+					$this->content = call_user_func($func, $this->content, $minify['script']);
+				}
 			}
 		}
 	}
