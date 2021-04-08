@@ -3,7 +3,11 @@ require(__DIR__.'/vendor/autoload.php');
 
 $error = null;
 set_error_handler(function (int $type, string $msg) use (&$error) {
-	$error = $msg;
+	if (in_array($type, [E_USER_WARNING, E_USER_NOTICE])) {
+		$error = $msg;
+	} else {
+		return false;
+	}
 });
 
 $base = empty($_POST['base']) ? '' : $_POST['base'];

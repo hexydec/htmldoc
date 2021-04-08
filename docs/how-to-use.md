@@ -41,7 +41,7 @@ if ($doc->load($html, $charset)) {
 $url = 'https://github.com/hexydec'; // of course you want to parse this page
 $context = stream_context_create([
 	'http' => [
-		'user-agent' => 'My HTML Bot 1.0 (Mozilla Compatible)',
+		'user_agent' => 'My HTML Bot 1.0 (Mozilla Compatible)',
 		'timeout' => 10
 	]
 ]);

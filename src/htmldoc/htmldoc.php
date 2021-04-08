@@ -441,7 +441,7 @@ class htmldoc implements \ArrayAccess, \Iterator {
 	protected function parseSelector(string $selector) {
 		$selector = trim($selector);
 		$tokens = new tokenise(self::$selectors, $selector);
-		if (($token = $tokens->current()) !== null) {
+		if (($token = $tokens->next()) !== null) {
 			$selectors = $parts = [];
 			$join = null;
 			do {

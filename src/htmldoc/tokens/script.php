@@ -31,24 +31,10 @@ class script implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		if (($token = $tokens->current()) !== null) {
-			$value = '';
-
-			// note that if you have a Javascript string with </script> in it, this will incorrectly close the capture
-			// the only way to mitigate this would be to correctly parse the javascript, which would be too complex and slow
-			// the input javascript can be changed to "</scr" + "ipt>"
-			while ($token !== null && ($token['type'] != 'tagclose' || $token['value'] != '</script>')) {
-				if ($token['type'] == 'cdata') {
-					$value .= mb_substr($token['value'], 9, -3);
-				} else {
-					$value .= $token['value'];
-				}
-				$token = $tokens->next();
-			}
-			$tokens->prev();
-			if ($value) {
-				$this->content = $value;
-			}
+		// $pattern = '/\G(?:"(?:\\\\[^\\n\\r]|[^\\\\"\\n\\r])*+"|\'(?:\\\\[^\\n\\r]|[^\\\\\'\\n\\r])*+\'|`(?:\\\\.|[^\\\\`])*+`|[^"\'`]*)*(?=<\\/script>)/iU';
+		$pattern = '/[\\S\\s]*(?=<\\/script>)/iU';
+		if (($token = $tokens->next($pattern)) !== null && $token[0]) {
+			$this->content = $token[0];
 		}
 	}
 

@@ -106,7 +106,6 @@ class tag implements token {
 
 				case 'tagopenend':
 					if (!in_array($tag, $config['elements']['singleton'])) {
-						$tokens->next();
 						$this->children = $this->parseChildren($tokens, $config);
 						break;
 					} else {
@@ -174,7 +173,7 @@ class tag implements token {
 			$children[] = $item;
 
 		// parse children
-		} elseif (($token = $tokens->current()) !== null) {
+		} elseif (($token = $tokens->next()) !== null) {
 			$tag = null;
 			do {
 				switch ($token['type']) {
@@ -205,7 +204,7 @@ class tag implements token {
 
 						// prevent dropping down a level when tags don't match or close is optional
 						if ($parenttag && strcasecmp($close, $parenttag) === 0 || in_array($parenttag, $config['closeoptional'])) {
-							$tokens->prev(); // let the parebt parse() method handle it
+							$tokens->prev(); // let the parent parse() method handle it
 							break 2;
 						}
 						break;
@@ -256,7 +255,7 @@ class tag implements token {
 			}
 
 			// minify url attributes when not in list or match attribute
-			if ($minify['urls'] && in_array($key, $attr['urls']) && (!in_array($tag, array_keys($attr['urlskip'])) || $this->hasAttribute($attributes, $attr['urlskip'][$tag]))) {
+			if ($minify['urls'] && $attributes[$key] && in_array($key, $attr['urls']) && (!in_array($tag, array_keys($attr['urlskip'])) || $this->hasAttribute($attributes, $attr['urlskip'][$tag]))) {
 
 				// make folder variables
 				if ($folder === null && isset($_SERVER['REQUEST_URI'])) {
@@ -419,8 +418,19 @@ class tag implements token {
 
 		// minify children
 		if ($this->children) {
+
+			// use tag specific minification options
 			if (isset($minify['elements'][$tag])) {
-				$minify = array_replace_recursive($minify, $minify['elements'][$tag]);
+				foreach ($minify AS $key => $item) {
+					if (isset($minify['elements'][$tag][$key])) {
+						if (!is_array($minify['elements'][$tag][$key])) {
+							$minify[$key] = $minify['elements'][$tag][$key];
+						} elseif ($minify[$key]) {
+							$minify[$key] = array_merge($minify[$key], $minify['elements'][$tag][$key]);
+						}
+					}
+				}
+				// $minify = array_replace_recursive($minify, $minify['elements'][$tag]);
 			}
 			foreach ($this->children AS $item) {
 				$item->minify($minify);

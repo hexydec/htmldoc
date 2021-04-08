@@ -46,7 +46,7 @@ class tokenise {
 		$this->value = $value;
 
 		// generate the first token
-		$this->next();
+		// $this->next();
 	}
 
 	/**
@@ -70,9 +70,10 @@ class tokenise {
 	/**
 	 * Retrieves the next token
 	 *
+	 * @param string $pattern A custom pattern to get the next token, if set will be used in place of the configured token
 	 * @return array The next token or null if there are no more tokens to retrieve
 	 */
-	public function next() : ?array {
+	public function next(string $pattern = null) : ?array {
 		$pointer = $this->pointer + 1;
 
 		// get cached token
@@ -80,23 +81,29 @@ class tokenise {
 			return $this->tokens[++$this->pointer];
 
 		// extract next token
-		} elseif (preg_match($this->pattern, $this->value, $match, PREG_UNMATCHED_AS_NULL, $this->pos)) {
+		} elseif (preg_match($pattern ?? $this->pattern, $this->value, $match, PREG_UNMATCHED_AS_NULL, $this->pos)) {
+			$this->pos += strlen($match[0]);
+
+			// custom pattern
+			if ($pattern) {
+				return $match;
 
 			// go through tokens and find which one matched
-			foreach ($this->keys AS $i => $key) {
-				$i++; // 1 based array
-				if ($match[$i] !== null) {
-					$this->pos += strlen($match[$i]);
+			} else {
+				foreach ($this->keys AS $i => $key) {
+					$i++; // 1 based array
+					if ($match[$i] !== null) {
 
-					// save the token
-					$token = $this->tokens[++$this->pointer] = [
-						'type' => $key,
-						'value' => $match[$i]
-					];
+						// save the token
+						$token = $this->tokens[++$this->pointer] = [
+							'type' => $key,
+							'value' => $match[$i]
+						];
 
-					// remove previous tokens to lower memory consumption, also makes the program faster with a smaller array to handle
-					unset($this->tokens[$pointer - 2]);
-					return $token;
+						// remove previous tokens to lower memory consumption, also makes the program faster with a smaller array to handle
+						unset($this->tokens[$pointer - 2]);
+						return $token;
+					}
 				}
 			}
 		}

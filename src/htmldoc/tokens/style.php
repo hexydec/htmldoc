@@ -31,21 +31,26 @@ class style implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		if (($token = $tokens->current()) !== null) {
-			$value = '';
-			while ($token !== null && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
-				if ($token['type'] == 'cdata') {
-					$value .= mb_substr($token['value'], 9, -3);
-				} else {
-					$value .= $token['value'];
-				}
-				$token = $tokens->next();
-			}
-			$tokens->prev();
-			if ($value) {
-				$this->content = $value;
-			}
+		$pattern = '/[\\S\\s]*(?=<\\/style>)/iU';
+		if (($token = $tokens->next($pattern)) !== null && $token[0]) {
+			$this->content = $token[0];
+			return;
 		}
+		// if (($token = $tokens->current()) !== null) {
+		// 	$value = '';
+		// 	while ($token !== null && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
+		// 		if ($token['type'] == 'cdata') {
+		// 			$value .= mb_substr($token['value'], 9, -3);
+		// 		} else {
+		// 			$value .= $token['value'];
+		// 		}
+		// 		$token = $tokens->next();
+		// 	}
+		// 	$tokens->prev();
+		// 	if ($value) {
+		// 		$this->content = $value;
+		// 	}
+		// }
 	}
 
 	/**
