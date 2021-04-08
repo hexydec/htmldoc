@@ -5,3 +5,4 @@
 /vendor/
 /coverage
 /phpunit.xml
+/tests/cache

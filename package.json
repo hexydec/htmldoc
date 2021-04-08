@@ -18,13 +18,5 @@
   ],
   "author": "Will Earp <will@hexydec.com>",
   "repository": "https://github.com/hexydec/htmldoc",
-  "license": "MIT",
-  "dependencies": {
-    "grunt-cli": "^1.3.2",
-    "load-grunt-tasks": "^4.0.0"
-  },
-  "devDependencies": {
-    "grunt": "^1.0.4",
-    "grunt-phpunit": "^0.3.6"
-  }
+  "license": "MIT"
 }

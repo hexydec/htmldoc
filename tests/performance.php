@@ -42,7 +42,6 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 
 	// test the performance
 	foreach ($urls AS $item) {
-		var_dump($item);
 		set_time_limit(30);
 		$time1 = microtime(true);
 		if (($input = fetch($item)) !== false) {
