@@ -62,7 +62,6 @@ class tag implements token {
 	public function parse(tokenise $tokens) : void {
 
 		// cache vars
-		$config = $this->root->getConfig();
 		$tag = $this->tagName;
 		$attributes = [];
 
@@ -105,8 +104,8 @@ class tag implements token {
 					break;
 
 				case 'tagopenend':
-					if (!in_array($tag, $config['elements']['singleton'])) {
-						$this->children = $this->parseChildren($tokens, $config);
+					if (!in_array($tag, $this->root->getConfig('elements', 'singleton'))) {
+						$this->children = $this->parseChildren($tokens);
 						break;
 					} else {
 						$this->singleton = $token['value'];
@@ -114,7 +113,7 @@ class tag implements token {
 					}
 
 				case 'tagselfclose':
-					if (in_array($tag, $config['elements']['singleton'])) {
+					if (in_array($tag, $this->root->getConfig('elements', 'singleton'))) {
 						$this->singleton = $token['value'];
 					}
 					break 2;
@@ -127,7 +126,7 @@ class tag implements token {
 						break 2;
 
 					// same as parent tag and close optional
-					} elseif ($this->parent->tagName && strcasecmp($this->parent->tagName, $close) === 0 && in_array($tag, $config['elements']['closeoptional'])) {
+					} elseif ($this->parent->tagName && strcasecmp($this->parent->tagName, $close) === 0 && in_array($tag, $this->root->getConfig('elements', 'closeoptional'))) {
 						$this->close = false;
 						$tokens->prev(); // close the tag on parent
 						break 2;
@@ -163,11 +162,10 @@ class tag implements token {
 	public function parseChildren(tokenise $tokens) : array {
 		$root = $this->root;
 		$parenttag = $this->tagName;
-		$config = $this->root->getConfig('elements');
 		$children = [];
 
 		// process custom tags
-		if ($parenttag && ($custom = $this->root->getConfig('custom', $parenttag)) !== null) {
+		if ($parenttag && ($custom = $root->getConfig('custom', $parenttag)) !== null) {
 			$item = new $custom['class']($root);
 			$item->parse($tokens);
 			$children[] = $item;
@@ -175,6 +173,7 @@ class tag implements token {
 		// parse children
 		} elseif (($token = $tokens->next()) !== null) {
 			$tag = null;
+			$optional = $this->root->getConfig('elements', 'closeoptional');
 			do {
 				switch ($token['type']) {
 					case 'doctype':
@@ -187,7 +186,7 @@ class tag implements token {
 						$tag = trim($token['value'], '<');
 
 						// unnestable tag, pass back to parent
-						if ($parenttag && strcasecmp($tag, $parenttag) === 0 && in_array($tag, $config['closeoptional'])) {
+						if ($parenttag && strcasecmp($tag, $parenttag) === 0 && in_array($tag, $optional)) {
 							$tokens->prev();
 							break 2;
 						} else {
@@ -203,7 +202,7 @@ class tag implements token {
 						$close = trim($token['value'], "</ \r\n\t>");
 
 						// prevent dropping down a level when tags don't match or close is optional
-						if ($parenttag && strcasecmp($close, $parenttag) === 0 || in_array($parenttag, $config['closeoptional'])) {
+						if ($parenttag && strcasecmp($close, $parenttag) === 0 || in_array($parenttag, $optional)) {
 							$tokens->prev(); // let the parent parse() method handle it
 							break 2;
 						}
