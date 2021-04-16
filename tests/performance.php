@@ -20,6 +20,10 @@ function fetch($url) {
 	]);
 	$html = file_get_contents($url, false, $context);
 	if ($url != $cache) {
+		$dir = dirname($cache);
+		if (!is_dir($dir)) {
+			mkdir($dir, 0755, true);
+		}
 		file_put_contents($cache, $html);
 	}
 	return $html ? $html : false;
