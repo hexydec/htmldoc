@@ -43,23 +43,23 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 	// test the performance
 	foreach ($urls AS $item) {
 		set_time_limit(30);
-		$time1 = microtime(true);
+		$start = microtime(true);
 		if (($input = fetch($item)) !== false) {
-			$time2 = microtime(true);
+			$fetch = microtime(true);
 			$results[$item] = [
-				'load' => $time2 - $time1
+				'load' => $fetch - $start
 			];
 			$obj = new \hexydec\html\htmldoc();
 			if ($obj->load($input)) {
-				$start = $time = microtime(true);
-				$results[$item]['parse'] = $time - $time2;
+				$load = microtime(true);
+				$results[$item]['parse'] = $load - $fetch;
 				$obj->minify();
-				$time2 = microtime(true);
-				$results[$item]['minify'] = $time2 - $time;
+				$minify = microtime(true);
+				$results[$item]['minify'] = $minify - $load;
 				$output = $obj->save();
-				$time = microtime(true);
-				$results[$item]['compile'] = $time - $time2;
-				$results[$item]['total'] = $time - $start;
+				$save = microtime(true);
+				$results[$item]['compile'] = $save - $minify;
+				$results[$item]['total'] = $save - $fetch;
 				$results[$item]['input'] = strlen($input);
 				$results[$item]['inputgz'] = strlen(gzencode($input));
 				$results[$item]['output'] = strlen($output);
@@ -142,17 +142,45 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 						</tr>
 					<?php }
 					$count = count($results);
-					$input = array_sum(array_column($results, 'input')) / $count;
-					$output = array_sum(array_column($results, 'output')) / $count;
-					$inputgz = array_sum(array_column($results, 'inputgz')) / $count;
-					$outputgz = array_sum(array_column($results, 'outputgz')) / $count;
-					$load = array_sum(array_column($results, 'load')) / $count;
-					$parse = array_sum(array_column($results, 'parse')) / $count;
-					$minify = array_sum(array_column($results, 'minify')) / $count;
-					$compile = array_sum(array_column($results, 'compile')) / $count;
-					$total = array_sum(array_column($results, 'total')) / $count; ?>
+					$input = array_sum(array_column($results, 'input'));
+					$output = array_sum(array_column($results, 'output'));
+					$inputgz = array_sum(array_column($results, 'inputgz'));
+					$outputgz = array_sum(array_column($results, 'outputgz'));
+					$load = array_sum(array_column($results, 'load'));
+					$parse = array_sum(array_column($results, 'parse'));
+					$minify = array_sum(array_column($results, 'minify'));
+					$compile = array_sum(array_column($results, 'compile'));
+					$total = array_sum(array_column($results, 'total')); ?>
 					<tr style="font-weight:bold">
 						<td colspan="2">Total</td>
+						<td><?= htmlspecialchars(number_format($input)); ?></td>
+						<td><?= htmlspecialchars(number_format($output)); ?></td>
+						<td><?= htmlspecialchars(number_format($input - $output)); ?></td>
+						<td><?= htmlspecialchars(number_format((100 / $input) * $output)); ?>%</td>
+						<td><?= htmlspecialchars(number_format($inputgz)); ?></td>
+						<td><?= htmlspecialchars(number_format($outputgz)); ?></td>
+						<td><?= htmlspecialchars(number_format($inputgz - $outputgz)); ?></td>
+						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz)); ?>%</td>
+						<td><?= htmlspecialchars(number_format($load, 4)); ?>s</td>
+						<td><?= htmlspecialchars(number_format($parse, 4)); ?>s</td>
+						<td><?= htmlspecialchars(number_format($minify, 4)); ?>s</td>
+						<td><?= htmlspecialchars(number_format($compile, 4)); ?>s</td>
+						<td><?= htmlspecialchars(number_format($total, 4)); ?>s</td>
+					</tr>
+					<?php
+					$count = count($results);
+					$input /= $count;
+					$output /= $count;
+					$inputgz /= $count;
+					$outputgz /= $count;
+					$load /= $count;
+					$parse /= $count;
+					$minify /= $count;
+					$compile /= $count;
+					$total /= $count;
+					?>
+					<tr style="font-weight:bold">
+						<td colspan="2">Average</td>
 						<td><?= htmlspecialchars(number_format($input)); ?></td>
 						<td><?= htmlspecialchars(number_format($output)); ?></td>
 						<td><?= htmlspecialchars(number_format($input - $output)); ?></td>

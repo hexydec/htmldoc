@@ -81,6 +81,11 @@ An optional array contains a list of configuration parameters to configure the m
 			<td colspan="2">Minify attributes</td>
 			<td><code>Array()</code></td>
 		</tr>
+			<tr>
+				<td><code>trim</code></td>
+				<td>Trim whitespace from around attribute values</td>
+				<td><code>true</code></td>
+			</tr>
 		<tr>
 			<td><code>default</code></td>
 			<td>Remove default attributes as defined in <code>htmldoc::$config['attributes']['default']</code></td>
@@ -103,7 +108,7 @@ An optional array contains a list of configuration parameters to configure the m
 		</tr>
 		<tr>
 			<td><code>class</code></td>
-			<td>Sort class names for better gzip compression</td>
+			<td>Remove unnecessary whitespace from class attributes</td>
 			<td><code>true</code></td>
 		</tr>
 		<tr>

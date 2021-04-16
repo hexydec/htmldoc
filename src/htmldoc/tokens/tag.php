@@ -94,11 +94,6 @@ class tag implements token {
 							$value = substr($value, 1, -1);
 						}
 						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
-
-						// cache value for minifier
-						if ($attr == 'class') {
-							$this->root->cache('class', array_filter(explode(' ', $attributes[$attr])));
-						}
 						$attr = false;
 					}
 					break;
@@ -326,7 +321,8 @@ class tag implements token {
 			if ($minify['attributes']) {
 
 				// trim attribute
-				if ($attributes[$key]) {
+				if ($minify['attributes']['trim'] && $attributes[$key]) {
+					$a = $attributes[$key];
 					$attributes[$key] = trim($attributes[$key], " \r\n\t");
 				}
 
@@ -342,9 +338,9 @@ class tag implements token {
 						$attributes[$key]
 					), '; ');
 
-				// sort classes
+				// trim classes
 				} elseif ($key == 'class' && $minify['attributes']['class'] && mb_strpos($attributes[$key], ' ') !== false) {
-					$attributes[$key] = implode(' ', array_intersect($minify['attributes']['class'], explode(' ', $attributes[$key])));
+					$attributes[$key] = trim(preg_replace('/\s+/', ' ', $attributes[$key]));
 
 				// minify option tag, always capture the tag to prevent it being removed as a default
 				} elseif ($key == 'value' && $tag == 'option') {

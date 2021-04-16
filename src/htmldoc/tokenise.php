@@ -44,9 +44,6 @@ class tokenise {
 		$this->pattern = '/\G('.implode(')|(', $tokens).')/u';
 		$this->keys = array_keys($tokens);
 		$this->value = $value;
-
-		// generate the first token
-		// $this->next();
 	}
 
 	/**
@@ -71,9 +68,10 @@ class tokenise {
 	 * Retrieves the next token
 	 *
 	 * @param string $pattern A custom pattern to get the next token, if set will be used in place of the configured token
+	 * @param bool $delete Denotes whether to delete previous tokens to save memory
 	 * @return array The next token or null if there are no more tokens to retrieve
 	 */
-	public function next(string $pattern = null) : ?array {
+	public function next(string $pattern = null, bool $delete = true) : ?array {
 		$pointer = $this->pointer + 1;
 
 		// get cached token
@@ -101,7 +99,9 @@ class tokenise {
 						];
 
 						// remove previous tokens to lower memory consumption, also makes the program faster with a smaller array to handle
-						unset($this->tokens[$pointer - 2]);
+						if ($delete) {
+							unset($this->tokens[$pointer - 2]);
+						}
 						return $token;
 					}
 				}

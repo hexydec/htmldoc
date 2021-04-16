@@ -3,6 +3,7 @@ spl_autoload_register(function (string $class) : bool {
 	$dir = __DIR__.'/htmldoc';
 	$classes = [
 		'hexydec\\html\\htmldoc' => $dir.'/htmldoc.php',
+		'hexydec\\html\\config' => $dir.'/config.php',
 		'hexydec\\html\\tokenise' => $dir.'/tokenise.php',
 		'hexydec\\html\\token' => $dir.'/tokens/interfaces/token.php',
 		'hexydec\\html\\comment' => $dir.'/tokens/comment.php',
