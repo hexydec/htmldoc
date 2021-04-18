@@ -53,8 +53,8 @@ The above assumes the default output setting of `'quotestyle' => 'double'`. Note
 
 ## HTML Encoding
 
-HTML Attribute values and Textnodes are stored internally with any HTML encoding removed. On output the contents of the attribute or text node is then encoded with the `htmlspecialchars()` function, this will result in any special characters that were not encoded correctly on input being encoded on output.
+HTML Attribute values and Textnodes are stored internally with any HTML encoding removed. On output the contents of the attribute or text node is then encoded, this will result in any special characters that were not encoded correctly on input being encoded on output.
 
-Any HTML entities (Except `<`, `>`, `=`, `'`, `"`) that were encoded on input, will now no longer be encoded and use the native character.
+Any HTML entities (Except `<`, `>`, `=`, `'`, `"`) that were encoded on input, will now no longer be encoded and use the native character (Note that for HTML attributes, only `&`, `<` and the quote character used to contain the attribute will be encoded).
 
 *This is valid for documents that are outputted with the default UTF-8 encoding. For other encodings, especially single-byte encodings, characters that do not have a representation in the output encoding will be represented by its HTML entity.*
