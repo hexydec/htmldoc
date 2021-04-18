@@ -31,9 +31,9 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			'<!--->' => '<!---->',
 			'<!doctype html>' => '<!DOCTYPE html>',
 			'<a href="#"">Extra quote</a>' => '<a href="#">Extra quote</a>',
-			'<p title="</p>">Closing tag in title</p>' => '<p title="&lt;/p&gt;">Closing tag in title</p>',
-			'<p title=" <!-- hello world --> ">Comment in title</p>' => '<p title=" &lt;!-- hello world --&gt; ">Comment in title</p>',
-			'<p title="<![CDATA[ hello world ]]>">Comment in title</p>' => '<p title="&lt;![CDATA[ hello world ]]&gt;">Comment in title</p>',
+			'<p title="</p>">Closing tag in title</p>' => '<p title="&lt;/p>">Closing tag in title</p>',
+			'<p title=" <!-- hello world --> ">Comment in title</p>' => '<p title=" &lt;!-- hello world --> ">Comment in title</p>',
+			'<p title="<![CDATA[ hello world ]]>">Comment in title</p>' => '<p title="&lt;![CDATA[ hello world ]]>">Comment in title</p>',
 			'<section><div><h1>Wrong closing tag order</div></h1></section>' => '<section><div><h1>Wrong closing tag order</h1></div></section>',
 			'<p class=test data-test=tester>Unquoted attributes</p>' => '<p class="test" data-test="tester">Unquoted attributes</p>',
 			// '<script>let test = "</script><div>Test</div>";</script>' => '<script>let test = "</script><div>Test</div>";</script>',
@@ -64,12 +64,13 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanEncodeAttributes() {
 		$tests = Array(
+			'<p title="Test characters are encoded & <> \'"></p>' => '<p title="Test characters are encoded &amp; &lt;> \'"></p>',
 			'<p title="test single quotes \'"></p>' => '<p title="test single quotes \'"></p>',
 			'<p title="test single quotes &apos;"></p>' => '<p title="test single quotes \'"></p>',
 			'<p title="test single quotes &#39;"></p>' => '<p title="test single quotes \'"></p>',
 			"<p title='test single quotes &#39;'></p>" => '<p title="test single quotes \'"></p>',
 			"<p disabled></p>" => '<p disabled></p>',
-			'<p disabled title="test double attribute"></p>' => '<p disabled title="test double attribute"></p>',
+			'<p disabled title="test double attribute"></p>' => '<p disabled title="test double attribute"></p>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
@@ -77,8 +78,15 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 				$this->assertEquals($output, $doc->html());
 			}
 		}
+
+		// single quotes
 		if ($doc->load('<p title="test single quotes &quot; \'"></p>', mb_internal_encoding())) {
-			$this->assertEquals("<p title='test single quotes &quot; &apos;'></p>", $doc->html(Array('quotestyle' => 'single')));
+			$this->assertEquals("<p title='test single quotes \" &#39;'></p>", $doc->html(Array('quotestyle' => 'single')));
+		}
+
+		// minimal - swap quote style
+		if ($doc->load('<p data-json="{&quot;foo&quot;: &quot;bar&quot;}"></p>', mb_internal_encoding())) {
+			$this->assertEquals('<p data-json=\'{"foo": "bar"}\'></p>', $doc->html(['quotestyle' => 'minimal']));
 		}
 	}
 
@@ -110,6 +118,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 	public function testCanProduceXhtml() {
 		$tests = Array(
 			"<p disabled></p>" => '<p disabled=""></p>',
+			"<p title=unquoted></p>" => '<p title="unquoted"></p>',
 			"<p title='disabled'></p>" => '<p title="disabled"></p>',
 			'<p class="para__first">Test<p class="para__second">Test 2' => '<p class="para__first">Test</p><p class="para__second">Test 2</p>',
 			"<img src='test.png' alt=''>" => '<img src="test.png" alt=""/>',
@@ -126,7 +135,12 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 		$doc = new htmldoc();
 		if ($doc->load('<div>Hello world</div>')) {
 			$file = dirname(__DIR__).'/save.html';
+			if (file_exists($file)) {
+				unlink($file);
+			}
 			$this->assertEquals(true, $doc->save($file), 'Can save document');
+			$this->assertEquals(true, file_exists($file), 'Saved document ecists');
+			$this->assertEquals('<div>Hello world</div>', file_get_contents($file), 'Saved document has the correct content');
 			unlink($file);
 		}
 	}

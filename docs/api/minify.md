@@ -39,10 +39,15 @@ An optional array contains a list of configuration parameters to configure the m
 			<td><code>true</code></td>
 		</tr>
 		<tr>
-			<td rowspan="2"><code>comments</code></td>
-			<td rowspan="2">Array</td>
-			<td colspan="2">Remove comments, set to false to preserve comments</td>
+			<td rowspan="3"><code>comments</code></td>
+			<td rowspan="3">Array</td>
+			<td colspan="2">Options for removing comments</td>
 			<td><code>Array()</code></td>
+		</tr>
+		<tr>
+			<td><code>comments</code></td>
+			<td>Whether to remove comments</td>
+			<td><code>true</code></td>
 		</tr>
 		<tr>
 			<td><code>ie</code></td>
@@ -76,8 +81,8 @@ An optional array contains a list of configuration parameters to configure the m
 			<td><code>true</code></td>
 		</tr>
 		<tr>
-			<td rowspan="8"><code>attributes</code></td>
-			<td rowspan="8">Array</td>
+			<td rowspan="9"><code>attributes</code></td>
+			<td rowspan="9">Array</td>
 			<td colspan="2">Minify attributes</td>
 			<td><code>Array()</code></td>
 		</tr>

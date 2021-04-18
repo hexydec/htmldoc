@@ -1,6 +1,7 @@
 <?php
 declare(strict_types = 1);
 namespace hexydec\html;
+use \hexydec\tokens\tokenise;
 
 class style implements token {
 

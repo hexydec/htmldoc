@@ -1,6 +1,7 @@
 <?php
 declare(strict_types = 1);
 namespace hexydec\html;
+use \hexydec\tokens\tokenise;
 
 class tag implements token {
 
@@ -608,16 +609,24 @@ class tag implements token {
 		foreach ($this->attributes AS $key => $value) {
 			$html .= ' '.$key;
 			if ($value !== null || $options['xml']) {
-				$empty = in_array($value, Array(null, ''), true);
-				$quote = '"';
-				if ($options['quotestyle'] == 'single') {
-					$quote = "'";
-				} elseif (!$empty && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
+				$empty = in_array($value, [null, ''], true);
+
+				// unquoted
+				if (!$options['xml'] && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$quote = '';
+
+				// single quotes || swap when minimal and there are double quotes in the string
+				} elseif ($options['quotestyle'] == 'single' || ($options['quotestyle'] == 'minimal' && mb_strpos($value, '"') !== false)) {
+					$quote = "'";
+					$value = str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value);
+
+				// double quotes
+				} else {
+					$quote = '"';
+					$value = str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $value);
 				}
-				if (!$empty) {
-					$value = htmlspecialchars($value, ENT_HTML5 | ($options['quotestyle'] == 'single' ? ENT_QUOTES : ENT_COMPAT));
-				}
+
+				// compile
 				$html .= '='.$quote.$value.$quote;
 			}
 		}

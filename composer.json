@@ -7,11 +7,13 @@
         {
             "name": "Will Earp",
             "email": "will@hexydec.com",
-			"homepage": "https://github.com/hexydec/htmldoc"
+			"homepage": "https://github.com/hexydec"
         }
     ],
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "require": {
+        "php": ">=7.3",
+		"hexydec/tokenise": "@dev",
 		"hexydec/cssdoc": "@dev",
 		"hexydec/jslite": "@dev"
 	},

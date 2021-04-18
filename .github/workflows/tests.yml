@@ -8,13 +8,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: php-actions/composer@v5
 
       - name: PHPUnit Tests
         uses: php-actions/phpunit@v2
         with:
           php_version: 7.4
           php_extensions: mbstring xdebug
-          bootstrap: src/autoload.php
+          bootstrap: vendor/autoload.php
           args: --coverage-text --coverage-clover=coverage.xml tests
         env:
           XDEBUG_MODE: coverage

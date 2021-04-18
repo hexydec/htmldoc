@@ -98,7 +98,7 @@ if ($doc->load($html)) {
 
 The `minify()` method can also accept an array of minification options to change what is minified and what is not, this can be useful for example for minification of HTML for emails.
 
-To see all the available options [see the API documentation](api/minify.md).
+To see all the available options [API documentation for the `minify()` method](api/minify.md).
 
 ## Outputting Documents
 
