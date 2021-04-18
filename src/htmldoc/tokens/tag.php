@@ -600,12 +600,13 @@ class tag implements token {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
+		$tag = $this->tagName;
 
 		// merge output options + custom
-		$options = array_merge($this->root->output, $options, $this->root->output['elements'][$this->tagName] ?? []);
+		$options = array_merge($this->root->output, $options, $this->root->output['elements'][$tag] ?? []);
 
 		// compile attributes
-		$html = '<'.$this->tagName;
+		$html = '<'.$tag;
 		foreach ($this->attributes AS $key => $value) {
 			$html .= ' '.$key;
 			if ($value !== null || $options['xml']) {
@@ -613,21 +614,16 @@ class tag implements token {
 
 				// unquoted
 				if (!$options['xml'] && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
-					$quote = '';
+					$html .= '='.$value;
 
 				// single quotes || swap when minimal and there are double quotes in the string
 				} elseif ($options['quotestyle'] == 'single' || ($options['quotestyle'] == 'minimal' && mb_strpos($value, '"') !== false)) {
-					$quote = "'";
-					$value = str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value);
+					$html .= "='".str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value)."'";
 
 				// double quotes
 				} else {
-					$quote = '"';
-					$value = str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $value);
+					$html .= '="'.str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $value).'"';
 				}
-
-				// compile
-				$html .= '='.$quote.$value.$quote;
 			}
 		}
 
@@ -642,7 +638,7 @@ class tag implements token {
 				$html .= $item->html($options);
 			}
 			if ($options['closetags'] || $this->close) {
-				$html .= '</'.$this->tagName.'>';
+				$html .= '</'.$tag.'>';
 			}
 		}
 		return $html;
