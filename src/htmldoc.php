@@ -42,25 +42,6 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	];
 
 	/**
-	 * @var array Contains the output settings
-	 */
-	protected $output = [
-		'charset' => null, // set the output charset
-		'quotestyle' => 'double', // double, single, minimal
-		'singletonclose' => null, // string to close singleton tags, or false to leave as is
-		'closetags' => false, // whether to force tags to have a closing tag (true) or follow tag::close
-		'xml' => false, // sets the output presets to produce XML valid code
-		'elements' => [ // output options for particular tags elements
-			'svg' => [
-				'xml' => true,
-				'quotestyle' => 'double', // double, single, minimal
-				'singletonclose' => '/>', // string to close singleton tags, or false to leave as is
-				'closetags' => true, // whether to force tags to have a closing tag (true) or follow tag::close
-			]
-		]
-	];
-
-	/**
 	 * @var array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
 	protected $children = [];
@@ -82,10 +63,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return mixed The number of children in the object for length, the output config, or null if the parameter doesn't exist
 	 */
 	public function __get(string $var) {
-		if ($var == 'length') {
+		if ($var == 'config') {
+			return $this->config;
+		} elseif ($var == 'length') {
 			return count($this->children);
-		} elseif ($var == 'output') {
-			return $this->output;
 		}
 		return null;
 	}
@@ -139,22 +120,47 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		return $this->children[$i] ?? null;
 	}
 
+	/**
+	 * Retrieve the document node in the current position
+	 *
+	 * @return tag|text|comment|doctype The child node at the current pointer position
+	 */
 	public function current() {
 		return $this->children[$this->pointer] ?? null;
 	}
 
+	/**
+	 * Retrieve the the current pointer position for the object
+	 *
+	 * @return scalar The current pointer position
+	 */
 	public function key() : scalar {
 		return $this->pointer;
 	}
 
+	/**
+	 * Increments the pointer position
+	 *
+	 * @return void
+	 */
 	public function next() : void {
 		$this->pointer++;
 	}
 
+	/**
+	 * Decrements the pointer position
+	 *
+	 * @return void
+	 */
 	public function rewind() : void {
 		$this->pointer = 0;
 	}
 
+	/**
+	 * Determines whether there is a node at the current pointer position
+	 *
+	 * @return bool Whether there is a node at the current pointer position
+	 */
 	public function valid() : bool {
 		return isset($this->children[$this->pointer]);
 	}
@@ -547,7 +553,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// set minify output parameters
 		if ($minify['quotes']) {
-			$this->output['quotestyle'] = 'minimal';
+			$this->config['output']['quotestyle'] = 'minimal';
 		}
 
 		// email minification
@@ -597,7 +603,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		$options = $options ? array_merge($this->output, $options) : $this->output;
+		$options = $options ? array_merge($this->config['output'], $options) : $this->config['output'];
 
 		// presets
 		if (!empty($options['xml'])) {

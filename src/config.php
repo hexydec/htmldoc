@@ -137,6 +137,21 @@ class config {
 				'email' => false, // sets the minification presets to email safe options
 				'style' => [], // specify CSS minifier options
 				'script' => [] // specify CSS javascript options
+			],
+			'output' => [
+				'charset' => null, // set the output charset
+				'quotestyle' => 'double', // double, single, minimal
+				'singletonclose' => null, // string to close singleton tags, or false to leave as is
+				'closetags' => false, // whether to force tags to have a closing tag (true) or follow tag::close
+				'xml' => false, // sets the output presets to produce XML valid code
+				'elements' => [ // output options for particular tags elements
+					'svg' => [
+						'xml' => true,
+						'quotestyle' => 'double', // double, single, minimal
+						'singletonclose' => '/>', // string to close singleton tags, or false to leave as is
+						'closetags' => true, // whether to force tags to have a closing tag (true) or follow tag::close
+					]
+				]
 			]
 		], $config);
 	}

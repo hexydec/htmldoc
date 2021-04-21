@@ -10,7 +10,7 @@ set_error_handler(function (int $type, string $msg) use (&$error) {
 	}
 });
 
-$base = empty($_POST['base']) ? '' : $_POST['base'];
+$base = $_POST['base'] ?? null;
 $input = '';
 $output = '';
 $minify = Array();
@@ -262,7 +262,7 @@ if (!empty($_POST['action'])) {
 			</div>
 			<?php if ($output) { ?>
 				<input type="hidden" name="base" value="<?= htmlspecialchars($base); ?>" />
-				<iframe class="minify__preview" srcdoc="<?= htmlspecialchars(str_replace('</title>', '</title><base href="'.htmlspecialchars($base).'">', $output)); ?>"></iframe>
+				<iframe class="minify__preview" srcdoc="<?= htmlspecialchars(preg_replace('/<head[^>]*>/i', '$0<base href="'.htmlspecialchars($base).'">', $output)); ?>"></iframe>
 			<?php } ?>
 			<div class="minify__options">
 				<h3>Options</h3>
