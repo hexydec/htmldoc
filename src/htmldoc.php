@@ -291,7 +291,6 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			$join = null;
 			do {
 				switch ($token['type']) {
-
 					case 'id':
 						$parts[] = [
 							'id' => mb_substr($token['value'], 1),
@@ -319,14 +318,14 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 					case 'squareopen':
 						$item = ['join' => $join];
 						while (($token = $tokens->next()) !== false) {
-							if ($token['type'] == 'squareclose') {
+							if ($token['type'] === 'squareclose') {
 								break;
 							} elseif (in_array($token['type'], ['string', 'quotes'])) {
 								if ($token['type'] == 'quotes') {
 									$token['value'] = stripslashes(mb_substr($token['value'], 1, -1));
 								}
 								$item[isset($item['attribute']) ? 'value' : 'attribute'] = $token['value'];
-							} elseif ($token['type'] == 'comparison') {
+							} elseif ($token['type'] === 'comparison') {
 								$item['comparison'] = $token['value'];
 							}
 						}
@@ -401,7 +400,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// build children that are tags
 		$children = [];
 		foreach ($this->children AS $item) {
-			if (get_class($item) == 'hexydec\\html\\tag') {
+			if (get_class($item) === 'hexydec\\html\\tag') {
 				$children[] = $item;
 			}
 		}
@@ -435,7 +434,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// parse selector and find tags
 		if (is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
 			foreach ($this->children AS $item) {
-				if (get_class($item) == 'hexydec\\html\\tag') {
+				if (get_class($item) === 'hexydec\\html\\tag') {
 					foreach ($selector AS $value) {
 						if (($items = $item->find($value)) !== false) {
 							$found = array_merge($found, $items);
@@ -505,7 +504,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function attr(string $key) : ?string {
 		foreach ($this->children AS $item) {
-			if (get_class($item) == 'hexydec\\html\\tag') {
+			if (get_class($item) === 'hexydec\\html\\tag') {
 				return $item->attr($key);
 			}
 		}
@@ -522,7 +521,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (in_array(get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
+			if (in_array(get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'], true)) {
 				$value = $item->text();
 				$text = array_merge($text, is_array($value) ? $value : [$value]);
 			}
@@ -635,7 +634,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		if (!empty($options['charset'])) {
 
 			// if not UTF-8, convert all applicable HTML entities
-			if ($options['charset'] != 'UTF-8') {
+			if ($options['charset'] !== 'UTF-8') {
 				$html = $this->htmlentities($html, $options['charset']);
 			}
 

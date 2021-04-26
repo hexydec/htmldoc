@@ -120,7 +120,7 @@ class tag implements token {
 					}
 
 				case 'tagselfclose':
-					if (in_array($tag, $this->config['elements']['singleton'])) {
+					if (in_array($tag, $this->config['elements']['singleton'], true)) {
 						$this->singleton = $token['value'];
 					}
 					break 2;
@@ -132,7 +132,7 @@ class tag implements token {
 					if (in_array($close, $this->getParentTagNames())) {
 
 						// when it is not our tag, pass it to the parent to handle
-						if ($close != $tag) {
+						if ($close !== $tag) {
 							$tokens->prev();
 
 						// otherwise we are closing ourself

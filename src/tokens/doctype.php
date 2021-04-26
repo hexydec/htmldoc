@@ -28,8 +28,8 @@ class doctype implements token {
 	 */
 	public function parse(tokenise $tokens) : void {
 		$content = '';
-		while (($token = $tokens->next()) !== null && $token['type'] != 'tagopenend') {
-			if ($token['type'] == 'attribute') {
+		while (($token = $tokens->next()) !== null && $token['type'] !== 'tagopenend') {
+			if ($token['type'] === 'attribute') {
 				$content .= ($content ? ' ' : '').ltrim($token['value']);
 			}
 		}

@@ -37,21 +37,6 @@ class style implements token {
 			$this->content = $token[0];
 			return;
 		}
-		// if (($token = $tokens->current()) !== null) {
-		// 	$value = '';
-		// 	while ($token !== null && ($token['type'] != 'tagclose' || $token['value'] != '</style>')) {
-		// 		if ($token['type'] == 'cdata') {
-		// 			$value .= mb_substr($token['value'], 9, -3);
-		// 		} else {
-		// 			$value .= $token['value'];
-		// 		}
-		// 		$token = $tokens->next();
-		// 	}
-		// 	$tokens->prev();
-		// 	if ($value) {
-		// 		$this->content = $value;
-		// 	}
-		// }
 	}
 
 	/**
