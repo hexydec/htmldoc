@@ -191,8 +191,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			$meta = stream_get_meta_data($handle);
 			if (!empty($meta['wrapper_data'])) {
 				foreach ($meta['wrapper_data'] AS $item) {
-					if (mb_stripos($item, 'Content-Type:') === 0 && ($charset = mb_stristr($item, 'charset=')) !== false) {
-						$charset = mb_substr($charset, 8);
+					if (mb_stripos($item, 'Content-Type:') === 0 && ($value = mb_stristr($item, 'charset=')) !== false) {
+						$charset = mb_substr($value, 8);
 						break;
 					}
 				}

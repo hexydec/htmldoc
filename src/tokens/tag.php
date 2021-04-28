@@ -653,7 +653,7 @@ class tag implements token {
 
 				// double quotes
 				} else {
-					$html .= '="'.str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $value).'"';
+					$html .= '="'.str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], strval($value)).'"';
 				}
 			}
 		}
