@@ -62,7 +62,7 @@ class tag implements token {
 		$this->tagName = $tag;
 		$this->parent = $parent;
 		$this->config = $this->root->config; // cache the config
-		$this->close = !in_array($tag, $this->config['elements']['closeoptional']);
+		$this->close = !\in_array($tag, $this->config['elements']['closeoptional']);
 	}
 
 	/**
@@ -85,7 +85,7 @@ class tag implements token {
 
 				// if you end up here, you are parsing an unclosed tag
 				case 'tagopenstart':
-					$tag = ltrim($token['value'], '<');
+					$tag = \ltrim($token['value'], '<');
 					$tokens->prev();
 					break 2;
 
@@ -95,23 +95,23 @@ class tag implements token {
 						$attributes[$attr] = null;
 						$attr = null;
 					}
-					$attr = ltrim($token['value']);
+					$attr = \ltrim($token['value']);
 					break;
 
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$value = trim($token['value'], "= \t\r\n");
-						if (strpos($value, '"') === 0 || strpos($value, "'") === 0) {
-							$value = substr($value, 1, -1);
+						$value = \trim($token['value'], "= \t\r\n");
+						if (\strpos($value, '"') === 0 || \strpos($value, "'") === 0) {
+							$value = \substr($value, 1, -1);
 						}
-						$attributes[$attr] = html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
+						$attributes[$attr] = \html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 						$attr = false;
 					}
 					break;
 
 				case 'tagopenend':
-					if (!in_array($tag, $this->config['elements']['singleton'])) {
+					if (!\in_array($tag, $this->config['elements']['singleton'])) {
 						$this->children = $this->parseChildren($tokens);
 						break;
 					} else {
@@ -120,16 +120,16 @@ class tag implements token {
 					}
 
 				case 'tagselfclose':
-					if (in_array($tag, $this->config['elements']['singleton'], true)) {
+					if (\in_array($tag, $this->config['elements']['singleton'], true)) {
 						$this->singleton = $token['value'];
 					}
 					break 2;
 
 				case 'tagclose':
-					$close = mb_strtolower(trim($token['value'], "</ \r\n\t>"));
+					$close = \mb_strtolower(\trim($token['value'], "</ \r\n\t>"));
 
 					// if tags same, we are closing this tag, go back to parent
-					if (in_array($close, $this->getParentTagNames())) {
+					if (\in_array($close, $this->getParentTagNames())) {
 
 						// when it is not our tag, pass it to the parent to handle
 						if ($close !== $tag) {
@@ -154,7 +154,7 @@ class tag implements token {
 			$this->attributes = $attributes;
 
 			// cache attribute for minifier
-			$this->root->cache('attr', array_keys($attributes));
+			$this->root->cache('attr', \array_keys($attributes));
 			$attrvalues = [];
 			foreach ($attributes AS $key => $item) {
 				$attrvalues[] = $key.'='.$item;
@@ -172,7 +172,7 @@ class tag implements token {
 		if (!$this->parenttags) {
 			$this->parenttags = $this->parent ? $this->parent->getParentTagNames() : [];
 			if ($this->tagName) {
-				$this->parenttags[] = mb_strtolower($this->tagName);
+				$this->parenttags[] = \mb_strtolower($this->tagName);
 			}
 		}
 		return $this->parenttags;
@@ -212,7 +212,7 @@ class tag implements token {
 						$tag = trim($token['value'], '<');
 
 						// unnestable tag, pass back to parent
-						if ($parenttag && strcasecmp($tag, $parenttag) === 0 && in_array($tag, $optional)) {
+						if ($parenttag && \strcasecmp($tag, $parenttag) === 0 && \in_array($tag, $optional)) {
 							$tokens->prev();
 							break 2;
 						} else {
@@ -225,10 +225,10 @@ class tag implements token {
 						break;
 
 					case 'tagclose':
-						$close = trim($token['value'], "</ \r\n\t>");
+						$close = \trim($token['value'], "</ \r\n\t>");
 
 						// prevent dropping down a level when tags don't match or close is optional
-						if (in_array(mb_strtolower($close), $this->getParentTagNames())) {
+						if (\in_array(\mb_strtolower($close), $this->getParentTagNames())) {
 							$tokens->prev(); // let the parent parse() method handle it
 							break 2;
 						}
@@ -261,7 +261,7 @@ class tag implements token {
 		$config = $this->config;
 		$attr = $config['attributes'];
 		if ($minify['lowercase']) {
-			$this->tagName = mb_strtolower($this->tagName);
+			$this->tagName = \mb_strtolower($this->tagName);
 		}
 		$folder = null;
 		$dirs = null;
@@ -275,26 +275,26 @@ class tag implements token {
 			// lowercase attribute key
 			if ($minify['lowercase']) {
 				unset($attributes[$key]);
-				$key = mb_strtolower(strval($key));
+				$key = \mb_strtolower(\strval($key));
 				$attributes[$key] = $value;
 			}
 
 			// minify url attributes when not in list or match attribute
-			if ($minify['urls'] && $attributes[$key] && in_array($key, $attr['urls']) && (!in_array($tag, array_keys($attr['urlskip'])) || $this->hasAttribute($attributes, $attr['urlskip'][$tag]))) {
+			if ($minify['urls'] && $attributes[$key] && \in_array($key, $attr['urls']) && (!\in_array($tag, \array_keys($attr['urlskip'])) || $this->hasAttribute($attributes, $attr['urlskip'][$tag]))) {
 
 				// make folder variables
 				if ($folder === null && isset($_SERVER['REQUEST_URI'])) {
-					if (($folder = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== '') {
-						if (mb_substr($folder, -1) != '/') {
-							$folder = dirname($folder).'/';
+					if (($folder = \parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== '') {
+						if (\mb_substr($folder, -1) != '/') {
+							$folder = \dirname($folder).'/';
 						}
-						$dirs = explode('/', trim($folder, '/'));
+						$dirs = \explode('/', \trim($folder, '/'));
 					}
 				}
 
 				// strip scheme from absolute URL's if the same as current scheme
-				if ($minify['urls']['scheme'] && mb_strpos($attributes[$key], $scheme) === 0) {
-					$attributes[$key] = mb_substr($attributes[$key], mb_strlen($scheme)-2);
+				if ($minify['urls']['scheme'] && \mb_strpos($attributes[$key], $scheme) === 0) {
+					$attributes[$key] = \mb_substr($attributes[$key], \mb_strlen($scheme)-2);
 				}
 
 				// remove host for own domain
@@ -303,9 +303,9 @@ class tag implements token {
 						$host = [$scheme.$_SERVER['HTTP_HOST'], '//'.$_SERVER['HTTP_HOST']];
 					}
 					foreach ($host AS $item) {
-						$len = mb_strlen($item);
-						if (mb_stripos($attributes[$key], $item) === 0 && (mb_strlen($attributes[$key]) == $len || mb_strpos($attributes[$key], '/', 2) == $len)) {
-							$attributes[$key] = mb_substr($attributes[$key], $len);
+						$len = \mb_strlen($item);
+						if (\mb_stripos($attributes[$key], $item) === 0 && (\mb_strlen($attributes[$key]) == $len || \mb_strpos($attributes[$key], '/', 2) == $len)) {
+							$attributes[$key] = \mb_substr($attributes[$key], $len);
 						}
 					}
 				}
@@ -314,24 +314,24 @@ class tag implements token {
 				if ($minify['urls']['relative'] && $folder) {
 
 					// minify
-					if (mb_strpos($attributes[$key], $folder) === 0 && ($folder != '/' || mb_strpos($attributes[$key], '//') !== 0)) {
+					if (\mb_strpos($attributes[$key], $folder) === 0 && ($folder != '/' || \mb_strpos($attributes[$key], '//') !== 0)) {
 						if ($attributes[$key] == $folder && $attributes[$key] != $_SERVER['REQUEST_URI']) {
 							$attributes[$key] = './';
 						} else {
-							$attributes[$key] = mb_substr($attributes[$key], mb_strlen($folder));
+							$attributes[$key] = \mb_substr($attributes[$key], \mb_strlen($folder));
 						}
 					}
 				}
 
 				// use parent folders if it is shorter
-				if ($minify['urls']['parent'] && $dirs && mb_strpos($attributes[$key], '/') === 0 && mb_strpos($attributes[$key], '//') === false) {
+				if ($minify['urls']['parent'] && $dirs && \mb_strpos($attributes[$key], '/') === 0 && \mb_strpos($attributes[$key], '//') === false) {
 
-					$compare = explode('/', trim(dirname($attributes[$key]), '/'));
+					$compare = \explode('/', \trim(\dirname($attributes[$key]), '/'));
 					$update = false;
 					$count = 0;
 					foreach ($compare AS $i => $item) {
 						if (isset($dirs[$i]) && $item == $dirs[$i]) {
-							array_shift($compare);
+							\array_shift($compare);
 							$update = true;
 							$count++;
 						} else {
@@ -339,9 +339,9 @@ class tag implements token {
 						}
 					}
 					if ($update) {
-						$compare = array_merge(array_fill(0, count($dirs) - $count, '..'), $compare);
-						$url = implode('/', $compare).'/'.basename($attributes[$key]);
-						if (strlen($url) <= strlen($attributes[$key])) { // compare as bytes
+						$compare = \array_merge(\array_fill(0, \count($dirs) - $count, '..'), $compare);
+						$url = \implode('/', $compare).'/'.\basename($attributes[$key]);
+						if (\strlen($url) <= \strlen($attributes[$key])) { // compare as bytes
 							$attributes[$key] = $url;
 						}
 					}
@@ -354,24 +354,24 @@ class tag implements token {
 				// trim attribute
 				if ($minify['attributes']['trim'] && $attributes[$key]) {
 					$a = $attributes[$key];
-					$attributes[$key] = trim($attributes[$key], " \r\n\t");
+					$attributes[$key] = \trim($attributes[$key], " \r\n\t");
 				}
 
 				// boolean attributes
-				if ($minify['attributes']['boolean'] && in_array($key, $attr['boolean'])) {
+				if ($minify['attributes']['boolean'] && \in_array($key, $attr['boolean'])) {
 					$attributes[$key] = null;
 
 				// minify style tag
 				} elseif ($key == 'style' && $minify['attributes']['style']) {
-					$attributes[$key] = trim(str_replace(
+					$attributes[$key] = \trim(\str_replace(
 						['  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '],
 						[' ', ':', ':', ':', ';', ';', ';'],
 						$attributes[$key]
 					), '; ');
 
 				// trim classes
-				} elseif ($key == 'class' && $minify['attributes']['class'] && mb_strpos($attributes[$key], ' ') !== false) {
-					$attributes[$key] = trim(preg_replace('/\s+/', ' ', $attributes[$key]));
+				} elseif ($key == 'class' && $minify['attributes']['class'] && \mb_strpos($attributes[$key], ' ') !== false) {
+					$attributes[$key] = \trim(\preg_replace('/\s+/', ' ', $attributes[$key]));
 
 				// minify option tag, always capture the tag to prevent it being removed as a default
 				} elseif ($key == 'value' && $tag == 'option') {
@@ -387,7 +387,7 @@ class tag implements token {
 				}
 
 				// remove other attributes
-				if ($attributes[$key] === '' && $minify['attributes']['empty'] && in_array($key, $attr['empty'])) {
+				if ($attributes[$key] === '' && $minify['attributes']['empty'] && \in_array($key, $attr['empty'])) {
 					unset($attributes[$key]);
 					continue;
 				}
@@ -400,10 +400,10 @@ class tag implements token {
 		}
 
 		// work out whether to omit the closing tag
-		if ($minify['close'] && in_array($tag, $config['elements']['closeoptional']) && !in_array($this->parent->tagName, $config['elements']['inline'])) {
+		if ($minify['close'] && \in_array($tag, $config['elements']['closeoptional']) && !\in_array($this->parent->tagName, $config['elements']['inline'])) {
 			$tag = null;
 			$children = $this->parent->toArray();
-			$last = end($children);
+			$last = \end($children);
 			$next = false;
 			foreach ($children AS $item) {
 
@@ -413,13 +413,13 @@ class tag implements token {
 
 				// find next tag
 				} elseif ($next) {
-					$type = get_class($item);
+					$type = \get_class($item);
 
 					// if type is not text or the text content is empty
 					if ($type != 'hexydec\\html\\text' || !$item->text()) {
 
 						// if the next tag is optinally closable too, then we can remove the closing tag of this
-						if ($type == 'hexydec\\html\\tag' && in_array($item->tagName, $config['elements']['closeoptional'])) {
+						if ($type == 'hexydec\\html\\tag' && \in_array($item->tagName, $config['elements']['closeoptional'])) {
 							$this->close = false;
 						}
 
@@ -438,7 +438,7 @@ class tag implements token {
 
 		// sort attributes
 		if (!empty($minify['attributes']['sort']) && $attributes) {
-			$attributes = array_replace(array_intersect_key(array_fill_keys($minify['attributes']['sort'], false), $attributes), $attributes);
+			$attributes = \array_replace(\array_intersect_key(\array_fill_keys($minify['attributes']['sort'], false), $attributes), $attributes);
 		}
 		$this->attributes = $attributes;
 
@@ -449,10 +449,10 @@ class tag implements token {
 			if (isset($minify['elements'][$tag])) {
 				foreach ($minify AS $key => $item) {
 					if (isset($minify['elements'][$tag][$key])) {
-						if (!is_array($minify['elements'][$tag][$key])) {
+						if (!\is_array($minify['elements'][$tag][$key])) {
 							$minify[$key] = $minify['elements'][$tag][$key];
 						} elseif ($minify[$key]) {
-							$minify[$key] = array_merge($minify[$key], $minify['elements'][$tag][$key]);
+							$minify[$key] = \array_merge($minify[$key], $minify['elements'][$tag][$key]);
 						}
 					}
 				}
@@ -466,7 +466,7 @@ class tag implements token {
 
 	protected function hasAttribute(array $attr, array $items) {
 		foreach ($items AS $key => $item) {
-			if (!isset($attr[$key]) || !in_array($attr[$key], $item)) {
+			if (!isset($attr[$key]) || !\in_array($attr[$key], $item)) {
 				return false;
 			}
 		}
@@ -493,8 +493,8 @@ class tag implements token {
 			if ($item['join'] && $i) {
 				$match = false;
 				foreach ($this->children AS $child) {
-					if (get_class($child) == 'hexydec\\html\\tag') {
-						$found = array_merge($found, $child->find(array_slice($selector, $i)));
+					if (\get_class($child) == 'hexydec\\html\\tag') {
+						$found = \array_merge($found, $child->find(\array_slice($selector, $i)));
 					}
 				}
 				break;
@@ -515,7 +515,7 @@ class tag implements token {
 
 			// match class
 			} elseif (!empty($item['class'])) {
-				if (empty($this->attributes['class']) || !in_array($item['class'], explode(' ', $this->attributes['class']))) {
+				if (empty($this->attributes['class']) || !\in_array($item['class'], \explode(' ', $this->attributes['class']))) {
 					$match = false;
 					break;
 				}
@@ -538,21 +538,21 @@ class tag implements token {
 
 					// match start
 					} elseif ($item['comparison'] == '^=') {
-						if (mb_strpos($this->attributes[$item['attribute']], $item['value']) !== 0) {
+						if (\mb_strpos($this->attributes[$item['attribute']], $item['value']) !== 0) {
 							$match = false;
 							break;
 						}
 
 					// match within
 					} elseif ($item['comparison'] == '*=') {
-						if (mb_strpos($this->attributes[$item['attribute']], $item['value']) === false) {
+						if (\mb_strpos($this->attributes[$item['attribute']], $item['value']) === false) {
 							$match = false;
 							break;
 						}
 
 					// match end
 					} elseif ($item['comparison'] == '$=') {
-						if (mb_strpos($this->attributes[$item['attribute']], $item['value']) !== mb_strlen($this->attributes[$item['attribute']]) - mb_strlen($item['value'])) {
+						if (\mb_strpos($this->attributes[$item['attribute']], $item['value']) !== \mb_strlen($this->attributes[$item['attribute']]) - \mb_strlen($item['value'])) {
 							$match = false;
 							break;
 						}
@@ -572,7 +572,7 @@ class tag implements token {
 
 				// match last child
 				} elseif ($item['pseudo'] == 'last-child') {
-					if (($last = end($children)) === false || $this !== $last) {
+					if (($last = \end($children)) === false || $this !== $last) {
 						$match = false;
 						break;
 					}
@@ -584,8 +584,8 @@ class tag implements token {
 		}
 		if ($searchChildren && $this->children) {
 			foreach ($this->children AS $child) {
-				if (get_class($child) == 'hexydec\\html\\tag') {
-					$found = array_merge($found, $child->find($selector));
+				if (\get_class($child) == 'hexydec\\html\\tag') {
+					$found = \array_merge($found, $child->find($selector));
 				}
 			}
 		}
@@ -599,7 +599,7 @@ class tag implements token {
 	 * @return string The value of the attrbute or NULL if the attribute does not exist
 	 */
 	public function attr(string $key) : ?string {
-		if (array_key_exists($key, $this->attributes)) {
+		if (\array_key_exists($key, $this->attributes)) {
 			return $this->attributes[$key] === null ? true : $this->attributes[$key];
 		}
 		return null;
@@ -615,9 +615,9 @@ class tag implements token {
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (in_array(get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
+			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
 				$value = $item->text();
-				$text = array_merge($text, is_array($value) ? $value : [$value]);
+				$text = \array_merge($text, \is_array($value) ? $value : [$value]);
 			}
 		}
 		return $text;
@@ -634,26 +634,26 @@ class tag implements token {
 
 		// merge output options + custom
 		$output = $this->config['output'];
-		$options = array_merge($output, $options, $output['elements'][$tag] ?? []);
+		$options = \array_merge($output, $options, $output['elements'][$tag] ?? []);
 
 		// compile attributes
 		$html = '<'.$tag;
 		foreach ($this->attributes AS $key => $value) {
 			$html .= ' '.$key;
 			if ($value !== null || $options['xml']) {
-				$empty = in_array($value, [null, ''], true);
+				$empty = \in_array($value, [null, ''], true);
 
 				// unquoted
-				if (!$empty && !$options['xml'] && $options['quotestyle'] == 'minimal' && strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
+				if (!$empty && !$options['xml'] && $options['quotestyle'] == 'minimal' && \strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
 					$html .= '='.$value;
 
 				// single quotes || swap when minimal and there are double quotes in the string
-				} elseif ($options['quotestyle'] == 'single' || ($options['quotestyle'] == 'minimal' && mb_strpos($value, '"') !== false)) {
-					$html .= "='".str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value)."'";
+				} elseif ($options['quotestyle'] == 'single' || ($options['quotestyle'] == 'minimal' && \mb_strpos($value, '"') !== false)) {
+					$html .= "='".\str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value)."'";
 
 				// double quotes
 				} else {
-					$html .= '="'.str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $value).'"';
+					$html .= '="'.\str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $value).'"';
 				}
 			}
 		}
@@ -692,7 +692,7 @@ class tag implements token {
 	public function children() : array {
 		$children = [];
 		foreach ($this->children AS $item) {
-			if (get_class($item) == 'hexydec\\html\\tag') {
+			if (\get_class($item) == 'hexydec\\html\\tag') {
 				$children[] = $item;
 			}
 		}

@@ -15,7 +15,7 @@ class config {
 	 * @param array $config An array of configuration parameters that is recursively merged with the default config
 	 */
 	public function __construct(array $config = []) {
-		$this->config = array_replace_recursive($this->config, [
+		$this->config = \array_replace_recursive($this->config, [
 			'elements' => [
 				'inline' => [
 					'b', 'u', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span'
@@ -66,7 +66,7 @@ class config {
 				'style' => [
 					'class' => '\\hexydec\\html\\style',
 					'config' => [
-						'minifier' => class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
+						'minifier' => \class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
 							$obj = new \hexydec\css\cssdoc();
 							if ($obj->load($css)) {
 								$obj->minify($minify);
@@ -81,7 +81,7 @@ class config {
 				'script' => [
 					'class' => '\\hexydec\\html\\script',
 					'config' => [
-						'minifier' => class_exists('\\hexydec\\jslite\\jslite') ? function (string $css, array $minify) {
+						'minifier' => \class_exists('\\hexydec\\jslite\\jslite') ? function (string $css, array $minify) {
 							$obj = new \hexydec\jslite\jslite();
 							if ($obj->load($css)) {
 								$obj->minify($minify);

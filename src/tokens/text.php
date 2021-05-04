@@ -40,7 +40,7 @@ class text implements token {
 	 */
 	public function parse(tokenise $tokens) : void {
 		if (($token = $tokens->current()) !== null) {
-			$this->content = html_entity_decode($token['value'], ENT_QUOTES);
+			$this->content = \html_entity_decode($token['value'], ENT_QUOTES);
 		}
 	}
 
@@ -59,46 +59,46 @@ class text implements token {
 		// collapse whitespace
 		if ($minify['whitespace']) {
 			$parent = $this->parent;
-			$this->content = preg_replace('/[\\n\\t ]++/u', ' ', str_replace("\r", '', $this->content));
+			$this->content = \preg_replace('/[\\n\\t ]++/u', ' ', \str_replace("\r", '', $this->content));
 
 			if ($parent) {
 				$children = $parent->tagName ? $parent->toArray() : $this->root->toArray();
 				if (($index = $this->getIndex($children)) !== false) {
-					$keys = array_keys($children);
-					$i = array_search($index, $keys, true);
+					$keys = \array_keys($children);
+					$i = \array_search($index, $keys, true);
 					$inline = $this->root->getConfig('elements', 'inline');
 					$min = ['hexydec\\html\\comment', 'hexydec\\html\\doctype'];
 
 					// if previous tag is a block element, ltrim the textnode
 					$trim = false;
 					if (!$i) {
-						$trim = !in_array($parent->tagName, $inline);
+						$trim = !\in_array($parent->tagName, $inline);
 					} else {
-						$class = get_class($children[$i - 1]);
+						$class = \get_class($children[$i - 1]);
 						if ($class == 'hexydec\\html\\tag') {
-							$trim = !in_array($children[$i - 1]->tagName, $inline);
-						} elseif (in_array($class, $min)) {
+							$trim = !\in_array($children[$i - 1]->tagName, $inline);
+						} elseif (\in_array($class, $min)) {
 							$trim = true;
 						}
 					}
 					if ($trim) {
-						$this->content = ltrim($this->content, " \t\r\n");
+						$this->content = \ltrim($this->content, " \t\r\n");
 					}
 
 					// if next tag is a block element, rtrim the textnode
 					$trim = false;
 					if (!isset($keys[$i + 1])) {
-						$trim = !in_array($parent->tagName, $inline);
+						$trim = !\in_array($parent->tagName, $inline);
 					} else {
-						$class = get_class($children[$i + 1]);
+						$class = \get_class($children[$i + 1]);
 						if ($class == 'hexydec\\html\\tag') {
-							$trim = !in_array($children[$i + 1]->tagName, $inline);
-						} elseif (in_array($class, $min)) {
+							$trim = !\in_array($children[$i + 1]->tagName, $inline);
+						} elseif (\in_array($class, $min)) {
 							$trim = true;
 						}
 					}
 					if ($trim) {
-						$this->content = rtrim($this->content, " \t\r\n");
+						$this->content = \rtrim($this->content, " \t\r\n");
 					}
 				}
 			}
@@ -121,6 +121,6 @@ class text implements token {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		return $this->content !== '' ? htmlspecialchars($this->content, ENT_NOQUOTES | ENT_HTML5) : '';
+		return $this->content !== '' ? \htmlspecialchars($this->content, ENT_NOQUOTES | ENT_HTML5) : '';
 	}
 }

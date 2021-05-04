@@ -47,11 +47,11 @@ class script implements token {
 	 */
 	public function minify(array $minify) : void {
 		if (!isset($minify['script']) || $minify['script'] !== false) {
-			$this->content = trim($this->content);
+			$this->content = \trim($this->content);
 			if ($this->content) {
 				$func = $this->root->getConfig('custom', 'script', 'config', 'minifier');
 				if ($func) {
-					$this->content = call_user_func($func, $this->content, $minify['script']);
+					$this->content = \call_user_func($func, $this->content, $minify['script']);
 				}
 			}
 		}

@@ -28,7 +28,7 @@ class comment implements token {
 	 */
 	public function parse(tokenise $tokens) : void {
 		if (($token = $tokens->current()) !== null) {
-			$this->content = mb_substr($token['value'], 4, -3);
+			$this->content = \mb_substr($token['value'], 4, -3);
 		}
 	}
 
@@ -39,7 +39,7 @@ class comment implements token {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-		if (!empty($minify['comments']['remove']) && (empty($minify['comments']['ie']) || (mb_strpos($this->content, '[if ') !== 0 && $this->content !== '<![endif]'))) {
+		if (!empty($minify['comments']['remove']) && (empty($minify['comments']['ie']) || (\mb_strpos($this->content, '[if ') !== 0 && $this->content !== '<![endif]'))) {
 			$this->content = null;
 		}
 	}

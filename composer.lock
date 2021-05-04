@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "62805af536f6e14666e85f597811ce05a8b72bb1"
+                "reference": "827598b960e1ec36a369328ffbca1b91c6595f6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/62805af536f6e14666e85f597811ce05a8b72bb1",
-                "reference": "62805af536f6e14666e85f597811ce05a8b72bb1",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/827598b960e1ec36a369328ffbca1b91c6595f6a",
+                "reference": "827598b960e1ec36a369328ffbca1b91c6595f6a",
                 "shasum": ""
             },
             "default-branch": true,
@@ -43,7 +43,7 @@
                 "issues": "https://github.com/hexydec/cssdoc/issues",
                 "source": "https://github.com/hexydec/cssdoc/tree/Development"
             },
-            "time": "2020-11-15T22:51:48+00:00"
+            "time": "2021-04-27T22:42:09+00:00"
         },
         {
             "name": "hexydec/jslite",
@@ -51,12 +51,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "e805f58508b69988dc9b7f931f372180ece1555b"
+                "reference": "c6d949a5540f62a1d15e4e3eb038a2386b1fcd88"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/e805f58508b69988dc9b7f931f372180ece1555b",
-                "reference": "e805f58508b69988dc9b7f931f372180ece1555b",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/c6d949a5540f62a1d15e4e3eb038a2386b1fcd88",
+                "reference": "c6d949a5540f62a1d15e4e3eb038a2386b1fcd88",
                 "shasum": ""
             },
             "require": {
@@ -86,7 +86,7 @@
                 "issues": "https://github.com/hexydec/jslite/issues",
                 "source": "https://github.com/hexydec/jslite/tree/master"
             },
-            "time": "2021-04-25T21:48:03+00:00"
+            "time": "2021-04-26T23:04:12+00:00"
         },
         {
             "name": "hexydec/tokenise",

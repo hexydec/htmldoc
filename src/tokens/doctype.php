@@ -30,10 +30,10 @@ class doctype implements token {
 		$content = '';
 		while (($token = $tokens->next()) !== null && $token['type'] !== 'tagopenend') {
 			if ($token['type'] === 'attribute') {
-				$content .= ($content ? ' ' : '').ltrim($token['value']);
+				$content .= ($content ? ' ' : '').\ltrim($token['value']);
 			}
 		}
-		$this->content = html_entity_decode($content);
+		$this->content = \html_entity_decode($content);
 	}
 
 	/**

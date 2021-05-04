@@ -66,7 +66,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		if ($var == 'config') {
 			return $this->config;
 		} elseif ($var == 'length') {
-			return count($this->children);
+			return \count($this->children);
 		}
 		return null;
 	}
@@ -87,7 +87,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param mixed $value The value of the array key in the children array to be updated
 	 */
 	public function offsetSet($i, $value) : void {
-		if (is_null($i)) $this->children[] = $value;
+		if (\is_null($i)) $this->children[] = $value;
 		else $this->children[$i] = $value;
 	}
 
@@ -176,11 +176,11 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	public function open(string $url, $context = null, string &$error = null) {
 
 		// open a handle to the stream
-		if (($handle = @fopen($url, 'rb', false, $context)) === false) {
+		if (($handle = @\fopen($url, 'rb', false, $context)) === false) {
 			$error = 'Could not open file "'.$url.'"';
 
 		// retrieve the stream contents
-		} elseif (($html = stream_get_contents($handle)) === false) {
+		} elseif (($html = \stream_get_contents($handle)) === false) {
 			$error = 'Could not read file "'.$url.'"';
 
 		// success
@@ -188,11 +188,11 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 			// find charset in headers
 			$charset = null;
-			$meta = stream_get_meta_data($handle);
+			$meta = \stream_get_meta_data($handle);
 			if (!empty($meta['wrapper_data'])) {
 				foreach ($meta['wrapper_data'] AS $item) {
-					if (mb_stripos($item, 'Content-Type:') === 0 && ($charset = mb_stristr($item, 'charset=')) !== false) {
-						$charset = mb_substr($charset, 8);
+					if (\mb_stripos($item, 'Content-Type:') === 0 && ($charset = \mb_stristr($item, 'charset=')) !== false) {
+						$charset = \mb_substr($charset, 8);
 						break;
 					}
 				}
@@ -218,7 +218,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// detect the charset
 		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== null) {
-			$html = mb_convert_encoding($html, mb_internal_encoding(), $charset);
+			$html = \mb_convert_encoding($html, \mb_internal_encoding(), $charset);
 		}
 
 		// reset the document
@@ -246,20 +246,20 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return string The defined or detected charset or null if the charset is not defined
 	 */
 	protected function getCharsetFromHtml(string $html) : ?string {
-		if (preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
+		if (\preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
 			$obj = new htmldoc($this->config);
-			if ($obj->load($match[0], mb_internal_encoding())) {
+			if ($obj->load($match[0], \mb_internal_encoding())) {
 
 				// <meta charset="xxx" />
 				if (($value = $obj->attr('charset')) !== null) {
 					return $value;
 
 				// <meta http-equiv="Content-Type" content="text/html; charset=xxx" />
-				} elseif (($value = $obj->eq(0)->attr('content')) !== null && ($charset = mb_stristr($value, 'charset=')) !== false) {
-					return mb_substr($charset, 8);
+				} elseif (($value = $obj->eq(0)->attr('content')) !== null && ($charset = \mb_stristr($value, 'charset=')) !== false) {
+					return \mb_substr($charset, 8);
 				}
 			}
-		} elseif (($charset = mb_detect_encoding($html)) !== false) {
+		} elseif (($charset = \mb_detect_encoding($html)) !== false) {
 			return $charset;
 		}
 		return null;
@@ -284,7 +284,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return array An array of selector components
 	 */
 	protected function parseSelector(string $selector) {
-		$selector = trim($selector);
+		$selector = \trim($selector);
 		$tokens = new tokenise(self::$selectors, $selector);
 		if (($token = $tokens->next()) !== null) {
 			$selectors = $parts = [];
@@ -293,7 +293,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 				switch ($token['type']) {
 					case 'id':
 						$parts[] = [
-							'id' => mb_substr($token['value'], 1),
+							'id' => \mb_substr($token['value'], 1),
 							'join' => $join
 						];
 						$join = null;
@@ -301,7 +301,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 					case 'class':
 						$parts[] = [
-							'class' => mb_substr($token['value'], 1),
+							'class' => \mb_substr($token['value'], 1),
 							'join' => $join
 						];
 						$join = null;
@@ -320,9 +320,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 						while (($token = $tokens->next()) !== false) {
 							if ($token['type'] === 'squareclose') {
 								break;
-							} elseif (in_array($token['type'], ['string', 'quotes'])) {
+							} elseif (\in_array($token['type'], ['string', 'quotes'])) {
 								if ($token['type'] == 'quotes') {
-									$token['value'] = stripslashes(mb_substr($token['value'], 1, -1));
+									$token['value'] = \stripslashes(\mb_substr($token['value'], 1, -1));
 								}
 								$item[isset($item['attribute']) ? 'value' : 'attribute'] = $token['value'];
 							} elseif ($token['type'] === 'comparison') {
@@ -335,14 +335,14 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 					case 'pseudo':
 						$parts[] = [
-							'pseudo' => mb_substr($token['value'], 1),
+							'pseudo' => \mb_substr($token['value'], 1),
 							'join' => $join
 						];
 						$join = null;
 						break;
 
 					case 'join':
-						$join = trim($token['value']);
+						$join = \trim($token['value']);
 						break;
 
 					case 'whitespace':
@@ -400,7 +400,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// build children that are tags
 		$children = [];
 		foreach ($this->children AS $item) {
-			if (get_class($item) === 'hexydec\\html\\tag') {
+			if (\get_class($item) === 'hexydec\\html\\tag') {
 				$children[] = $item;
 			}
 		}
@@ -412,7 +412,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// check if index is minus
 		if ($index < 0) {
-			$index = count($children) + $index;
+			$index = \count($children) + $index;
 		}
 
 		// return index if set
@@ -432,12 +432,12 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		$found = [];
 
 		// parse selector and find tags
-		if (is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
+		if (\is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
 			foreach ($this->children AS $item) {
-				if (get_class($item) === 'hexydec\\html\\tag') {
+				if (\get_class($item) === 'hexydec\\html\\tag') {
 					foreach ($selector AS $value) {
 						if (($items = $item->find($value)) !== false) {
-							$found = array_merge($found, $items);
+							$found = \array_merge($found, $items);
 						}
 					}
 				}
@@ -479,7 +479,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	public function eq(int $index) : htmldoc {
 		$doc = new htmldoc($this->config);
 		if ($index < 0) {
-			$index = count($this->children) + $index;
+			$index = \count($this->children) + $index;
 		}
 		if (isset($this->children[$index])) {
 			$doc->collection([$this->children[$index]]);
@@ -504,7 +504,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function attr(string $key) : ?string {
 		foreach ($this->children AS $item) {
-			if (get_class($item) === 'hexydec\\html\\tag') {
+			if (\get_class($item) === 'hexydec\\html\\tag') {
 				return $item->attr($key);
 			}
 		}
@@ -521,12 +521,12 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (in_array(get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'], true)) {
+			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'], true)) {
 				$value = $item->text();
-				$text = array_merge($text, is_array($value) ? $value : [$value]);
+				$text = \array_merge($text, \is_array($value) ? $value : [$value]);
 			}
 		}
-		return implode(' ', $text);
+		return \implode(' ', $text);
 	}
 
 	/**
@@ -548,7 +548,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	public function minify(array $minify = []) : void {
 
 		// merge config
-		$minify = array_replace_recursive($this->config['minify'], $minify);
+		$minify = \array_replace_recursive($this->config['minify'], $minify);
 
 		// set minify output parameters
 		if ($minify['quotes']) {
@@ -568,24 +568,24 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		}
 
 		// sort classes by occurence, then by string
-		if (is_array($minify['attributes'])) {
+		if (\is_array($minify['attributes'])) {
 
 			// sort attribute values by most frequent
 			if ($minify['attributes']['sort'] && !empty($this->cache['attr'])) {
-				arsort($this->cache['attr']);
-				arsort($this->cache['attrvalues']);
+				\arsort($this->cache['attr']);
+				\arsort($this->cache['attrvalues']);
 				$attr = [];
 				foreach ($this->cache['attrvalues'] AS $item => $occurences) {
 					if ($occurences > 5) {
-						$item = mb_strstr($item, '=', true);
-						if (!in_array($item, $attr)) {
+						$item = \mb_strstr($item, '=', true);
+						if (!\in_array($item, $attr)) {
 							$attr[] = $item;
 						}
 					} else {
 						break;
 					}
 				}
-				$minify['attributes']['sort'] = array_unique(array_merge($attr, array_keys($this->cache['attr'])));
+				$minify['attributes']['sort'] = \array_unique(\array_merge($attr, \array_keys($this->cache['attr'])));
 			}
 		}
 
@@ -602,7 +602,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		$options = $options ? array_merge($this->config['output'], $options) : $this->config['output'];
+		$options = $options ? \array_merge($this->config['output'], $options) : $this->config['output'];
 
 		// presets
 		if (!empty($options['xml'])) {
@@ -639,7 +639,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			}
 
 			// convert to target charset
-			$html = mb_convert_encoding($html, $options['charset']);
+			$html = \mb_convert_encoding($html, $options['charset']);
 		}
 
 		// send back as string
@@ -647,8 +647,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			return $html;
 
 		// save file
-		} elseif (file_put_contents($file, $html) === false) {
-			trigger_error('File could not be written', E_USER_WARNING);
+		} elseif (\file_put_contents($file, $html) === false) {
+			\trigger_error('File could not be written', E_USER_WARNING);
 		} else {
 			return true;
 		}
@@ -667,21 +667,21 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// generate single-byte characters
 		$str = '';
 		for ($i = 1; $i < 256; $i++) {
-			$str .= chr($i);
+			$str .= \chr($i);
 		}
-		$str = mb_convert_encoding($str, mb_internal_encoding(), $charset);
+		$str = \mb_convert_encoding($str, \mb_internal_encoding(), $charset);
 
 		// build html entities conversion map
 		$replace = [];
-		foreach (preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY) AS $chr) {
-			$ent = mb_convert_encoding($chr, 'HTML-ENTITIES');
+		foreach (\preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY) AS $chr) {
+			$ent = \mb_convert_encoding($chr, 'HTML-ENTITIES');
 			if ($ent != $chr) {
 				$replace[$chr] = $ent;
 			}
 		}
 
 		// convert entities
-		$html = mb_convert_encoding($html, 'HTML-ENTITIES');
-		return str_replace(array_values($replace), array_keys($replace), $html);
+		$html = \mb_convert_encoding($html, 'HTML-ENTITIES');
+		return \str_replace(\array_values($replace), \array_keys($replace), $html);
 	}
 }
