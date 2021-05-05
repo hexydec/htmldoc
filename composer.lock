@@ -51,12 +51,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "c6d949a5540f62a1d15e4e3eb038a2386b1fcd88"
+                "reference": "7c8841e18c2a99dfaff9ecbcea790f2d0ae76d49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/c6d949a5540f62a1d15e4e3eb038a2386b1fcd88",
-                "reference": "c6d949a5540f62a1d15e4e3eb038a2386b1fcd88",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/7c8841e18c2a99dfaff9ecbcea790f2d0ae76d49",
+                "reference": "7c8841e18c2a99dfaff9ecbcea790f2d0ae76d49",
                 "shasum": ""
             },
             "require": {
@@ -86,7 +86,7 @@
                 "issues": "https://github.com/hexydec/jslite/issues",
                 "source": "https://github.com/hexydec/jslite/tree/master"
             },
-            "time": "2021-04-26T23:04:12+00:00"
+            "time": "2021-05-05T20:13:58+00:00"
         },
         {
             "name": "hexydec/tokenise",
@@ -94,12 +94,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "4192abc89543c56ab28dc0d8b266ab6ed56cfe14"
+                "reference": "e334bab525c5878a5444090f611ae00af9c88c6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/4192abc89543c56ab28dc0d8b266ab6ed56cfe14",
-                "reference": "4192abc89543c56ab28dc0d8b266ab6ed56cfe14",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/e334bab525c5878a5444090f611ae00af9c88c6c",
+                "reference": "e334bab525c5878a5444090f611ae00af9c88c6c",
                 "shasum": ""
             },
             "require": {
@@ -128,7 +128,7 @@
                 "issues": "https://github.com/hexydec/tokenise/issues",
                 "source": "https://github.com/hexydec/tokenise/tree/master"
             },
-            "time": "2021-04-25T20:29:42+00:00"
+            "time": "2021-05-04T23:28:26+00:00"
         }
     ],
     "packages-dev": [],
