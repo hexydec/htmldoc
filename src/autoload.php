@@ -14,7 +14,7 @@ spl_autoload_register(function (string $class) : bool {
 		'hexydec\\html\\text' => __DIR__.'/tokens/text.php'
 	];
 	if (isset($classes[$class])) {
-		return require($classes[$class]);
+		return (bool) require($classes[$class]);
 	}
 	return false;
 });
