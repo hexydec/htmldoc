@@ -6,9 +6,9 @@ use \hexydec\tokens\tokenise;
 class style implements token {
 
 	/**
-	 * @var htmldoc The parent htmldoc object
+	 * @var array The style configuration
 	 */
-	protected $root;
+	protected $config = [];
 
 	/**
 	 * @var string A string containing CSS styles
@@ -21,7 +21,7 @@ class style implements token {
 	 * @param htmldoc $root The parent htmldoc object
 	 */
 	public function __construct(htmldoc $root) {
-		$this->root = $root;
+		$this->config = $root->config['custom']['style'];
 	}
 
 	/**
@@ -47,11 +47,31 @@ class style implements token {
 	 */
 	public function minify(array $minify) : void {
 		if (!isset($minify['style']) || $minify['style'] !== false) {
-			$this->content = \trim($this->content);
-			if ($this->content) {
-				$func = $this->root->getConfig('custom', 'style', 'config', 'minifier');
-				if ($func) {
-					$this->content = \call_user_func($func, $this->content, $minify['style']);
+			$config = $this->config;
+			$content = \trim($this->content);
+
+			// minify?
+			if ($content && $config['minifier']) {
+
+				// cache the output?
+				if (empty($config['cache'])) {
+					$file = null;
+				} else {
+					$file = sprintf($config['cache'], md5($content));
+					if (\file_exists($file) && ($output = \file_get_contents($file)) !== false) {
+						$this->content = $output;
+						return;
+					}
+				}
+
+				// minify the CSS
+				if (($content = \call_user_func($config['minifier'], $content, $minify['style'])) !== false) {
+
+					// cache the minified code
+					if ($file) {
+						\file_put_contents($file, $content);
+					}
+					$this->content = $content;
 				}
 			}
 		}

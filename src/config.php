@@ -15,7 +15,7 @@ class config {
 	 * @param array $config An array of configuration parameters that is recursively merged with the default config
 	 */
 	public function __construct(array $config = []) {
-		$this->config = \array_replace_recursive($this->config, [
+		$default = [
 			'elements' => [
 				'inline' => [
 					'b', 'u', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span'
@@ -65,31 +65,29 @@ class config {
 				// default to CSSdoc if available
 				'style' => [
 					'class' => '\\hexydec\\html\\style',
-					'config' => [
-						'minifier' => \class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
-							$obj = new \hexydec\css\cssdoc();
-							if ($obj->load($css)) {
-								$obj->minify($minify);
-								return $obj->compile();
-							}
-							return $css;
-						} : null
-					]
+					'cache' => null, // a file path pattern containing %s to replace the generated file key, e.g. dirname(__DIR__).'/cache/%s.css'
+					'minifier' => \class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
+						$obj = new \hexydec\css\cssdoc();
+						if ($obj->load($css)) {
+							$obj->minify($minify);
+							return $obj->compile();
+						}
+						return false;
+					} : null
 				],
 
 				// default to JSLite if available
 				'script' => [
 					'class' => '\\hexydec\\html\\script',
-					'config' => [
-						'minifier' => \class_exists('\\hexydec\\jslite\\jslite') ? function (string $css, array $minify) {
-							$obj = new \hexydec\jslite\jslite();
-							if ($obj->load($css)) {
-								$obj->minify($minify);
-								return $obj->compile();
-							}
-							return $css;
-						} : null
-					]
+					'cache' => null, // a file path pattern containing %s to replace the generated file key, e.g. dirname(__DIR__).'/cache/%s.js'
+					'minifier' => \class_exists('\\hexydec\\jslite\\jslite') ? function (string $css, array $minify) {
+						$obj = new \hexydec\jslite\jslite();
+						if ($obj->load($css)) {
+							$obj->minify($minify);
+							return $obj->compile();
+						}
+						return false;
+					} : null
 				]
 			],
 			'minify' => [
@@ -136,7 +134,8 @@ class config {
 				'close' => true, // don't write close tags where possible
 				'email' => false, // sets the minification presets to email safe options
 				'style' => [], // specify CSS minifier options
-				'script' => [] // specify CSS javascript options
+				'script' => [], // specify CSS javascript options
+				'cache' => null // for style and scipt tags, the folder to cache the minified code in (Assuming you are using the default callback)
 			],
 			'output' => [
 				'charset' => null, // set the output charset
@@ -153,7 +152,8 @@ class config {
 					]
 				]
 			]
-		], $config);
+		];
+		$this->config = $config ? \array_replace_recursive($default, $config) : $default;
 	}
 
 	/**

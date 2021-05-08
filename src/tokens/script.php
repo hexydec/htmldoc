@@ -6,9 +6,9 @@ use \hexydec\tokens\tokenise;
 class script implements token {
 
 	/**
-	 * @var htmldoc The parent htmldoc object
+	 * @var array The style configuration
 	 */
-	protected $root;
+	protected $config = [];
 
 	/**
 	 * @var string A string containing javascript
@@ -21,7 +21,7 @@ class script implements token {
 	 * @param htmldoc $root The parent htmldoc object
 	 */
 	public function __construct(htmldoc $root) {
-		$this->root = $root;
+		$this->config = $root->config['custom']['script'];
 	}
 
 	/**
@@ -32,7 +32,6 @@ class script implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		// $pattern = '/\G(?:"(?:\\\\[^\\n\\r]|[^\\\\"\\n\\r])*+"|\'(?:\\\\[^\\n\\r]|[^\\\\\'\\n\\r])*+\'|`(?:\\\\.|[^\\\\`])*+`|[^"\'`]*)*(?=<\\/script>)/iU';
 		$pattern = '/[\\S\\s]*(?=<\\/script>)/iU';
 		if (($token = $tokens->next($pattern)) !== null && $token[0]) {
 			$this->content = $token[0];
@@ -47,11 +46,31 @@ class script implements token {
 	 */
 	public function minify(array $minify) : void {
 		if (!isset($minify['script']) || $minify['script'] !== false) {
-			$this->content = \trim($this->content);
-			if ($this->content) {
-				$func = $this->root->getConfig('custom', 'script', 'config', 'minifier');
-				if ($func) {
-					$this->content = \call_user_func($func, $this->content, $minify['script']);
+			$config = $this->config;
+			$content = \trim($this->content);
+
+			// minify?
+			if ($content && $config['minifier']) {
+
+				// cache the output?
+				if (empty($config['cache'])) {
+					$file = null;
+				} else {
+					$file = sprintf($config['cache'], md5($content));
+					if (\file_exists($file) && ($output = \file_get_contents($file)) !== false) {
+						$this->content = $output;
+						return;
+					}
+				}
+
+				// minify the CSS
+				if (($content = \call_user_func($config['minifier'], $content, $minify['script'])) !== false) {
+
+					// cache the minified code
+					if ($file) {
+						\file_put_contents($file, $content);
+					}
+					$this->content = $content;
 				}
 			}
 		}

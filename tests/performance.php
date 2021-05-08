@@ -44,6 +44,18 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 		// }
 	}
 
+	// cache css and js
+	$config = [
+		'custom' => [
+			'style' => [
+				'cache' =>  __DIR__.'/cache/%s.css'
+			],
+			'script' => [
+				'cache' =>  __DIR__.'/cache/%s.js'
+			]
+		]
+	];
+
 	// test the performance
 	foreach ($urls AS $item) {
 		set_time_limit(30);
@@ -53,7 +65,7 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 			$results[$item] = [
 				'load' => $fetch - $start
 			];
-			$obj = new \hexydec\html\htmldoc();
+			$obj = new \hexydec\html\htmldoc($config);
 			if ($obj->load($input)) {
 				$load = microtime(true);
 				$results[$item]['parse'] = $load - $fetch;
