@@ -16,7 +16,7 @@ The options set into the object are setup for general use, but can be configured
 | option		| Description										| Defaults						|
 |---------------|---------------------------------------------------|-------------------------------|
 | `inline`		| HTML elements that are considered inline			| `['b', 'u', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span']` |
-| `singleton`	| HTML elements that are singletons					| `['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']` |
+| `singleton`	| HTML elements that are singletons					| `['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr', 'animate', 'animateMotion', 'animateTransform', 'circle', 'ellipse', 'feBlend', 'feColorMatrix', 'feComponentTransfer', 'feComposite', 'feConvolveMatrix', 'feDiffuseLighting', 'feDisplacementMap', 'feDistantLight', 'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMerge', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpecularLighting', 'feSpotLight', 'feTile', 'feTurbulence', 'hatchpath', 'image', 'line', 'mpath', 'path', 'polygon', 'polyline', 'rect', 'set', 'stop', 'use', 'view']` |
 | `closeoptional`	| HTML elements that don't have to be closed	| `['head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup']` |
 
 #### `attributes`
@@ -31,23 +31,30 @@ The options set into the object are setup for general use, but can be configured
 
 #### `custom`
 
-This option enables you to specify custom handlers for specific tags. By default there are built in handlers for `style` and `script` tags, currently CSS is minified using [hexydec\\css\\cssdoc](https://github.com/hexydec/cssdoc) if you install the module using composer.
+This option enables you to specify custom handlers for specific tags. To use a custom handler, create a new index inside `custom` with a key of the custom tag name. The value should be an array specifying any configuration options.
 
-There is currently no built-in minifier for Javascript, although an external minifier can be specified in the custom tag options:
+The only required key is `class` which should specify a fully qualified class name to handle the tag (The class must implement \hexydec\html\token).
+
+By default there are built in handlers for `style` and `script` tags, CSS is minified using [hexydec\\css\\cssdoc](https://github.com/hexydec/cssdoc), and Javascript is minified with [hexydec\\css\\jslite](https://github.com/hexydec/jslite)  (if you install the modules using composer).
+
+The `style` and `script` handlers have the following options:
 
 | option		| Description																		|
 |---------------|-----------------------------------------------------------------------------------|
 | `class`		| The name of the handler class (Should implement \hexydec\html\token) 				|
-| `config`		| An array of custom configuration to be passed to the handler class				|
+| `cache`		| A string specifying a file pattern to cache minified code to, use %s for the generated file name	|
+| `minifier`	| A callback for minifying the custom code											|
 
-Note that the built in `style` and `script` handlers both specify `minifier` in the `config` array, here you can specify a callback for a custom minifier with the following pattern:
+The `minifier` callback has the following pattern:
 
 ```php
-function (string $css) : string {
-	// manipulate the css
-	return $css;
+function (string $code, array $minify) : ?string {
+	// manipulate the code, return null if minification failed
+	return $code;
 }
 ```
+
+The minifiers are implemented as callbacks to enable you to use your own minifiers, whist still using the built-in tag handler class.
 
 ## Returns
 
