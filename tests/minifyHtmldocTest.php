@@ -132,6 +132,7 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
 				'<a href="https://test.com/different/folders/">Different Folders</a>' => '<a href="/different/folders/">Different Folders</a>',
 				'<a href="https://test.com/deep/lot/test">Back two</a>' => '<a href="../../test">Back two</a>',
+				'<a href="https://test.com/deep/lot/test/">Back two keep slash</a>' => '<a href="../../test/">Back two keep slash</a>',
 				'<a href="https://test.com/deep/lot/test/this/and/this.php">Back two</a>' => '<a href="../../test/this/and/this.php">Back two</a>',
 				'<link rel="stylesheet" href="/deep/css/build/file.css?_12345">' => '<link rel="stylesheet" href="/deep/css/build/file.css?_12345">', // shorter to stay as is
 			),

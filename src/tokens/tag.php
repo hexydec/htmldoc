@@ -325,8 +325,8 @@ class tag implements token {
 
 				// use parent folders if it is shorter
 				if ($minify['urls']['parent'] && $dirs && \mb_strpos($attributes[$key], '/') === 0 && \mb_strpos($attributes[$key], '//') === false) {
-
-					$compare = \explode('/', \trim(\dirname($attributes[$key]), '/'));
+					$isDir = mb_strrpos($attributes[$key], '/') === mb_strlen($attributes[$key])-1;
+					$compare = \explode('/', \trim($isDir ? $attributes[$key] : \dirname($attributes[$key]), '/'));
 					$update = false;
 					$count = 0;
 					foreach ($compare AS $i => $item) {
@@ -340,7 +340,7 @@ class tag implements token {
 					}
 					if ($update) {
 						$compare = \array_merge(\array_fill(0, \count($dirs) - $count, '..'), $compare);
-						$url = \implode('/', $compare).'/'.\basename($attributes[$key]);
+						$url = \implode('/', $compare).'/'.($isDir ? '' : \basename($attributes[$key]));
 						if (\strlen($url) <= \strlen($attributes[$key])) { // compare as bytes
 							$attributes[$key] = $url;
 						}
