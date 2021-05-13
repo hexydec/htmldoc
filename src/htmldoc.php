@@ -572,8 +572,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 			// sort attribute values by most frequent
 			if ($minify['attributes']['sort'] && !empty($this->cache['attr'])) {
-				\arsort($this->cache['attr']);
-				\arsort($this->cache['attrvalues']);
+				\arsort($this->cache['attr'], SORT_NUMERIC);
+				\arsort($this->cache['attrvalues'], SORT_NUMERIC);
 				$attr = [];
 				foreach ($this->cache['attrvalues'] AS $item => $occurences) {
 					if ($occurences > 5) {

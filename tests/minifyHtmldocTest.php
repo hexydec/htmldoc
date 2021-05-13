@@ -245,7 +245,7 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 	public function testCanMinifySvg() {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/svg.html')) {
-			$doc->minify();
+			$doc->minify(['attributes' => ['sort' => false]]);
 			$minified = file_get_contents(__DIR__.'/templates/svg-minified.html');
 			$this->assertEquals(trim($minified), $doc->html(), 'Can minify SVGs');
 		}
