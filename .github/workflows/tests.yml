@@ -11,13 +11,7 @@ jobs:
       - uses: php-actions/composer@v5
 
       - name: PHPUnit Tests
-        uses: php-actions/phpunit@v2
-        with:
-          configuration: phpunit.xml
-          php_version: 7.4
-          php_extensions: mbstring xdebug
-          bootstrap: vendor/autoload.php
-          args: --coverage-text --coverage-clover=coverage.xml tests
+        run: ./vendor/bin/phpunit
         env:
           XDEBUG_MODE: coverage
 
