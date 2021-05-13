@@ -169,7 +169,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Open an HTML file from a URL
 	 *
 	 * @param string $url The address of the HTML file to retrieve
-	 * @param resource $context An optional array of context parameters
+	 * @param resource $context A resource object made with stream_context_create()
 	 * @param string &$error A reference to any user error that is generated
 	 * @return mixed The loaded HTML, or false on error
 	 */
