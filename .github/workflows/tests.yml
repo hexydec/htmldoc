@@ -24,6 +24,8 @@ jobs:
         run: ./vendor/bin/phpunit
         env:
           XDEBUG_MODE: coverage
+
+      - name: Test,
         run: ls
 
       - name: Upload coverage to Codecov
