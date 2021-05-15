@@ -18,7 +18,7 @@ jobs:
       - uses: php-actions/composer@v5
         with:
             php_version: 7.4
-            php_extensions: mbstring,xdebug
+            php_extensions: mbstring xdebug
 
       - name: PHPUnit Tests
         run: ./vendor/bin/phpunit
