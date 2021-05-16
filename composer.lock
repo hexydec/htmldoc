@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "fdf06b355ed4aa64ca31adffe21a3fd7d873a3cb"
+                "reference": "fd2c0300f3ff5654babed46f01132880cc1fb9b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/fdf06b355ed4aa64ca31adffe21a3fd7d873a3cb",
-                "reference": "fdf06b355ed4aa64ca31adffe21a3fd7d873a3cb",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/fd2c0300f3ff5654babed46f01132880cc1fb9b4",
+                "reference": "fd2c0300f3ff5654babed46f01132880cc1fb9b4",
                 "shasum": ""
             },
             "require": {
@@ -48,9 +48,9 @@
             "description": "A token based CSS Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/master"
+                "source": "https://github.com/hexydec/cssdoc/tree/0.2.0"
             },
-            "time": "2021-05-13T19:50:18+00:00"
+            "time": "2021-05-15T14:03:14+00:00"
         },
         {
             "name": "hexydec/jslite",
@@ -58,12 +58,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "2dd0a1bd78438244c78107c24ab088e2eb7a9197"
+                "reference": "2bb16cf810c25298a3f924d134adf496032d3d95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/2dd0a1bd78438244c78107c24ab088e2eb7a9197",
-                "reference": "2dd0a1bd78438244c78107c24ab088e2eb7a9197",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/2bb16cf810c25298a3f924d134adf496032d3d95",
+                "reference": "2bb16cf810c25298a3f924d134adf496032d3d95",
                 "shasum": ""
             },
             "require": {
@@ -71,7 +71,7 @@
                 "php": ">=7.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "9.3"
+                "phpunit/phpunit": "9.5"
             },
             "default-branch": true,
             "type": "library",
@@ -96,7 +96,7 @@
                 "issues": "https://github.com/hexydec/jslite/issues",
                 "source": "https://github.com/hexydec/jslite/tree/master"
             },
-            "time": "2021-05-13T19:48:50+00:00"
+            "time": "2021-05-16T21:55:46+00:00"
         },
         {
             "name": "hexydec/tokenise",
@@ -104,16 +104,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "c7f9e06199bb51cfcd0159d268d013b18f51efda"
+                "reference": "cefab11002ca074bd3bce2a5c4e3f82fcaa9b407"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/c7f9e06199bb51cfcd0159d268d013b18f51efda",
-                "reference": "c7f9e06199bb51cfcd0159d268d013b18f51efda",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/cefab11002ca074bd3bce2a5c4e3f82fcaa9b407",
+                "reference": "cefab11002ca074bd3bce2a5c4e3f82fcaa9b407",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "9.5"
             },
             "default-branch": true,
             "type": "library",
@@ -133,12 +136,12 @@
                     "homepage": "https://github.com/hexydec"
                 }
             ],
-            "description": "A program for performing lexical analysis, written in PHP. Designed to supply tokens to a parser in order to analyse the syntax of programming languages.",
+            "description": "A program for performing lexical analysis, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/tokenise/issues",
                 "source": "https://github.com/hexydec/tokenise/tree/master"
             },
-            "time": "2021-05-06T10:43:27+00:00"
+            "time": "2021-05-16T21:54:35+00:00"
         }
     ],
     "packages-dev": [
