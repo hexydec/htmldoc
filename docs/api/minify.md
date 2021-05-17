@@ -17,11 +17,13 @@ An optional array contains a list of configuration parameters to configure the m
 
 <table>
 	<thead>
-		<th>Parameter</th>
-		<th>Type</th>
-		<th>Options</th>
-		<th>Description</th>
-		<th>Default</th>
+		<tr>
+			<th>Parameter</th>
+			<th>Type</th>
+			<th>Options</th>
+			<th>Description</th>
+			<th>Default</th>
+		</tr>
 	</thead>
 	<tbody>
 		<tr>

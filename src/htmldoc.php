@@ -134,7 +134,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @return scalar The current pointer position
 	 */
-	public function key() : scalar {
+	public function key() : int {
 		return $this->pointer;
 	}
 

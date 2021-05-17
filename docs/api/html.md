@@ -13,11 +13,13 @@ if ($doc->load($html)) {
 
 <table>
 	<thead>
-		<th>Parameter</th>
-		<th>Type</th>
-		<th>Options</th>
-		<th>Description</th>
-		<th>Default</th>
+		<tr>
+			<th>Parameter</th>
+			<th>Type</th>
+			<th>Options</th>
+			<th>Description</th>
+			<th>Default</th>
+		</tr>
 	</thead>
 	<tbody>
 		<tr>

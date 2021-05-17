@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "fd2c0300f3ff5654babed46f01132880cc1fb9b4"
+                "reference": "ed5b578ce7848997b1033b01c3da336791062606"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/fd2c0300f3ff5654babed46f01132880cc1fb9b4",
-                "reference": "fd2c0300f3ff5654babed46f01132880cc1fb9b4",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/ed5b578ce7848997b1033b01c3da336791062606",
+                "reference": "ed5b578ce7848997b1033b01c3da336791062606",
                 "shasum": ""
             },
             "require": {
@@ -48,9 +48,9 @@
             "description": "A token based CSS Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/0.2.0"
+                "source": "https://github.com/hexydec/cssdoc/tree/master"
             },
-            "time": "2021-05-15T14:03:14+00:00"
+            "time": "2021-05-17T21:19:43+00:00"
         },
         {
             "name": "hexydec/jslite",

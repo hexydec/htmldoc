@@ -60,6 +60,17 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals(3, count($doc->find('body > *')->get()));
 			$this->assertEquals('<div class="last">Last</div>', $doc->find('body > *')->get(2)->html());
 			$this->assertEquals('<div class="last">Last</div>', $doc->find('body > *')->get(-1)->html());
+
+			$cls = ['first', 'find', 'last'];
+			$divs = $doc->find('body > *');
+			$this->assertTrue(isset($divs[0]), true);
+			$this->assertEquals($cls[0], $divs[0]->attr('class'));
+			foreach ($divs AS $key => $item) {
+				$this->assertEquals($cls[$key], $item->attr('class'));
+			}
+
+			unset($divs[2]);
+			$this->assertEquals(isset($divs[2]), false);
 		}
 	}
 
