@@ -63,7 +63,7 @@ if ($doc->open($url) {
 The easiest way to get up and running is to use composer:
 
 ```
-$ composer install
+$ composer install hexydec/htmldoc
 ```
 
 HTMLdoc requires [\hexydec\token\tokenise](https://github.com/hexydec/tokenise) to run, which you can install manually if not using composer. Optionally you can also install [CSSdoc](https://github.com/hexydec/cssdoc) and [JSlite](https://github.com/hexydec/jslite) to perform inline CSS and Javascript minification respectively.

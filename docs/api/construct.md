@@ -7,9 +7,9 @@ $doc = new \hexydec\html\htmldoc($config);
 ```
 ## Arguments
 
-### $config
+### `$config`
 
-The options set into the object are setup for general use, but can be configured with the following options:
+A optional array of configuration options that will be merged recursively with the default configuration. The available options and their defaults are:
 
 #### `elements`
 

@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "ed5b578ce7848997b1033b01c3da336791062606"
+                "reference": "3cab5cb23167a853d9decceeb0301a927f81ddd7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/ed5b578ce7848997b1033b01c3da336791062606",
-                "reference": "ed5b578ce7848997b1033b01c3da336791062606",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/3cab5cb23167a853d9decceeb0301a927f81ddd7",
+                "reference": "3cab5cb23167a853d9decceeb0301a927f81ddd7",
                 "shasum": ""
             },
             "require": {
@@ -25,7 +25,7 @@
                 "php": ">=7.3"
             },
             "require-dev": {
-                "phpunit/phpunit": "9.3"
+                "phpunit/phpunit": "9.5"
             },
             "default-branch": true,
             "type": "library",
@@ -50,7 +50,7 @@
                 "issues": "https://github.com/hexydec/cssdoc/issues",
                 "source": "https://github.com/hexydec/cssdoc/tree/master"
             },
-            "time": "2021-05-17T21:19:43+00:00"
+            "time": "2021-05-22T17:37:31+00:00"
         },
         {
             "name": "hexydec/jslite",
@@ -58,12 +58,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "2bb16cf810c25298a3f924d134adf496032d3d95"
+                "reference": "9bcfa3f7a85b512502dc81a92b3850d00931bdcf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/2bb16cf810c25298a3f924d134adf496032d3d95",
-                "reference": "2bb16cf810c25298a3f924d134adf496032d3d95",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/9bcfa3f7a85b512502dc81a92b3850d00931bdcf",
+                "reference": "9bcfa3f7a85b512502dc81a92b3850d00931bdcf",
                 "shasum": ""
             },
             "require": {
@@ -94,9 +94,9 @@
             "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/master"
+                "source": "https://github.com/hexydec/jslite/tree/0.4.0"
             },
-            "time": "2021-05-16T21:55:46+00:00"
+            "time": "2021-05-22T17:24:37+00:00"
         },
         {
             "name": "hexydec/tokenise",
@@ -104,12 +104,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "cefab11002ca074bd3bce2a5c4e3f82fcaa9b407"
+                "reference": "fb449b74e11b9cb15d4977f43dbb941d6a2fe300"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/cefab11002ca074bd3bce2a5c4e3f82fcaa9b407",
-                "reference": "cefab11002ca074bd3bce2a5c4e3f82fcaa9b407",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/fb449b74e11b9cb15d4977f43dbb941d6a2fe300",
+                "reference": "fb449b74e11b9cb15d4977f43dbb941d6a2fe300",
                 "shasum": ""
             },
             "require": {
@@ -139,9 +139,9 @@
             "description": "A program for performing lexical analysis, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/tokenise/issues",
-                "source": "https://github.com/hexydec/tokenise/tree/master"
+                "source": "https://github.com/hexydec/tokenise/tree/0.4.0"
             },
-            "time": "2021-05-16T21:54:35+00:00"
+            "time": "2021-05-22T16:48:33+00:00"
         }
     ],
     "packages-dev": [

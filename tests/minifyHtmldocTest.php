@@ -250,4 +250,51 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals(trim($minified), $doc->html(), 'Can minify SVGs');
 		}
 	}
+
+	public function testCanMinifyCssAndJs() {
+
+		// this basic test is to test that the HTMLdoc object can invoke the minifiers, not how good the minifiers themselves are
+		// There are tests within the minifiers' respective projects for that
+		$doc = new htmldoc();
+		$input = '
+			<style type="text/css">
+				.test {
+					display: block;
+					font-weight: bold;
+				}
+			</style>
+			<script type="text/javascript" async="async">
+				(function () {
+					console.log("Test");
+				}());
+			</script>
+		';
+		$output = '<style>.test{display:block;font-weight:700}</style><script async>(function(){console.log("Test")}())</script>';
+		$doc->load($input);
+		$this->assertEquals($input, $doc->html(), 'Can load CSS and Javascript');
+
+		// minify the code
+		$doc->minify();
+		$this->assertEquals($output, $doc->html(), 'Can minify CSS and Javascript');
+
+		// minify and cache
+		$doc = new htmldoc([
+			'custom' => [
+				'style' => [
+					'cache' => __DIR__.'/cache/%s.css'
+				],
+				'script' => [
+					'cache' => __DIR__.'/cache/%s.js'
+				]
+			]
+		]);
+		$doc->load($input);
+		$doc->minify();
+		$this->assertEquals($output, $doc->html(), 'Can minify and cache CSS and Javascript');
+
+		// do it again to pull from cache
+		$doc->load($input);
+		$doc->minify();
+		$this->assertEquals($output, $doc->html(), 'Can load minified CSS and Javascript from cache');
+	}
 }

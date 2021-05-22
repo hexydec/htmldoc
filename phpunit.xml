@@ -4,6 +4,9 @@
     <include>
       <directory suffix=".php">src</directory>
     </include>
+	<exclude>
+		<file>src/autoload.php</file>
+	</exclude>
     <report>
       <clover outputFile="./coverage/result.xml"/>
       <html outputDirectory="./coverage/result"/>

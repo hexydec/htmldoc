@@ -187,7 +187,7 @@ if (!empty($_POST['action'])) {
 		</style>
 	</head>
 	<body>
-		<form action="<?= \htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" accept-charset="<?= \htmlspecialchars(\mb_internal_encoding()); ?>" class="minify__form">
+		<form action="<?= \htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="post" accept-charset="<?= \htmlspecialchars(\mb_internal_encoding()); ?>" class="minify__form">
 			<div class="minify__form-wrap">
 				<h1 class="minify__form-heading">HTML Minifier</h1>
 				<?php if ($error) { ?>
