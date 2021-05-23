@@ -15,7 +15,7 @@ class config {
 	 * @param array $config An array of configuration parameters that is recursively merged with the default config
 	 */
 	public function __construct(array $config = []) {
-		$minify = function (string $css, array $minify, string $tag) {
+		$minify = function (string $code, array $minify, string $tag) {
 			switch ($tag) {
 				case 'style':
 					$obj = new \hexydec\css\cssdoc();
@@ -26,7 +26,7 @@ class config {
 				default:
 					return false;
 			}
-			if ($obj->load($css)) {
+			if ($obj->load($code)) {
 				$obj->minify($minify);
 				return $obj->compile();
 			}
