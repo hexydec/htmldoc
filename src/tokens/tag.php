@@ -85,7 +85,6 @@ class tag implements token {
 
 				// if you end up here, you are parsing an unclosed tag
 				case 'tagopenstart':
-					$tag = \ltrim($token['value'], '<');
 					$tokens->prev();
 					break 2;
 
@@ -191,7 +190,7 @@ class tag implements token {
 
 		// process custom tags
 		if ($parenttag && isset($this->config['custom'][$parenttag])) {
-			$item = new $this->config['custom'][$parenttag]['class']($root);
+			$item = new $this->config['custom'][$parenttag]['class']($root, $parenttag);
 			$item->parse($tokens);
 			$children[] = $item;
 			$this->close = true;

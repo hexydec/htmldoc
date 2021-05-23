@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "13621c8637a0cc23cd808f88448a2087",
+    "content-hash": "7d57a365e53e523e3994fac5a59f1f0e",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "dev-master",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "3cab5cb23167a853d9decceeb0301a927f81ddd7"
+                "reference": "bca547a067069c09fa3e94579eb9537844454361"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/3cab5cb23167a853d9decceeb0301a927f81ddd7",
-                "reference": "3cab5cb23167a853d9decceeb0301a927f81ddd7",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/bca547a067069c09fa3e94579eb9537844454361",
+                "reference": "bca547a067069c09fa3e94579eb9537844454361",
                 "shasum": ""
             },
             "require": {
@@ -27,7 +27,6 @@
             "require-dev": {
                 "phpunit/phpunit": "9.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -48,32 +47,31 @@
             "description": "A token based CSS Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/master"
+                "source": "https://github.com/hexydec/cssdoc/tree/0.3.0"
             },
-            "time": "2021-05-22T17:37:31+00:00"
+            "time": "2021-05-21T20:44:27+00:00"
         },
         {
             "name": "hexydec/jslite",
-            "version": "dev-master",
+            "version": "0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "9bcfa3f7a85b512502dc81a92b3850d00931bdcf"
+                "reference": "2d414cf9a3e56959636f08983b5369d980edbb98"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/9bcfa3f7a85b512502dc81a92b3850d00931bdcf",
-                "reference": "9bcfa3f7a85b512502dc81a92b3850d00931bdcf",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/2d414cf9a3e56959636f08983b5369d980edbb98",
+                "reference": "2d414cf9a3e56959636f08983b5369d980edbb98",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "@dev",
+                "hexydec/tokenise": "0.4.0",
                 "php": ">=7.3"
             },
             "require-dev": {
                 "phpunit/phpunit": "9.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -94,13 +92,13 @@
             "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/0.4.0"
+                "source": "https://github.com/hexydec/jslite/tree/0.4.1"
             },
-            "time": "2021-05-22T17:24:37+00:00"
+            "time": "2021-05-23T19:16:31+00:00"
         },
         {
             "name": "hexydec/tokenise",
-            "version": "dev-master",
+            "version": "0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
@@ -118,7 +116,6 @@
             "require-dev": {
                 "phpunit/phpunit": "9.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -2239,11 +2236,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "hexydec/tokenise": 20,
-        "hexydec/cssdoc": 20,
-        "hexydec/jslite": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -15,7 +15,7 @@
         "php": ">=7.3",
 		"hexydec/tokenise": "0.4.0",
 		"hexydec/cssdoc": "0.3.0",
-		"hexydec/jslite": "0.4.0"
+		"hexydec/jslite": "0.4.1"
 	},
 	"autoload": {
 		"classmap": ["src/"]

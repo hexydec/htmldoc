@@ -15,6 +15,23 @@ class config {
 	 * @param array $config An array of configuration parameters that is recursively merged with the default config
 	 */
 	public function __construct(array $config = []) {
+		$minify = function (string $css, array $minify, string $tag) {
+			switch ($tag) {
+				case 'style':
+					$obj = new \hexydec\css\cssdoc();
+					break;
+				case  'script':
+					$obj = new \hexydec\jslite\jslite();
+					break;
+				default:
+					return false;
+			}
+			if ($obj->load($css)) {
+				$obj->minify($minify);
+				return $obj->compile();
+			}
+			return false;
+		};
 		$default = [
 			'elements' => [
 				'inline' => [
@@ -64,30 +81,16 @@ class config {
 
 				// default to CSSdoc if available
 				'style' => [
-					'class' => '\\hexydec\\html\\style',
+					'class' => '\\hexydec\\html\\custom', // the class that will parse the tag, must implement \hexydec\html\token
 					'cache' => null, // a file path pattern containing %s to replace the generated file key, e.g. dirname(__DIR__).'/cache/%s.css'
-					'minifier' => \class_exists('\\hexydec\\css\\cssdoc') ? function (string $css, array $minify) {
-						$obj = new \hexydec\css\cssdoc();
-						if ($obj->load($css)) {
-							$obj->minify($minify);
-							return $obj->compile();
-						}
-						return false;
-					} : null
+					'minifier' => \class_exists('\\hexydec\\css\\cssdoc') ? $minify : null
 				],
 
 				// default to JSLite if available
 				'script' => [
-					'class' => '\\hexydec\\html\\script',
+					'class' => '\\hexydec\\html\\custom',
 					'cache' => null, // a file path pattern containing %s to replace the generated file key, e.g. dirname(__DIR__).'/cache/%s.js'
-					'minifier' => \class_exists('\\hexydec\\jslite\\jslite') ? function (string $css, array $minify) {
-						$obj = new \hexydec\jslite\jslite();
-						if ($obj->load($css)) {
-							$obj->minify($minify);
-							return $obj->compile();
-						}
-						return false;
-					} : null
+					'minifier' => \class_exists('\\hexydec\\jslite\\jslite') ? $minify : null
 				]
 			],
 			'minify' => [

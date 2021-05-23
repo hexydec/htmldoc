@@ -8,8 +8,7 @@ spl_autoload_register(function (string $class) : bool {
 		'hexydec\\html\\comment' => __DIR__.'/tokens/comment.php',
 		'hexydec\\html\\doctype' => __DIR__.'/tokens/doctype.php',
 		'hexydec\\html\\pre' => __DIR__.'/tokens/pre.php',
-		'hexydec\\html\\script' => __DIR__.'/tokens/script.php',
-		'hexydec\\html\\style' => __DIR__.'/tokens/style.php',
+		'hexydec\\html\\custom' => __DIR__.'/tokens/custom.php',
 		'hexydec\\html\\tag' => __DIR__.'/tokens/tag.php',
 		'hexydec\\html\\text' => __DIR__.'/tokens/text.php'
 	];

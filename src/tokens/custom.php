@@ -3,12 +3,17 @@ declare(strict_types = 1);
 namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
-class script implements token {
+class custom implements token {
 
 	/**
-	 * @var array The style configuration
+	 * @var array The custom configuration
 	 */
 	protected $config = [];
+
+	/**
+	 * @var array The name of the tag
+	 */
+	protected $tagName;
 
 	/**
 	 * @var string A string containing javascript
@@ -19,9 +24,11 @@ class script implements token {
 	 * Constructs the script object
 	 *
 	 * @param htmldoc $root The parent htmldoc object
+	 * @param string $tag The name of the custom tag, note this cannot be null
 	 */
-	public function __construct(htmldoc $root) {
-		$this->config = $root->config['custom']['script'];
+	public function __construct(htmldoc $root, string $tagName = null) {
+		$this->tagName = $tagName = \mb_strtolower($tagName);
+		$this->config = $root->config['custom'][$tagName];
 	}
 
 	/**
@@ -32,7 +39,7 @@ class script implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		$pattern = '/[\\S\\s]*(?=<\\/script>)/iU';
+		$pattern = '/[\\S\\s]*(?=<\\/'.$this->tagName.'>)/iU';
 		if (($token = $tokens->next($pattern)) !== null && $token[0]) {
 			$this->content = $token[0];
 		}
@@ -45,7 +52,8 @@ class script implements token {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-		if (!isset($minify['script']) || $minify['script'] !== false) {
+		$tag = $this->tagName;
+		if (!isset($minify[$tag]) || $minify[$tag] !== false) {
 			$config = $this->config;
 			$content = \trim($this->content);
 
@@ -63,11 +71,15 @@ class script implements token {
 					}
 				}
 
-				// minify the CSS
-				if (($content = \call_user_func($config['minifier'], $content, $minify['script'])) !== false) {
+				// minify the custom code
+				if (($content = \call_user_func($config['minifier'], $content, $minify[$tag], $tag)) !== false) {
 
 					// cache the minified code
 					if ($file) {
+						$dir = \dirname($file);
+						if (!\is_dir($dir)) {
+							\mkdir($dir, 0755);
+						}
 						\file_put_contents($file, $content);
 					}
 					$this->content = $content;
@@ -77,7 +89,7 @@ class script implements token {
 	}
 
 	/**
-	 * Compile the scripts as an HTML string
+	 * Compile the custom tag content as an HTML string
 	 *
 	 * @param array $options An array indicating output options
 	 * @return string The compiled HTML
