@@ -72,7 +72,7 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 				$obj->minify();
 				$minify = microtime(true);
 				$results[$item]['minify'] = $minify - $load;
-				$output = $obj->save();
+				$output = $obj->html();
 				$save = microtime(true);
 				$results[$item]['compile'] = $save - $minify;
 				$results[$item]['total'] = $save - $fetch;

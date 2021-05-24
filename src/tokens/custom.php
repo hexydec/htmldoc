@@ -39,7 +39,7 @@ class custom implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		$pattern = '/[\\S\\s]*(?=<\\/'.$this->tagName.'>)/iU';
+		$pattern = '/(?:[^<]|<(?!\\/'.$this->tagName.'>))*+/iU'; // capture anything up to the closing tag
 		if (($token = $tokens->next($pattern)) !== null && $token[0]) {
 			$this->content = $token[0];
 		}
