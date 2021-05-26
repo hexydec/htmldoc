@@ -643,7 +643,7 @@ class tag implements token {
 				$empty = \in_array($value, [null, ''], true);
 
 				// unquoted
-				if (!$empty && !$options['xml'] && $options['quotestyle'] == 'minimal' && \strcspn($value, " =\"'`<>\n\r\t/") == strlen($value)) {
+				if (!$empty && !$options['xml'] && $options['quotestyle'] == 'minimal' && \strpbrk($value, " =\"'`<>\n\r\t") === false) {
 					$html .= '='.$value;
 
 				// single quotes || swap when minimal and there are double quotes in the string

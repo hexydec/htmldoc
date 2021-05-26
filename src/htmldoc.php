@@ -251,18 +251,28 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			if ($obj->load($match[0], \mb_internal_encoding())) {
 
 				// <meta charset="xxx" />
-				if (($value = $obj->attr('charset')) !== null) {
-					return $value;
+				if (($charset = $obj->attr('charset')) !== null && $this->isEncodingValid($charset)) {
+					return $charset;
 
 				// <meta http-equiv="Content-Type" content="text/html; charset=xxx" />
 				} elseif (($value = $obj->eq(0)->attr('content')) !== null && ($charset = \mb_stristr($value, 'charset=')) !== false) {
-					return \mb_substr($charset, 8);
+					$charset = \mb_substr($charset, 8);
+					if ($this->isEncodingValid($charset)) {
+						return $charset;
+					}
 				}
 			}
-		} elseif (($charset = \mb_detect_encoding($html)) !== false) {
+		}
+
+		// just detect the charset
+		if (($charset = \mb_detect_encoding($html)) !== false) {
 			return $charset;
 		}
 		return null;
+	}
+
+	protected function isEncodingValid(string $charset) : bool {
+		return \in_array(\strtolower($charset), array_map('\\strtolower', mb_list_encodings()));
 	}
 
 	/**

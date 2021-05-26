@@ -61,19 +61,34 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 		set_time_limit(10);
 		$start = microtime(true);
 		if (($input = fetch($item)) !== false) {
+
+			// Setup the environment
+			$_SERVER['HTTP_HOST'] = parse_url($item, PHP_URL_HOST);
+			$_SERVER['REQUEST_URI'] = parse_url($item, PHP_URL_PATH);
+			$_SERVER['HTTPS'] = mb_strpos($item, 'https://') === 0 ? 'on' : '';
+
+			// setup timing
 			$fetch = microtime(true);
 			$results[$item] = [
 				'load' => $fetch - $start
 			];
+
+			// create the object
 			$obj = new \hexydec\html\htmldoc($config);
 			if ($obj->load($input)) {
 				$load = microtime(true);
 				$results[$item]['parse'] = $load - $fetch;
+
+				// minify
 				$obj->minify();
 				$minify = microtime(true);
 				$results[$item]['minify'] = $minify - $load;
+
+				// output
 				$output = $obj->html();
 				$save = microtime(true);
+
+				// compile timings
 				$results[$item]['compile'] = $save - $minify;
 				$results[$item]['total'] = $save - $fetch;
 				$results[$item]['input'] = strlen($input);
@@ -145,11 +160,11 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 							<td><?= htmlspecialchars(number_format($item['input'])); ?></td>
 							<td><?= htmlspecialchars(number_format($item['output'])); ?></td>
 							<td><?= htmlspecialchars(number_format($item['input'] - $item['output'])); ?></td>
-							<td><?= htmlspecialchars(number_format((100 / $item['input']) * $item['output'])); ?>%</td>
+							<td><?= htmlspecialchars(number_format((100 / $item['input']) * $item['output'], 2)); ?>%</td>
 							<td><?= htmlspecialchars(number_format($item['inputgz'])); ?></td>
 							<td><?= htmlspecialchars(number_format($item['outputgz'])); ?></td>
 							<td><?= htmlspecialchars(number_format($item['inputgz'] - $item['outputgz'])); ?></td>
-							<td><?= htmlspecialchars(number_format((100 / $item['inputgz']) * $item['outputgz'])); ?>%</td>
+							<td><?= htmlspecialchars(number_format((100 / $item['inputgz']) * $item['outputgz'], 2)); ?>%</td>
 							<td><?= htmlspecialchars(number_format($item['load'], 4)); ?>s</td>
 							<td><?= htmlspecialchars(number_format($item['parse'], 4)); ?>s</td>
 							<td><?= htmlspecialchars(number_format($item['minify'], 4)); ?>s</td>
@@ -172,11 +187,11 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 						<td><?= htmlspecialchars(number_format($input)); ?></td>
 						<td><?= htmlspecialchars(number_format($output)); ?></td>
 						<td><?= htmlspecialchars(number_format($input - $output)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $input) * $output)); ?>%</td>
+						<td><?= htmlspecialchars(number_format((100 / $input) * $output, 2)); ?>%</td>
 						<td><?= htmlspecialchars(number_format($inputgz)); ?></td>
 						<td><?= htmlspecialchars(number_format($outputgz)); ?></td>
 						<td><?= htmlspecialchars(number_format($inputgz - $outputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz)); ?>%</td>
+						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz, 2)); ?>%</td>
 						<td><?= htmlspecialchars(number_format($load, 4)); ?>s</td>
 						<td><?= htmlspecialchars(number_format($parse, 4)); ?>s</td>
 						<td><?= htmlspecialchars(number_format($minify, 4)); ?>s</td>
@@ -200,11 +215,11 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 						<td><?= htmlspecialchars(number_format($input)); ?></td>
 						<td><?= htmlspecialchars(number_format($output)); ?></td>
 						<td><?= htmlspecialchars(number_format($input - $output)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $input) * $output)); ?>%</td>
+						<td><?= htmlspecialchars(number_format((100 / $input) * $output, 2)); ?>%</td>
 						<td><?= htmlspecialchars(number_format($inputgz)); ?></td>
 						<td><?= htmlspecialchars(number_format($outputgz)); ?></td>
 						<td><?= htmlspecialchars(number_format($inputgz - $outputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz)); ?>%</td>
+						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz, 2)); ?>%</td>
 						<td><?= htmlspecialchars(number_format($load, 4)); ?>s</td>
 						<td><?= htmlspecialchars(number_format($parse, 4)); ?>s</td>
 						<td><?= htmlspecialchars(number_format($minify, 4)); ?>s</td>

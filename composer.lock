@@ -4,24 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7d57a365e53e523e3994fac5a59f1f0e",
+    "content-hash": "240155d8a88cb860ae44c9774d90a20c",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "0.3.0",
+            "version": "0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "bca547a067069c09fa3e94579eb9537844454361"
+                "reference": "bbc7d4eeccd840bb3bfc3d4d521374b44158fe8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/bca547a067069c09fa3e94579eb9537844454361",
-                "reference": "bca547a067069c09fa3e94579eb9537844454361",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/bbc7d4eeccd840bb3bfc3d4d521374b44158fe8e",
+                "reference": "bbc7d4eeccd840bb3bfc3d4d521374b44158fe8e",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "@dev",
+                "hexydec/tokenise": "0.4.0",
                 "php": ">=7.3"
             },
             "require-dev": {
@@ -47,22 +47,22 @@
             "description": "A token based CSS Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/0.3.0"
+                "source": "https://github.com/hexydec/cssdoc/tree/0.4.0"
             },
-            "time": "2021-05-21T20:44:27+00:00"
+            "time": "2021-05-26T16:19:26+00:00"
         },
         {
             "name": "hexydec/jslite",
-            "version": "0.4.1",
+            "version": "0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "2d414cf9a3e56959636f08983b5369d980edbb98"
+                "reference": "54fe9e19657132cf0018634ee728493031542925"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/2d414cf9a3e56959636f08983b5369d980edbb98",
-                "reference": "2d414cf9a3e56959636f08983b5369d980edbb98",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/54fe9e19657132cf0018634ee728493031542925",
+                "reference": "54fe9e19657132cf0018634ee728493031542925",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/0.4.1"
+                "source": "https://github.com/hexydec/jslite/tree/0.5.0"
             },
-            "time": "2021-05-23T19:16:31+00:00"
+            "time": "2021-05-26T16:09:23+00:00"
         },
         {
             "name": "hexydec/tokenise",
