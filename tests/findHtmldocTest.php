@@ -84,6 +84,52 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
+	public function testCanSetAttributes() {
+		$tests = [
+			[
+				'input' => '<div>Test</div><div>Test 2</div>',
+				'find' => 'div',
+				'attr' => 'class',
+				'value' => 'test',
+				'output' => '<div class="test">Test</div><div class="test">Test 2</div>'
+			],
+			[
+				'input' => '<div>
+						<img src="test.png" alt="Test" />
+					</div>
+					<div class="main">
+						<p>
+							<img src="test.png" alt="Test" width="800" height="450" />
+						</p>
+					</div>',
+				'find' => 'img',
+				'attr' => 'loading',
+				'value' => 'lazy',
+				'output' => '<div>
+						<img src="test.png" alt="Test" loading="lazy" />
+					</div>
+					<div class="main">
+						<p>
+							<img src="test.png" alt="Test" width="800" height="450" loading="lazy" />
+						</p>
+					</div>'
+			],
+			[
+				'input' => '<div class="test">Test</div><div class="test">Test 2</div>',
+				'find' => 'div',
+				'attr' => 'class',
+				'value' => 'test test--add-attr',
+				'output' => '<div class="test test--add-attr">Test</div><div class="test test--add-attr">Test 2</div>'
+			]
+		];
+		$doc = new htmldoc();
+		foreach ($tests AS $item) {
+			$doc->load($item['input'], \mb_internal_encoding());
+			$doc->find($item['find'])->attr($item['attr'], $item['value']);
+			$this->assertEquals($item['output'], $doc->html());
+		}
+	}
+
 	public function testCanReadTextNodes() {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {

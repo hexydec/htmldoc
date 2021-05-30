@@ -592,13 +592,20 @@ class tag implements token {
 	}
 
 	/**
-	 * Retrieve the specified attribute from the tag
+	 * Retrieve the specified attribute from the tag or update its value
 	 *
-	 * @param string $key The key of the attribute whos value you wish to retrieve
+	 * @param string $key The key of the attribute whos value you wish to retrieve or update
+	 * @param string $value The value of the attribute to update
 	 * @return string The value of the attrbute or NULL if the attribute does not exist
 	 */
-	public function attr(string $key) : ?string {
-		if (\array_key_exists($key, $this->attributes)) {
+	public function attr(string $key, ?string $value = null) : ?string {
+
+		// set the value
+		if ($value !== null) {
+			$this->attributes[$key] = $value;
+
+		// get the value
+		} elseif (\array_key_exists($key, $this->attributes)) {
 			return $this->attributes[$key] === null ? true : $this->attributes[$key];
 		}
 		return null;

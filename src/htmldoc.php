@@ -507,15 +507,20 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	/**
-	 * Retrieves the specified attribute value from the first tag in the collection
+	 * Retrieves the specified attribute value from the first tag in the collection or update the attribute on all matching tags
 	 *
 	 * @param string $key The name of the attribute to retrieve
+	 * @param string $value The value of the attribute to update
 	 * @return string The value of the attribute or null if the attribute doesn't exist
 	 */
-	public function attr(string $key) : ?string {
+	public function attr(string $key, ?string $value = null) : ?string {
 		foreach ($this->children AS $item) {
 			if (\get_class($item) === 'hexydec\\html\\tag') {
-				return $item->attr($key);
+				if ($value === null) {
+					return $item->attr($key);
+				} else {
+					$item->attr($key, $value);
+				}
 			}
 		}
 		return null;
