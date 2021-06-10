@@ -1,6 +1,6 @@
 {
   "name": "HTMLdoc",
-  "version": "1.2.5",
+  "version": "1.2.4",
   "description": "A token based HTML Document parser and minifier written in PHP",
   "main": "src/htmldoc.php",
   "directories": {
