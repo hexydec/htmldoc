@@ -56,7 +56,17 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			"<div\n\r\n\t   >Test</div\n\r\n\t    >" => '<div>Test</div>',
 			'<div><table><tbody><tr><td>Cell 1<td>cell 2</table></div><p>hi' => '<div><table><tbody><tr><td>Cell 1<td>cell 2</table></div><p>hi',
 			'<div>hi</p></div>' => '<div>hi</div>',
-			'<p><div>hi</p></div>' => '<p><div>hi</div></p>'
+			'<p><div>hi</p></div>' => '<p><div>hi</div></p>',
+			'<script>
+				<!--
+					alert("Hey there");
+				//-->
+			</script>' => '<script>
+					alert("Hey there");
+				//-->
+			</script>',
+			'<p data-attr="attribute"data-another="too close">No space between attributes</p>' => '<p data-attr="attribute" data-another="too close">No space between attributes</p>',
+			'<p class="test""><span class="something">Extra Quote</span></p>' => '<p class="test"><span class="something">Extra Quote</span></p>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {

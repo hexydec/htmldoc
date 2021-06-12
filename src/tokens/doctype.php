@@ -6,9 +6,9 @@ use \hexydec\tokens\tokenise;
 class doctype implements token {
 
 	/**
-	 * @var string The text content of this object
+	 * @var array The text content of this object
 	 */
-	protected $content = '';
+	protected $content = [];
 
 	/**
 	 * Constructs the script object
@@ -27,13 +27,14 @@ class doctype implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		$content = '';
+		$types = ['attribute', 'quotes'];
+		$content = [];
 		while (($token = $tokens->next()) !== null && $token['type'] !== 'tagopenend') {
-			if ($token['type'] === 'attribute') {
-				$content .= ($content ? ' ' : '').\ltrim($token['value']);
+			if (in_array($token['type'], $types)) {
+				$content[] = \html_entity_decode(\ltrim($token['value']));
 			}
 		}
-		$this->content = \html_entity_decode($content);
+		$this->content = $content;
 	}
 
 	/**
@@ -43,7 +44,11 @@ class doctype implements token {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-
+		foreach ($this->content AS &$item) {
+			if ($minify['lowercase'] && strcspn($item, '"\'', 0, 1) === 1) {
+				$item = \mb_strtolower($item);
+			}
+		}
 	}
 
 	/**
@@ -53,6 +58,26 @@ class doctype implements token {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		return '<!DOCTYPE '.\htmlspecialchars($this->content).'>';
+		$html = '<!DOCTYPE';
+		foreach ($this->content AS $item) {
+
+			// unquoted
+			if (strcspn($item, '"\'', 0, 1) === 1) {
+				$html .= ' '.$item;
+
+			} else {
+				$item = trim($item, '"\'');
+
+				// single or minimal
+				if ($options['quotestyle'] == 'single' || ($options['quotestyle'] == 'minimal' && strpos($item, '"') !== false)) {
+					$html .= " '".\str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $item)."'";
+
+				// double quotes
+				} else {
+					$html .= ' "'.\str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], $item).'"';
+				}
+			}
+		}
+		return $html.'>';
 	}
 }

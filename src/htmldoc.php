@@ -10,7 +10,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	protected static $tokens = [
 		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
-		'attributevalue' => '\\s*+=\\s*+(?:"[^"]*+"|\'[^\']*+\'|[^\\s>]*+)',
+		'attributevalue' => '\\s*+=\\s*+(?:"[^"]*+"++|\'[^\']*+\'++|[^\\s>]*+)',
 		'attribute' => '\\s*+[^<>"\'\\/=\\s]++',
 		'tagopenend' => '\\s*+>',
 		'tagselfclose' => '\\s*+\\/>',
@@ -19,6 +19,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		'doctype' => '<!(?i:DOCTYPE)',
 		'comment' => '<!--[\\d\\D]*?(?<=--)>',
 		'cdata' => '<!\\[CDATA\\[[\\d\\D]*?\\]\\]>',
+		'quotes' => '\\s*+(?:"[^"]*+"|\'[^\']*+\')',
 		'other' => '.'
 	];
 
@@ -226,6 +227,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// tokenise the input HTML
 		$tokens = new tokenise(self::$tokens, $html);
+		// while (($token = $tokens->next()) !== null) {
+		// 	var_dump($token);
+		// }
+		// exit();
 
 		// parse the document
 		if (!$this->parse($tokens)) {
@@ -233,7 +238,6 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// success
 		} else {
-			// var_dump($tokens);
 			return true;
 		}
 		return false;

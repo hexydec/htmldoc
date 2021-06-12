@@ -101,8 +101,8 @@ class tag implements token {
 				case 'attributevalue':
 					if ($attr) {
 						$value = \trim($token['value'], "= \t\r\n");
-						if (\strpos($value, '"') === 0 || \strpos($value, "'") === 0) {
-							$value = \substr($value, 1, -1);
+						if (($pos = \strpos($value, '"')) === 0 || \strpos($value, "'") === 0) {
+							$value = \trim($value, $pos === 0 ? '"' : "'");
 						}
 						$attributes[$attr] = \html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 						$attr = false;

@@ -39,9 +39,12 @@ class custom implements token {
 	 * @return void
 	 */
 	public function parse(tokenise $tokens) : void {
-		$pattern = '/(?:[^<]|<(?!\\/'.$this->tagName.'>))*+/iU'; // capture anything up to the closing tag
-		if (($token = $tokens->next($pattern)) !== null && $token[0]) {
-			$this->content = $token[0];
+		$tag = $this->tagName;
+
+		// account for opening comment tag in <script>
+		$pattern = '/'.($tag === 'script' ? '(?:\\s*+<!--)?' : '').'((?U:[^<]|<(?!\\/'.$tag.'>))*+)/i'; // capture anything up to the closing tag
+		if (($token = $tokens->next($pattern)) !== null && $token[1]) {
+			$this->content = $token[1];
 		}
 	}
 

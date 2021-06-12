@@ -69,7 +69,7 @@ class config {
 						'type' => 'text'
 					]
 				],
-				'empty' => ['id', 'class', 'style', 'title', 'action', 'alt', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'], // attributes to remove if empty
+				'empty' => ['id', 'class', 'style', 'title', 'action', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup'], // attributes to remove if empty
 				'urls' => ['href', 'src', 'action', 'poster'], // attributes to minify URLs in
 				'urlskip' => [
 					'link' => [
