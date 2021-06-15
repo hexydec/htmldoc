@@ -283,7 +283,7 @@ class tag implements token {
 
 				// make folder variables
 				if ($folder === null && isset($_SERVER['REQUEST_URI'])) {
-					if (($folder = \parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== '') {
+					if (($folder = \parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== null) {
 						if (\mb_substr($folder, -1) != '/') {
 							$folder = \dirname($folder).'/';
 						}
