@@ -63,10 +63,21 @@ class config {
 						'language' => true
 					],
 					'form' => [
-						'method' => 'get'
+						'method' => 'get',
+						'autocomplete' => 'on',
+						'enctype' => 'application/x-www-form-urlencoded',
+						'target' => '_self'
 					],
 					'input' => [
 						'type' => 'text'
+					],
+					'button' => [
+						'type' => 'submit',
+						'formenctype' => 'application/x-www-form-urlencoded',
+						'formtarget' => '_self'
+					],
+					'select' => [
+						'size' => '0'
 					]
 				],
 				'empty' => ['id', 'class', 'style', 'title', 'action', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup', 'target'], // attributes to remove if empty
