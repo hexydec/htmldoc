@@ -14,7 +14,7 @@ $doc->open($url, $context = null, &$error = null);
 | Parameter	| Type		| Description 									|
 |-----------|-----------|-----------------------------------------------|
 | `$url`	| String 	| The URL of the HTML document to be opened		|
-| `$context`| Resource 	| A stream context resource created with stream_context_create()	|
+| `$context`| Resource 	| A stream context resource created with `stream_context_create()`	|
 | `$error`	| String	| A reference to a description of any error that is generated.	|
 
 ## Returns

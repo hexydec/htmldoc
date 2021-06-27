@@ -34,7 +34,7 @@ if ($doc->load($html) {
 }
 ```
 
-You can test out the minifier online at [https://hexydec.com/htmldoc/](https://hexydec.com/htmldoc/), or run the supplied index.php file after installation.
+You can test out the minifier online at [https://hexydec.com/htmldoc/](https://hexydec.com/htmldoc/), or run the supplied `index.php` file after installation.
 
 To extract data from an HTML document:
 
@@ -69,6 +69,19 @@ $ composer install hexydec/htmldoc
 HTMLdoc requires [\hexydec\token\tokenise](https://github.com/hexydec/tokenise) to run, which you can install manually if not using composer. Optionally you can also install [CSSdoc](https://github.com/hexydec/cssdoc) and [JSlite](https://github.com/hexydec/jslite) to perform inline CSS and Javascript minification respectively.
 
 All these dependencies will be installed through composer.
+
+## Test Suite
+
+You can run the test suite like this:
+
+### Linux
+```
+$ vendor/bin/phpunit
+```
+### Windows
+```
+> vendor\bin\phpunit
+```
 
 ## Documentation
 

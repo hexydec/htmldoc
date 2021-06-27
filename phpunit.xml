@@ -23,6 +23,9 @@
     <testsuite name="Minify">
       <file>tests/minifyHtmldocTest.php</file>
     </testsuite>
+    <testsuite name="Edit">
+      <file>tests/editHtmldocTest.php</file>
+    </testsuite>
   </testsuites>
   <logging/>
 </phpunit>

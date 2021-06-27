@@ -66,18 +66,18 @@ class text implements token {
 				if (($index = $this->getIndex($children)) !== false) {
 					$keys = \array_keys($children);
 					$i = \array_search($index, $keys, true);
-					$inline = $this->root->getConfig('elements', 'inline');
+					$inline = $this->root->config['elements']['inline'];
 					$min = ['hexydec\\html\\comment', 'hexydec\\html\\doctype'];
 
 					// if previous tag is a block element, ltrim the textnode
 					$trim = false;
 					if (!$i) {
-						$trim = !\in_array($parent->tagName, $inline);
+						$trim = !\in_array($parent->tagName, $inline, true);
 					} else {
 						$class = \get_class($children[$i - 1]);
-						if ($class == 'hexydec\\html\\tag') {
-							$trim = !\in_array($children[$i - 1]->tagName, $inline);
-						} elseif (\in_array($class, $min)) {
+						if ($class === 'hexydec\\html\\tag') {
+							$trim = !\in_array($children[$i - 1]->tagName, $inline, true);
+						} elseif (\in_array($class, $min, true)) {
 							$trim = true;
 						}
 					}
@@ -88,12 +88,12 @@ class text implements token {
 					// if next tag is a block element, rtrim the textnode
 					$trim = false;
 					if (!isset($keys[$i + 1])) {
-						$trim = !\in_array($parent->tagName, $inline);
+						$trim = !\in_array($parent->tagName, $inline, true);
 					} else {
 						$class = \get_class($children[$i + 1]);
-						if ($class == 'hexydec\\html\\tag') {
-							$trim = !\in_array($children[$i + 1]->tagName, $inline);
-						} elseif (\in_array($class, $min)) {
+						if ($class === 'hexydec\\html\\tag') {
+							$trim = !\in_array($children[$i + 1]->tagName, $inline, true);
+						} elseif (\in_array($class, $min, true)) {
 							$trim = true;
 						}
 					}

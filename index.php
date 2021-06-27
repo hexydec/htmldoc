@@ -23,7 +23,7 @@ $mem = Array(
 
 // create object and retrieve config
 $doc = new hexydec\html\htmldoc();
-$options = $doc->getConfig('minify');
+$options = $doc->config['minify'];
 
 // process form submmission
 if (!empty($_POST['action'])) {

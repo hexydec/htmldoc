@@ -30,7 +30,7 @@ class doctype implements token {
 		$types = ['attribute', 'quotes'];
 		$content = [];
 		while (($token = $tokens->next()) !== null && $token['type'] !== 'tagopenend') {
-			if (in_array($token['type'], $types)) {
+			if (in_array($token['type'], $types, true)) {
 				$content[] = \html_entity_decode(\ltrim($token['value']));
 			}
 		}
@@ -69,7 +69,7 @@ class doctype implements token {
 				$item = trim($item, '"\'');
 
 				// single or minimal
-				if ($options['quotestyle'] == 'single' || ($options['quotestyle'] == 'minimal' && strpos($item, '"') !== false)) {
+				if ($options['quotestyle'] === 'single' || ($options['quotestyle'] === 'minimal' && strpos($item, '"') !== false)) {
 					$html .= " '".\str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $item)."'";
 
 				// double quotes

@@ -1,6 +1,6 @@
 # html()
 
-Compile the document into an HTML string and save to the specified location, or return as a string.
+Compile the document into an HTML string and return as a string.
 
 ```php
 $doc = new \hexydec\html\htmldoc();
