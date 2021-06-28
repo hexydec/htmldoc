@@ -66,12 +66,28 @@ class tag implements token {
 	}
 
 	/**
+	 * Magic method to set protected variables
 	 *
+	 * @param string $name The name of the property to set
+	 * @param mixed $value The value of the property to set
+	 * @return void
 	 */
-	public function __set(string $name, $value) {
+	public function __set(string $name, $value) : void {
 		if ($name === 'parent' && \get_class($value) === 'hexydec\\html\\tag') {
 			$this->parent = $value;
 		}
+	}
+
+	/**
+	 * Magic method to clone the current object
+	 *
+	 * @return void
+	 */
+	public function __clone() : void {
+		foreach ($this->children AS &$item) {
+			$item = clone $item;
+		}
+		unset($item);
 	}
 
 	/**
@@ -260,6 +276,15 @@ class tag implements token {
 	}
 
 	/**
+	 * Returns the parent of the current object
+	 *
+	 * @return void
+	 */
+	public function parent() : ?tag {
+		return $this->parent;
+	}
+
+	/**
 	 * Append an array of nodes to the current children
 	 *
 	 * @param array $nodes An array of node objects
@@ -288,15 +313,17 @@ class tag implements token {
 	}
 
 	/**
-	 * Magic method to clone the current object
+	 * Remove the selected child from the object
 	 *
+	 * @param tag $child The child object to delete
 	 * @return void
 	 */
-	public function __clone() : void {
-		foreach ($this->children AS &$item) {
-			$item = clone $item;
+	public function remove(tag $node) : void {
+		foreach ($this->children AS $key => $item) {
+			if ($item === $node) {
+				unset($this->children[$key]);
+			}
 		}
-		unset($item);
 	}
 
 	/**

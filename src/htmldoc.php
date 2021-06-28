@@ -270,7 +270,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	protected function isEncodingValid(string $charset) : bool {
-		return \in_array(\strtolower($charset), array_map('\\strtolower', mb_list_encodings()), true);
+		return \in_array(\strtolower($charset), \array_map('\\strtolower', \mb_list_encodings()), true);
 	}
 
 	/**
@@ -659,6 +659,22 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
 					$item->append($nodes);
 				}
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * Append HTML or another document to each node in the current document
+	 *
+	 * @param string $selectors A CSS selector to refine the nodes to delete
+	 * @return htmldoc The current htmldoc object with the requested nodes deleted
+	 */
+	public function remove(string $selector = null) : htmldoc {
+		$obj = $selector ? $this->find($selector) : $this;
+		foreach ($obj->children AS $item) {
+			if (\get_class($item) === 'hexydec\\html\\tag') {
+				$item->parent()->remove($item);
 			}
 		}
 		return $this;
