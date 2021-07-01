@@ -36,9 +36,9 @@ class tag implements token {
 	protected $attributes = [];
 
 	/**
-	 * @var bool Denotes whether the tag is a singleton
+	 * @var string If the tag is a singleton, this defines the closing string
 	 */
-	protected $singleton = false;
+	protected $singleton = null;
 
 	/**
 	 * @var array An array of child token objects
@@ -83,7 +83,7 @@ class tag implements token {
 	 *
 	 * @return void
 	 */
-	public function __clone() : void {
+	public function __clone() {
 		foreach ($this->children AS &$item) {
 			$item = clone $item;
 		}
@@ -130,7 +130,7 @@ class tag implements token {
 							$value = \trim($value, $pos === 0 ? '"' : "'");
 						}
 						$attributes[$attr] = \html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
-						$attr = false;
+						$attr = null;
 					}
 					break;
 
@@ -222,7 +222,6 @@ class tag implements token {
 
 		// parse children
 		} else {
-			$tag = null;
 			$optional = $this->config['elements']['closeoptional'];
 			while (($token = $tokens->next()) !== null) {
 				switch ($token['type']) {
@@ -280,7 +279,7 @@ class tag implements token {
 	 *
 	 * @return void
 	 */
-	public function parent() : ?tag {
+	public function parent() : ?\hexydec\html\tag {
 		return $this->parent;
 	}
 
@@ -428,7 +427,6 @@ class tag implements token {
 
 				// trim attribute
 				if ($minify['attributes']['trim'] && $attributes[$key]) {
-					$a = $attributes[$key];
 					$attributes[$key] = \trim($attributes[$key], " \r\n\t");
 				}
 
@@ -478,7 +476,6 @@ class tag implements token {
 		if ($minify['close'] && \in_array($tag, $config['elements']['closeoptional']) && !\in_array($this->parent->tagName, $config['elements']['inline'], true)) {
 			$tag = null;
 			$children = $this->parent->toArray();
-			$last = \end($children);
 			$next = false;
 			foreach ($children AS $item) {
 

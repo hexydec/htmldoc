@@ -279,7 +279,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
 	 * @return bool|array An array of node objects or false on error
 	 */
-	protected function parse($html) : array {
+	protected function parse($html) {
 
 		// convert string to nodes
 		if (\is_string($html)) {
@@ -304,7 +304,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Parses a CSS selector string
 	 *
 	 * @param string $selector The CSS seelctor string to parse
-	 * @return array An array of selector components
+	 * @return array|bool An array of selector components
 	 */
 	protected function parseSelector(string $selector) {
 		$selector = \trim($selector);
