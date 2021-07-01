@@ -277,9 +277,9 @@ class tag implements token {
 	/**
 	 * Returns the parent of the current object
 	 *
-	 * @return void
+	 * @return tag The parent tag
 	 */
-	public function parent() : ?\hexydec\html\tag {
+	public function parent() : ?tag {
 		return $this->parent;
 	}
 
