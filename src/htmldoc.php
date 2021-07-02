@@ -550,8 +550,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 			// only get text from these objects
 			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'], true)) {
-				$value = $item->text();
-				$text = \array_merge($text, \is_array($value) ? $value : [$value]);
+				$text[] = $item->text();
 			}
 		}
 		return \implode(' ', $text);

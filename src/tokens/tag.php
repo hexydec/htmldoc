@@ -692,19 +692,18 @@ class tag implements token {
 	/**
 	 * Retrievves the value of the text nodes contained within the object, multiple values are concatenated with a space
 	 *
-	 * @return array An array of text strings from this tag's child objects
+	 * @return string The text string from this tag's child objects
 	 */
-	public function text() : array {
+	public function text() : string {
 		$text = [];
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'], true)) {
-				$value = $item->text();
-				$text = \array_merge($text, \is_array($value) ? $value : [$value]);
+			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
+				$text[] = $item->text();
 			}
 		}
-		return $text;
+		return \implode(' ', $text);
 	}
 
 	/**
