@@ -28,17 +28,17 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	protected static $selectors = [
 		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
-		'join' => '\s*[>+~]\s*',
-		'comparison' => '[\^*$<>]?=', // comparison operators for media queries or attribute selectors
-		'squareopen' => '\[',
-		'squareclose' => '\]',
-		'bracketopen' => '\(',
-		'bracketclose' => '\)',
+		'join' => '\\s*[>+~]\\s*',
+		'comparison' => '[\\^*$<>]?=', // comparison operators for media queries or attribute selectors
+		'squareopen' => '\\[',
+		'squareclose' => '\\]',
+		'bracketopen' => '\\(',
+		'bracketclose' => '\\)',
 		'comma' => ',',
 		'pseudo' => ':[A-Za-z-]++',
-		'id' => '#[^ +>\.#{\[,]++',
-		'class' => '\.[^ +>\.#{\[,]++',
-		'string' => '\*|[^\[\]{}\(\):;,>+=~\^$!" #\.*]++',
+		'id' => '#[^ +>\.#{\\[,]++',
+		'class' => '\.[^ +>\.#{\\[\\(\\),]++',
+		'string' => '\\*|[^\\[\\]{}\\(\\):;,>+=~\\^$!" #\\.*]++',
 		'whitespace' => '\s++',
 	];
 
@@ -307,12 +307,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Parses a CSS selector string
 	 *
-	 * @param string $selector The CSS seelctor string to parse
+	 * @param string $selector The CSS selector string to parse
 	 * @return array|bool An array of selector components
 	 */
-	protected function parseSelector(string $selector) {
-		$selector = \trim($selector);
-		$tokens = new tokenise(self::$selectors, $selector);
+	protected function parseSelector(tokenise $tokens) {
 		if (($token = $tokens->next()) !== null) {
 			$selectors = $parts = [];
 			$join = null;
@@ -344,7 +342,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 					case 'squareopen':
 						$item = ['join' => $join];
-						while (($token = $tokens->next()) !== false) {
+						while (($token = $tokens->next()) !== null) {
 							if ($token['type'] === 'squareclose') {
 								break;
 							} elseif (\in_array($token['type'], ['string', 'quotes'], true)) {
@@ -361,8 +359,15 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 						break;
 
 					case 'pseudo':
+						$sub = null;
+						if (($bracket = $tokens->next()) !== null && $bracket['type'] === 'bracketopen') {
+							$sub = $this->parseSelector($tokens);
+						} elseif ($bracket) {
+							$tokens->prev();
+						}
 						$parts[] = [
 							'pseudo' => \mb_substr($token['value'], 1),
+							'sub' => $sub,
 							'join' => $join
 						];
 						$join = null;
@@ -379,6 +384,11 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 						break;
 
 					case 'comma':
+						$selectors[] = $parts;
+						$parts = [];
+						break;
+
+					case 'bracketclose':
 						$selectors[] = $parts;
 						$parts = [];
 						break;
@@ -456,13 +466,14 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return htmldoc A new htmldoc object containing the found tag items
 	 */
 	public function find(string $selector) : htmldoc {
-		$found = [];
+		$tokens = new tokenise(self::$selectors, \trim($selector));
 
 		// parse selector and find tags
-		if (\is_array($selector) || ($selector = $this->parseSelector($selector)) !== false) {
+		$found = [];
+		if (($parsed = $this->parseSelector($tokens)) !== false) {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
-					foreach ($selector AS $value) {
+					foreach ($parsed AS $value) {
 						if (($items = $item->find($value)) !== false) {
 							$found = \array_merge($found, $items);
 						}
