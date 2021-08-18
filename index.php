@@ -32,7 +32,7 @@ if (!empty($_POST['action'])) {
 	if (!empty($_POST['url'])) {
 
 		// parse the URL
-		if (($url = parse_url($_POST['url'])) === false) {
+		if (($url = \parse_url($_POST['url'])) === false) {
 			\trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
 
 		// check the host name
@@ -214,7 +214,7 @@ if (!empty($_POST['action'])) {
 								<th>Input (bytes)</th>
 								<th>Output (bytes)</th>
 								<th>Diff (bytes)</th>
-								<th>% of Original</th>
+								<th>Compression</th>
 								<th></th>
 								<th>Load</th>
 								<th>Parse</th>
@@ -271,7 +271,7 @@ if (!empty($_POST['action'])) {
 						if (\is_bool($item) || \is_array($item)) { ?>
 							<li>
 								<label>
-									<input type="checkbox" name="minify[]" value="<?= $key; ?>"<?= !isset($minify[$key]) || $minify[$key] === false ? '' : ' checked="checked"'; ?> /><?= \htmlspecialchars(ucfirst($key)); ?>
+									<input type="checkbox" name="minify[]" value="<?= $key; ?>"<?= !isset($minify[$key]) || $minify[$key] === false ? '' : ' checked="checked"'; ?> /><?= \htmlspecialchars(\ucfirst($key)); ?>
 								</label>
 								<?php if (\is_array($item)) { ?>
 									<ul class="minify__options-list">
