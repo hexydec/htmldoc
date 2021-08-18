@@ -548,12 +548,12 @@ class tag implements token {
 	 * Determine whether this tag or any of its child tokens match a selector
 	 *
 	 * @param array $selector An array of CSS selectors
+	 * @param array $searchChildren Denotes whether to search child tags as well as this tag
 	 * @return array An array of tag objects that match $selector
 	 */
-	public function find(array $selector) : array {
+	public function find(array $selector, bool $searchChildren = true) : array {
 		$found = [];
 		$match = true;
-		$searchChildren = true;
 		foreach ($selector AS $i => $item) {
 
 			// only search this level
@@ -638,21 +638,37 @@ class tag implements token {
 
 			// match pseudo selector
 			} elseif (!empty($item['pseudo'])) {
-				$children = $this->parent->children();
+				switch ($item['pseudo']) {
 
-				// match first-child
-				if ($item['pseudo'] === 'first-child') {
-					if (!isset($children[0]) || $this !== $children[0]) {
-						$match = false;
+					// match first-child
+					case 'first-child':
+						$children = $this->parent->children();
+						if (!isset($children[0]) || $this !== $children[0]) {
+							$match = false;
+							break 2;
+						}
 						break;
-					}
 
-				// match last child
-				} elseif ($item['pseudo'] === 'last-child') {
-					if (($last = \end($children)) === false || $this !== $last) {
-						$match = false;
+					// match last child
+					case 'last-child':
+						$children = $this->parent->children();
+						if (($last = \end($children)) === false || $this !== $last) {
+							$match = false;
+							break 2;
+						}
 						break;
-					}
+
+					// match not
+					case 'not':
+						if (!empty($item['sub'])) {
+							foreach ($item['sub'] AS $sub) {
+								if ($this->find($sub, false) !== []) {
+									$match = false;
+									break 3;
+								}
+							}
+						}
+						break;
 				}
 			}
 		}
