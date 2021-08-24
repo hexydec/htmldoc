@@ -13,6 +13,9 @@ This document describes how to configure and use the HTMLdoc object.
 | [`last()`](last.md)				| Filter elements by the last element		|
 | [`attr()`](attr.md)				| Retrieve the value of an attribute		|
 | [`text()`](text.md)				| Extract text from an HTMLdoc		 		|
+| [`append()`](append.md)			| Append HTML to the selected nodes	 		|
+| [`prepend()`](prepend.md)			| Prepend HTML to the selected nodes 		|
+| [`remove()`](remove.md)			| Remove nodes from a document		 		|
 | [`minify()`](minify.md)			| Minify the HTMLdoc						|
 | [`html()`](html.md)				| Render the document as HTML		 		|
 | [`save()`](save.md)				| Save as a file or output as a string 		|

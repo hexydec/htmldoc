@@ -28,7 +28,10 @@ A CSS selector defining the nodes to find within the document. The following sel
 | Attribute ends with	| `[href$=bar/]`	|
 | First Child			| `:first-child`	|
 | Last Child			| `:last-child`		|
+| Not selector			| `not(selector)`	|
 | Child selector		| `>`				|
+
+## Example
 
 Selectors can be put together in combinations, and multiple selectors can be used:
 
@@ -39,6 +42,7 @@ $found = $doc->find('div.foo[data-attr*=foo]:first-child');
 $found = $doc->find('table.list th');
 $found = $doc->find('ul.list > li');
 $found = $doc->find('form a.button, form label.button');
+$found = $doc->find('script:not([src])'); // not() can only negate single level selectors
 ```
 ## Returns
 

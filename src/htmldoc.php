@@ -679,22 +679,6 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	/**
-	 * Append HTML or another document to each node in the current document
-	 *
-	 * @param string $selectors A CSS selector to refine the nodes to delete
-	 * @return htmldoc The current htmldoc object with the requested nodes deleted
-	 */
-	public function remove(string $selector = null) : htmldoc {
-		$obj = $selector ? $this->find($selector) : $this;
-		foreach ($obj->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag') {
-				$item->parent()->remove($item);
-			}
-		}
-		return $this;
-	}
-
-	/**
 	 * Prepend HTML or another document to each node in the current document
 	 *
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
@@ -706,6 +690,22 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
 					$item->prepend($nodes);
 				}
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * Removes all top level nodes, or if $selector is specified, the nodes matched by the selector
+	 *
+	 * @param string $selector A CSS selector to refine the nodes to delete or null to delete top level nodes
+	 * @return htmldoc The current htmldoc object with the requested nodes deleted
+	 */
+	public function remove(string $selector = null) : htmldoc {
+		$obj = $selector ? $this->find($selector) : $this;
+		foreach ($obj->children AS $item) {
+			if (\get_class($item) === 'hexydec\\html\\tag') {
+				$item->parent()->remove($item);
 			}
 		}
 		return $this;
