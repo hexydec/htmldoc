@@ -108,6 +108,8 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 	public function testCanMinifyUrls() {
 		$html = Array(
 			'https://test.com/' => Array(
+				'<a href="https://test.com">Root</a>' => '<a href="">Root</a>',
+				'<a href="https://test.com/">Root</a>' => '<a href="">Root</a>',
 				'<a href="https://test.com/test">Own Host</a>' => '<a href="test">Own Host</a>',
 				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="url/test.php">Own Host under folder</a>',
 				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="url/test.php">Own Host under folder no scheme</a>',
@@ -119,6 +121,8 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'<video src="https://test.com/assets/video.mp4" poster="https://test.com/assets/video.jpg"></video>' => '<video src="assets/video.mp4" poster="assets/video.jpg"></video>'
 			),
 			'http://test.com/url/' => Array(
+				'<a href="http://test.com">Root</a>' => '<a href="/">Root</a>',
+				'<a href="http://test.com/">Root</a>' => '<a href="/">Root</a>',
 				'<a href="http://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
 				'<a href="http://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
 				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
@@ -129,44 +133,51 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'<a href="http://tester.com/test">Different Host</a>' => '<a href="//tester.com/test">Different Host</a>',
 				'<video src="http://test.com/assets/video.mp4" poster="http://test.com/assets/video.jpg"></video>' => '<video src="/assets/video.mp4" poster="/assets/video.jpg"></video>'
 			),
-			'https://test.com/url/' => Array(
-				'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
-				'<a href="https://test.com/url">Own Host</a>' => '<a href="/url">Own Host</a>',
-				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
-				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
-				'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
-				'<a href="http://tester.com/test">Different Host</a>' => '<a href="http://tester.com/test">Different Host</a>',
-			),
-			'https://test.com/url' => Array(
-				'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
-				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="/url/test.php">Own Host under folder</a>',
-				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="/url/test.php">Own Host under folder no scheme</a>',
-				'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
-				'<a href="http://tester.com/test">Different Host</a>' => '<a href="http://tester.com/test">Different Host</a>',
-			),
-			'https://test.com/url/?var=value' => Array(
-				'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
-				'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
-				'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
-				'<a href="https://test.com/url">Same URL with no querystring or slash</a>' => '<a href="/url">Same URL with no querystring or slash</a>',
-				'<a href="https://test.com/url/">Same URL with no querystring</a>' => '<a href="./">Same URL with no querystring</a>',
-			),
-			'https://test.com/deep/lot/of/folders/' => Array(
-				'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
-				'<a href="https://test.com/different/folders/">Different Folders</a>' => '<a href="/different/folders/">Different Folders</a>',
-				'<a href="https://test.com/deep/lot/test">Back two</a>' => '<a href="../../test">Back two</a>',
-				'<a href="https://test.com/deep/lot/test/">Back two keep slash</a>' => '<a href="../../test/">Back two keep slash</a>',
-				'<a href="https://test.com/deep/lot/test/this/and/this.php">Back two</a>' => '<a href="../../test/this/and/this.php">Back two</a>',
-				'<link rel="stylesheet" href="/deep/css/build/file.css?_12345">' => '<link rel="stylesheet" href="/deep/css/build/file.css?_12345">', // shorter to stay as is
-			),
-			'https://test.com/alotof/of/folders/' => Array(
-				'<link rel="stylesheet" href="/alotof/css/build/file.css?_12345">' => '<link rel="stylesheet" href="../../css/build/file.css?_12345">',
-				'<a href="https://nottest.com/alotof/of/test/test.php">Different Domain</a>' => '<a href="//nottest.com/alotof/of/test/test.php">Different Domain</a>',
-			),
-			'https://test.com/' => Array(
-				'<link rel="stylesheet" href="https://test.com/alotof/css/build/file.css?_12345">' => '<link rel="stylesheet" href="alotof/css/build/file.css?_12345">',
-				'<link itemtype="url" href="https://test.com/">' => '<link itemtype="url" href="https://test.com/">',
-			)
+			// 'https://test.com/url/' => Array(
+			// 	'<a href="https://test.com">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+			// 	'<a href="https://test.com/url">Own Host</a>' => '<a href="/url">Own Host</a>',
+			// 	'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
+			// 	'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
+			// 	'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
+			// 	'<a href="http://tester.com/test">Different Host</a>' => '<a href="http://tester.com/test">Different Host</a>',
+			// ),
+			// 'https://test.com/url' => Array(
+			// 	'<a href="https://test.com">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+			// 	'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="/url/test.php">Own Host under folder</a>',
+			// 	'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="/url/test.php">Own Host under folder no scheme</a>',
+			// 	'<a href="http://test.com/test">Different scheme</a>' => '<a href="http://test.com/test">Different scheme</a>',
+			// 	'<a href="http://tester.com/test">Different Host</a>' => '<a href="http://tester.com/test">Different Host</a>',
+			// ),
+			// 'https://test.com/url/?var=value' => Array(
+			// 	'<a href="https://test.com">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/test">Own Host</a>' => '<a href="/test">Own Host</a>',
+			// 	'<a href="https://test.com/url/test.php">Own Host under folder</a>' => '<a href="test.php">Own Host under folder</a>',
+			// 	'<a href="//test.com/url/test.php">Own Host under folder no scheme</a>' => '<a href="test.php">Own Host under folder no scheme</a>',
+			// 	'<a href="https://test.com/url">Same URL with no querystring or slash</a>' => '<a href="/url">Same URL with no querystring or slash</a>',
+			// 	'<a href="https://test.com/url/">Same URL with no querystring</a>' => '<a href="./">Same URL with no querystring</a>',
+			// ),
+			// 'https://test.com/deep/lot/of/folders/' => Array(
+			// 	'<a href="https://test.com">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/">Root</a>' => '<a href="/">Root</a>',
+			// 	'<a href="https://test.com/different/folders/">Different Folders</a>' => '<a href="/different/folders/">Different Folders</a>',
+			// 	'<a href="https://test.com/deep/lot/test">Back two</a>' => '<a href="../../test">Back two</a>',
+			// 	'<a href="https://test.com/deep/lot/test/">Back two keep slash</a>' => '<a href="../../test/">Back two keep slash</a>',
+			// 	'<a href="https://test.com/deep/lot/test/this/and/this.php">Back two</a>' => '<a href="../../test/this/and/this.php">Back two</a>',
+			// 	'<link rel="stylesheet" href="/deep/css/build/file.css?_12345">' => '<link rel="stylesheet" href="/deep/css/build/file.css?_12345">', // shorter to stay as is
+			// ),
+			// 'https://test.com/alotof/of/folders/' => Array(
+			// 	'<link rel="stylesheet" href="/alotof/css/build/file.css?_12345">' => '<link rel="stylesheet" href="../../css/build/file.css?_12345">',
+			// 	'<a href="https://nottest.com/alotof/of/test/test.php">Different Domain</a>' => '<a href="//nottest.com/alotof/of/test/test.php">Different Domain</a>',
+			// ),
+			// 'https://test.com/' => Array(
+			// 	'<link rel="stylesheet" href="https://test.com/alotof/css/build/file.css?_12345">' => '<link rel="stylesheet" href="alotof/css/build/file.css?_12345">',
+			// 	'<link itemtype="url" href="https://test.com/">' => '<link itemtype="url" href="https://test.com/">',
+			// )
 		);
 		$doc = new htmldoc();
 		foreach ($html AS $url => $items) {

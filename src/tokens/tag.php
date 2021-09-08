@@ -232,7 +232,7 @@ class tag implements token {
 						break;
 
 					case 'tagopenstart':
-						$tag = trim($token['value'], '<');
+						$tag = \trim($token['value'], '<');
 
 						// unnestable tag, pass back to parent
 						if ($parenttag && \strcasecmp($tag, $parenttag) === 0 && \in_array($tag, $optional, true)) {
@@ -374,12 +374,22 @@ class tag implements token {
 				// remove host for own domain
 				if ($minify['urls']['host'] && isset($_SERVER['HTTP_HOST'])) {
 					if (!isset($host)) {
-						$host = [$scheme.$_SERVER['HTTP_HOST'], '//'.$_SERVER['HTTP_HOST']];
+						$host = ['//'.$_SERVER['HTTP_HOST'], $scheme.$_SERVER['HTTP_HOST']];
 					}
 					foreach ($host AS $item) {
-						$len = \mb_strlen($item);
-						if (\mb_stripos($attributes[$key], $item) === 0 && (\mb_strlen($attributes[$key]) === $len || \mb_strpos($attributes[$key], '/', 2) === $len)) {
-							$attributes[$key] = \mb_substr($attributes[$key], $len);
+
+						// check if link goes to root
+						if ($item === $attributes[$key]) {
+							$attributes[$key] = $_SERVER['REQUEST_URI'] ? '/' : '';
+							break;
+
+						// remove host
+						} else {
+							$len = \mb_strlen($item);
+							if (\mb_stripos($attributes[$key], $item) === 0 && (\mb_strlen($attributes[$key]) === $len || \mb_strpos($attributes[$key], '/', 2) === $len)) {
+								$attributes[$key] = \mb_substr($attributes[$key], $len);
+								break;
+							}
 						}
 					}
 				}
@@ -399,7 +409,7 @@ class tag implements token {
 
 				// use parent folders if it is shorter
 				if ($minify['urls']['parent'] && $dirs && \mb_strpos($attributes[$key], '/') === 0 && \mb_strpos($attributes[$key], '//') === false) {
-					$isDir = mb_strrpos($attributes[$key], '/') === mb_strlen($attributes[$key])-1;
+					$isDir = \mb_strrpos($attributes[$key], '/') === \mb_strlen($attributes[$key])-1;
 					$compare = \explode('/', \trim($isDir ? $attributes[$key] : \dirname($attributes[$key]), '/'));
 					$update = false;
 					$count = 0;
