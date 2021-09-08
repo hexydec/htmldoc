@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1a3f2e97e81ec75a03802e07bc36bdfb",
+    "content-hash": "9e99529cf08ae3661590ebc654bc427b",
     "packages": [
         {
             "name": "hexydec/cssdoc",
@@ -53,16 +53,16 @@
         },
         {
             "name": "hexydec/jslite",
-            "version": "0.5.2",
+            "version": "0.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "0fe06c9af6c3d22d7c5049a5ba3b9d65250793e3"
+                "reference": "39bbd1f232a5492f2d21c420bc08de240b4f8727"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/0fe06c9af6c3d22d7c5049a5ba3b9d65250793e3",
-                "reference": "0fe06c9af6c3d22d7c5049a5ba3b9d65250793e3",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/39bbd1f232a5492f2d21c420bc08de240b4f8727",
+                "reference": "39bbd1f232a5492f2d21c420bc08de240b4f8727",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/0.5.2"
+                "source": "https://github.com/hexydec/jslite/tree/0.5.3"
             },
-            "time": "2021-08-23T19:31:51+00:00"
+            "time": "2021-08-24T22:26:21+00:00"
         },
         {
             "name": "hexydec/tokenise",
@@ -2243,5 +2243,5 @@
         "php": ">=7.3"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }
