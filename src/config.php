@@ -109,7 +109,7 @@ class config {
 				'whitespace' => true, // strip whitespace from text nodes
 				'comments' => [
 					'remove' => true, // remove comments
-					'ie' => true // preserve IE comments
+					'ie' => false // preserve IE comments
 				],
 				'urls' => [ // update internal URL's to be shorter
 					'scheme' => true, // remove the scheme from URLs that have the same scheme as the current document
@@ -146,6 +146,7 @@ class config {
 				'singleton' => true, // minify singleton element by removing slash
 				'quotes' => true, // sets the output option 'quotestyle' to 'minimal'
 				'close' => true, // don't write close tags where possible
+				'safe' => false, // sets the minification presets to CSS safe options
 				'email' => false, // sets the minification presets to email safe options
 				'style' => [], // specify CSS minifier options
 				'script' => [], // specify CSS javascript options

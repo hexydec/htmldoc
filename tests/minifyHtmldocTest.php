@@ -98,7 +98,12 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'urls' => false, // update internal URL's to be shorter
 				'attributes' => false, // remove values from boolean attributes);
 	   			'quotes' => false, // minify attribute quotes
-				'close' => false // don't write close tags where possible
+				'close' => false, // don't write close tags where possible
+				'comments' => [
+					'remove' => true,
+					'ie' => true
+				],
+				'singleton' => false
 			));
 			$minified = file_get_contents(__DIR__.'/templates/comments-minified-ie.html');
 			$this->assertEquals($minified, $doc->html(), 'Can strip comments but leave IE comments intact');

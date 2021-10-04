@@ -483,8 +483,7 @@ class tag implements token {
 		}
 
 		// work out whether to omit the closing tag
-		if ($minify['close'] && \in_array($tag, $config['elements']['closeoptional']) && !\in_array($this->parent->tagName, $config['elements']['inline'], true)) {
-			$tag = null;
+		if ($minify['close'] && \in_array($tag, $config['elements']['closeoptional']) && ($this->parent->tagName === null || !\in_array($this->parent->tagName, $config['elements']['inline'], true))) {
 			$children = $this->parent->toArray();
 			$next = false;
 			foreach ($children AS $item) {
@@ -513,7 +512,7 @@ class tag implements token {
 			}
 
 			// if last tag, remove closing tag
-			if ($next) {
+			if (!$children || $next) {
 				$this->close = false;
 			}
 		}

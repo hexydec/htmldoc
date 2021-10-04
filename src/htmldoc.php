@@ -597,6 +597,15 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			$this->config['output']['quotestyle'] = 'minimal';
 		}
 
+		// set safe options
+		if ($minify['safe']) {
+			$minify['urls'] = false;
+			if ($minify['attributes'] !== false) {
+				$minify['attributes']['empty'] = false;
+				$minify['attributes']['default'] = false;
+			}
+		}
+
 		// email minification
 		if ($minify['email']) {
 			if ($minify['comments'] !== false) {
