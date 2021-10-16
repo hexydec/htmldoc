@@ -90,6 +90,92 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
+	public function testCanInserHtmlBefore() {
+		$obj = new htmldoc();
+		$obj->load('<h1>Insert Before</h1>');
+		$tests = [
+			[
+				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
+				'find' => 'p',
+				'before' => '<h1>Insert Before</h1>',
+				'output' => '<!DOCTYPE html><html><body><h1>Insert Before</h1><p>Test</p></body></html>',
+			],
+			[
+				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
+				'find' => 'p',
+				'before' => $obj,
+				'output' => '<!DOCTYPE html><html><body><h1>Insert Before</h1><p>Test</p></body></html>',
+			],
+			[
+				'input' => '<div><p>Test</p><p>Test</p><p>Test</p></div>',
+				'find' => 'p',
+				'before' => '<h3>Before</h3>',
+				'output' => '<div><h3>Before</h3><p>Test</p><h3>Before</h3><p>Test</p><h3>Before</h3><p>Test</p></div>',
+			],
+			[
+				'input' => '<div><p>Test</p><p>Test</p><p>Test</p></div>',
+				'find' => 'p',
+				'before' => '<h3>Before</h3><p>Test <span>this</span></p>',
+				'output' => '<div><h3>Before</h3><p>Test <span>this</span></p><p>Test</p><h3>Before</h3><p>Test <span>this</span></p><p>Test</p><h3>Before</h3><p>Test <span>this</span></p><p>Test</p></div>',
+			],
+			[
+				'input' => '<body><div><div></div></div></body>',
+				'find' => 'div',
+				'before' => '<h3>Before</h3><p>Test <span>this</span></p>',
+				'output' => '<body><h3>Before</h3><p>Test <span>this</span></p><div><h3>Before</h3><p>Test <span>this</span></p><div></div></div></body>',
+			]
+		];
+		$doc = new htmldoc();
+		foreach ($tests AS $item) {
+			$doc->load($item['input'], \mb_internal_encoding());
+			$doc->find($item['find'])->before($item['before']);
+			$this->assertEquals($item['output'], $doc->html());
+		}
+	}
+
+	public function testCanInserHtmlAfter() {
+		$obj = new htmldoc();
+		$obj->load('<h1>Insert After</h1>');
+		$tests = [
+			[
+				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
+				'find' => 'p',
+				'after' => '<h1>Insert After</h1>',
+				'output' => '<!DOCTYPE html><html><body><p>Test</p><h1>Insert After</h1></body></html>',
+			],
+			[
+				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
+				'find' => 'p',
+				'after' => $obj,
+				'output' => '<!DOCTYPE html><html><body><p>Test</p><h1>Insert After</h1></body></html>',
+			],
+			[
+				'input' => '<div><p>Test</p><p>Test</p><p>Test</p></div>',
+				'find' => 'p',
+				'after' => '<h3>After</h3>',
+				'output' => '<div><p>Test</p><h3>After</h3><p>Test</p><h3>After</h3><p>Test</p><h3>After</h3></div>',
+			],
+			[
+				'input' => '<div><p>Test</p><p>Test</p><p>Test</p></div>',
+				'find' => 'p',
+				'after' => '<h3>After</h3><p>Test <span>this</span></p>',
+				'output' => '<div><p>Test</p><h3>After</h3><p>Test <span>this</span></p><p>Test</p><h3>After</h3><p>Test <span>this</span></p><p>Test</p><h3>After</h3><p>Test <span>this</span></p></div>',
+			],
+			[
+				'input' => '<body><div><div></div></div></body>',
+				'find' => 'div',
+				'after' => '<h3>After</h3><p>Test <span>this</span></p>',
+				'output' => '<body><div><div></div><h3>After</h3><p>Test <span>this</span></p></div><h3>After</h3><p>Test <span>this</span></p></body>',
+			]
+		];
+		$doc = new htmldoc();
+		foreach ($tests AS $item) {
+			$doc->load($item['input'], \mb_internal_encoding());
+			$doc->find($item['find'])->after($item['after']);
+			$this->assertEquals($item['output'], $doc->html());
+		}
+	}
+
 	public function testCanRemoveNodes() {
 		$tests = [
 			[

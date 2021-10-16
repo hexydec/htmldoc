@@ -287,13 +287,31 @@ class tag implements token {
 	 * Append an array of nodes to the current children
 	 *
 	 * @param array $nodes An array of node objects
+	 * @param int $index To insert the nodes at a particular position, set the index
 	 * @return void
 	 */
-	public function append(array $nodes) : void {
+	public function append(array $nodes, int $index = null) : void {
+
+		// reset the index if it doesn't exist
+		if ($index !== null && !isset($this->children[$index])) {
+			$index = null;
+		}
+
+		// clone the nodes
+		$clones = [];
 		foreach ($nodes AS $item) {
 			$child = clone $item;
 			$child->parent = $this;
-			$this->children[] = $child;
+			if ($index === null) {
+				$this->children[] = $child;
+			} else {
+				$clones[] = $child;
+			}
+		}
+
+		// insert the nodes
+		if ($index !== null) {
+			$this->chidren = \array_splice($this->children, $index, 0, $clones);
 		}
 	}
 
@@ -308,6 +326,39 @@ class tag implements token {
 			$child = clone $item;
 			$child->parent = $this;
 			\array_unshift($this->children, $child);
+		}
+	}
+
+	protected function getIndex() : ?int {
+		foreach ($this->parent->children() AS $key => $item) {
+			if ($item === $this) {
+				return $key;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Insert an array of nodes before the current node
+	 *
+	 * @param array $nodes An array of node objects
+	 * @return void
+	 */
+	public function before(array $nodes) : void {
+		if (($index = $this->getIndex()) !== null) {
+			$this->parent->append($nodes, $index);
+		}
+	}
+
+	/**
+	 * Insert an array of nodes after the current node
+	 *
+	 * @param array $nodes An array of node objects
+	 * @return void
+	 */
+	public function after(array $nodes) : void {
+		if (($index = $this->getIndex()) !== null) {
+			$this->parent->append($nodes, $index + 1);
 		}
 	}
 

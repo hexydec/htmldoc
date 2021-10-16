@@ -705,6 +705,40 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	/**
+	 * Insert an array of nodes before the each node in the current document
+	 *
+	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
+	 * @return htmldoc The current htmldoc object with the nodes appended
+	 */
+	public function before($html) : htmldoc {
+		if (($nodes = $this->parse($html)) !== false) {
+			foreach ($this->children AS $item) {
+				if (\get_class($item) === 'hexydec\\html\\tag') {
+					$item->before($nodes);
+				}
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * Insert an array of nodes after the each node in the current document
+	 *
+	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
+	 * @return htmldoc The current htmldoc object with the nodes appended
+	 */
+	public function after($html) : htmldoc {
+		if (($nodes = $this->parse($html)) !== false) {
+			foreach ($this->children AS $item) {
+				if (\get_class($item) === 'hexydec\\html\\tag') {
+					$item->after($nodes);
+				}
+			}
+		}
+		return $this;
+	}
+
+	/**
 	 * Removes all top level nodes, or if $selector is specified, the nodes matched by the selector
 	 *
 	 * @param string $selector A CSS selector to refine the nodes to delete or null to delete top level nodes
