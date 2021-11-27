@@ -371,7 +371,11 @@ class tag implements token {
 	public function remove(tag $node) : void {
 		foreach ($this->children AS $key => $item) {
 			if ($item === $node) {
-				unset($this->children[$key]);
+				$children = $this->children;
+				unset($children[$key]);
+
+				// re-key the values so the indexes are sequential
+				$this->children = \array_values($children);
 			}
 		}
 	}
