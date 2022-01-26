@@ -31,6 +31,8 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'html h1[class$=heading]' => '<h1 class="find__heading">Heading</h1>',
 				'a[href$="://github.com/hexydec/htmldoc/"]' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
 				'a[href$="://github.com/hexydec/htmldoc"]' => null,
+				'a[href$="://github.com/Hexydec/Htmldoc"]' => null,
+				'a[href$="://github.com/Hexydec/Htmldoc/" i]' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
 				'div:first-child' => '<div id="first" class="first">First</div>',
 				// 'div:last-child' => '<div class="last">Last</div>',
 				'.first, .find__heading, .find__paragraph' => '<div id="first" class="first">First</div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>',

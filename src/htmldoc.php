@@ -341,7 +341,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 						break;
 
 					case 'squareopen':
-						$item = ['join' => $join];
+						$item = ['join' => $join, 'sensitive' => true];
 						while (($token = $tokens->next()) !== null) {
 							if ($token['type'] === 'squareclose') {
 								break;
@@ -349,7 +349,13 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 								if ($token['type'] === 'quotes') {
 									$token['value'] = \stripslashes(\mb_substr($token['value'], 1, -1));
 								}
-								$item[isset($item['attribute']) ? 'value' : 'attribute'] = $token['value'];
+								if (!isset($item['attribute'])) {
+									$item['attribute'] = $token['value'];
+								} elseif (!isset($item['value'])) {
+									$item['value'] = $token['value'];
+								} elseif ($token['value'] === 'i') {
+									$item['sensitive'] = false;
+								}
 							} elseif ($token['type'] === 'comparison') {
 								$item['comparison'] = $token['value'];
 							}
