@@ -329,6 +329,11 @@ class tag implements token {
 		}
 	}
 
+	/**
+	 * Retrieve the index position of the current element in the parent
+	 *
+	 * @return int|null The index of the current element with the parent, or null if there is no parent
+	 */
 	protected function getIndex() : ?int {
 		foreach ($this->parent->children() AS $key => $item) {
 			if ($item === $this) {
@@ -664,11 +669,17 @@ class tag implements token {
 					$match = false;
 					break;
 				} elseif (!empty($item['value'])) {
+					$current = $this->attributes[$item['attribute']];
 					switch ($item['comparison']) {
 
 						// exact match
 						case '=':
-							if ($this->attributes[$item['attribute']] !== $item['value']) {
+							if ($item['sensitive']) {
+								if ($current !== $item['value']) {
+									$match = false;
+									break;
+								}
+							} elseif (\mb_strtolower($current) !== \mb_strtolower($item['value'])) {
 								$match = false;
 								break;
 							}
@@ -676,7 +687,12 @@ class tag implements token {
 
 						// match start
 						case '^=':
-							if (\mb_strpos($this->attributes[$item['attribute']], $item['value']) !== 0) {
+							if ($item['sensitive']) {
+								if (\mb_strpos($current, $item['value']) !== 0) {
+									$match = false;
+									break;
+								}
+							} elseif (\mb_stripos($current, $item['value']) !== 0) {
 								$match = false;
 								break;
 							}
@@ -684,7 +700,12 @@ class tag implements token {
 
 						// match within
 						case '*=':
-							if (\mb_strpos($this->attributes[$item['attribute']], $item['value']) === false) {
+							if ($item['sensitive']) {
+								if (\mb_strpos($current, $item['value']) === false) {
+									$match = false;
+									break;
+								}
+							} elseif (\mb_stripos($current, $item['value']) === false) {
 								$match = false;
 								break;
 							}
@@ -692,7 +713,12 @@ class tag implements token {
 
 						// match end
 						case '$=':
-							if (\mb_strpos($this->attributes[$item['attribute']], $item['value']) !== \mb_strlen($this->attributes[$item['attribute']]) - \mb_strlen($item['value'])) {
+							if ($item['sensitive']) {
+								if (\mb_strpos($current, $item['value']) !== \mb_strlen($current) - \mb_strlen($item['value'])) {
+									$match = false;
+									break;
+								}
+							} elseif (\mb_stripos($current, $item['value']) !== \mb_strlen($current) - \mb_strlen($item['value'])) {
 								$match = false;
 								break;
 							}
