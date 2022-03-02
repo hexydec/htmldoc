@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5038835949c8df723ccd7d4496d312da",
+    "content-hash": "a904cfddb4fe7815784573692f4dc1e8",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "0.5.2",
+            "version": "0.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "a56d4847202c8180172b70fdf315c9d8a990dc0e"
+                "reference": "881205e359883c9e5acf9a823c5751b5ff70e538"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/a56d4847202c8180172b70fdf315c9d8a990dc0e",
-                "reference": "a56d4847202c8180172b70fdf315c9d8a990dc0e",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/881205e359883c9e5acf9a823c5751b5ff70e538",
+                "reference": "881205e359883c9e5acf9a823c5751b5ff70e538",
                 "shasum": ""
             },
             "require": {
@@ -47,9 +47,9 @@
             "description": "A token based CSS Document parser and minifier written in PHP",
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/0.5.2"
+                "source": "https://github.com/hexydec/cssdoc/tree/0.5.3"
             },
-            "time": "2021-08-23T19:38:37+00:00"
+            "time": "2022-03-02T22:44:48+00:00"
         },
         {
             "name": "hexydec/jslite",
