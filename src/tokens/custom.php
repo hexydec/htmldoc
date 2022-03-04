@@ -8,17 +8,17 @@ class custom implements token {
 	/**
 	 * @var array The custom configuration
 	 */
-	protected $config = [];
+	protected array $config = [];
 
 	/**
-	 * @var array The name of the tag
+	 * @var string The name of the tag
 	 */
-	protected $tagName;
+	protected string $tagName;
 
 	/**
 	 * @var string A string containing javascript
 	 */
-	protected $content = '';
+	protected string $content = '';
 
 	/**
 	 * Constructs the script object

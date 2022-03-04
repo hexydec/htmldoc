@@ -8,47 +8,47 @@ class tag implements token {
 	/**
 	 * @var htmldoc The parent htmldoc object
 	 */
-	protected $root;
+	protected htmldoc $root;
 
 	/**
 	 * @var array The object configuration
 	 */
-	protected $config = [];
+	protected array $config = [];
 
 	/**
 	 * @var tag The parent tag object
 	 */
-	protected $parent = null;
+	protected ?tag $parent = null;
 
 	/**
 	 * @var array Cache for the list of parent tags
 	 */
-	protected $parenttags = null;
+	protected ?array $parenttags = null;
 
 	/**
 	 * @var string The type of tag
 	 */
-	protected $tagName = null;
+	protected ?string $tagName = null;
 
 	/**
 	 * @var array An array of attributes where the key is the name of the attribute and the value is the value
 	 */
-	protected $attributes = [];
+	protected array $attributes = [];
 
 	/**
 	 * @var string If the tag is a singleton, this defines the closing string
 	 */
-	protected $singleton = null;
+	protected ?string $singleton = null;
 
 	/**
 	 * @var array An array of child token objects
 	 */
-	protected $children = [];
+	protected array $children = [];
 
 	/**
 	 * @var bool Whether to close the tag when rendering as HTML
 	 */
-	public $close = true;
+	public bool $close = true;
 
 	/**
 	 * Constructs the token
@@ -433,9 +433,7 @@ class tag implements token {
 
 				// remove host for own domain
 				if ($minify['urls']['host'] && isset($_SERVER['HTTP_HOST'])) {
-					if (!isset($host)) {
-						$host = ['//'.$_SERVER['HTTP_HOST'], $scheme.$_SERVER['HTTP_HOST']];
-					}
+					$host ??= ['//'.$_SERVER['HTTP_HOST'], $scheme.$_SERVER['HTTP_HOST']];
 					foreach ($host AS $item) {
 
 						// check if link goes to root

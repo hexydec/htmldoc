@@ -8,7 +8,7 @@ class doctype implements token {
 	/**
 	 * @var array The text content of this object
 	 */
-	protected $content = [];
+	protected array $content = [];
 
 	/**
 	 * Constructs the script object

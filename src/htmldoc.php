@@ -8,7 +8,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * @var array $tokens Regexp components keyed by their corresponding codename for tokenising HTML
 	 */
-	protected static $tokens = [
+	protected static array $tokens = [
 		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
 		'attributevalue' => '\\s*+=\\s*+(?:"[^"]*+"++|\'[^\']*+\'++|[^\\s>]*+)',
 		'attribute' => '\\s*+[^<>"\'\\/=\\s]++',
@@ -26,7 +26,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * @var array $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
-	protected static $selectors = [
+	protected static array $selectors = [
 		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
 		'join' => '\\s*[>+~]\\s*',
 		'comparison' => '[\\^*$<>]?=', // comparison operators for media queries or attribute selectors
@@ -45,17 +45,17 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * @var array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
-	protected $children = [];
+	protected array $children = [];
 
 	/**
 	 * @var int $pointer The current pointer position for the array iterator
 	 */
-	protected $pointer = 0;
+	protected int $pointer = 0;
 
 	/**
 	 * @var array A cache of attribute and class names for sorting
 	 */
-	protected $cache = [];
+	protected array $cache = [];
 
 	/**
 	 * Calculates the length property
@@ -88,8 +88,11 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param mixed $value The value of the array key in the children array to be updated
 	 */
 	public function offsetSet($i, $value) : void {
-		if (\is_null($i)) $this->children[] = $value;
-		else $this->children[$i] = $value;
+		if (\is_null($i)) {
+			$this->children[] = $value;
+		} else {
+			$this->children[$i] = $value;
+		}
 	}
 
 	/**

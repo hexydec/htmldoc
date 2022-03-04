@@ -8,17 +8,17 @@ class text implements token {
 	/**
 	 * @var htmldoc The parent htmldoc object
 	 */
-	protected $root;
+	protected htmldoc $root;
 
 	/**
 	 * @var tag The parent tag object
 	 */
-	protected $parent;
+	protected tag $parent;
 
 	/**
 	 * @var string The text content of this object
 	 */
-	protected $content = '';
+	protected string $content = '';
 
 	/**
 	 * Constructs the token

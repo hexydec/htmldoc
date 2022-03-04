@@ -12,10 +12,10 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.3",
-		"hexydec/tokenise": "0.4.2",
-		"hexydec/cssdoc": "0.5.3",
-		"hexydec/jslite": "0.5.5"
+        "php": ">=7.4",
+		"hexydec/tokenise": "1.0.0",
+		"hexydec/cssdoc": "1.0.1",
+		"hexydec/jslite": "0.5.6"
 	},
 	"autoload": {
 		"classmap": ["src/"]

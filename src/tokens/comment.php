@@ -8,7 +8,7 @@ class comment implements token {
 	/**
 	 * @var string The text content of this object
 	 */
-	protected $content = null;
+	protected ?string $content = null;
 
 	/**
 	 * Constructs the comment object
