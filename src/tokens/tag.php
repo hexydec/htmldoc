@@ -744,7 +744,7 @@ class tag implements token {
 
 					// match first-child
 					case 'first-child':
-						$children = $this->parent->children();
+						$children =  !== null ? $this->parent->children() : [];
 						if (!isset($children[0]) || $this !== $children[0]) {
 							$match = false;
 							break 2;
@@ -753,7 +753,7 @@ class tag implements token {
 
 					// match last child
 					case 'last-child':
-						$children = $this->parent->children();
+						$children = $this->parent !== null ? $this->parent->children() : [];
 						if (($last = \end($children)) === false || $this !== $last) {
 							$match = false;
 							break 2;
