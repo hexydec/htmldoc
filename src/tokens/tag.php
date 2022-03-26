@@ -204,9 +204,9 @@ class tag implements token {
 	 * @return array An array of parent tag names
 	 */
 	protected function getParentTagNames() : array {
-		if (!$this->parenttags) {
+		if (empty($this->parenttags)) {
 			$this->parenttags = $this->parent ? $this->parent->getParentTagNames() : [];
-			if ($this->tagName) {
+			if ($this->tagName !== null) {
 				$this->parenttags[] = \mb_strtolower($this->tagName);
 			}
 		}
@@ -363,7 +363,7 @@ class tag implements token {
 	 * @return void
 	 */
 	public function before(array $nodes) : void {
-		if (($index = $this->getIndex()) !== null) {
+		if ($this->parent !== null && ($index = $this->getIndex()) !== null) {
 			$this->parent->append($nodes, $index);
 		}
 	}
@@ -375,7 +375,7 @@ class tag implements token {
 	 * @return void
 	 */
 	public function after(array $nodes) : void {
-		if (($index = $this->getIndex()) !== null) {
+		if ($this->parent !== null && ($index = $this->getIndex()) !== null) {
 			$this->parent->append($nodes, $index + 1);
 		}
 	}

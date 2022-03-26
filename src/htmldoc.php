@@ -813,7 +813,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		for ($i = 1; $i < 256; $i++) {
 			$str .= \chr($i);
 		}
-		$str = \mb_convert_encoding($str, \mb_internal_encoding(), $charset);
+		$str = (string) \mb_convert_encoding($str, \mb_internal_encoding(), $charset);
 
 		// build html entities conversion map
 		$replace = [];
@@ -825,7 +825,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		}
 
 		// convert entities
-		$html = \mb_convert_encoding($html, 'HTML-ENTITIES');
+		$html = (string) \mb_convert_encoding($html, 'HTML-ENTITIES');
 		return \str_replace(\array_values($replace), \array_keys($replace), $html);
 	}
 }
