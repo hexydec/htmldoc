@@ -11,9 +11,9 @@ class text implements token {
 	protected htmldoc $root;
 
 	/**
-	 * @var tag The parent tag object
+	 * @var tag|null The parent tag object
 	 */
-	protected tag $parent;
+	protected ?tag $parent = null;
 
 	/**
 	 * @var string The text content of this object
@@ -26,7 +26,7 @@ class text implements token {
 	 * @param htmldoc $root The parent HTMLdoc object
 	 * @param tag $parent The parent tag object
 	 */
-	public function __construct(htmldoc $root, tag $parent = null) {
+	public function __construct(htmldoc $root, ?tag $parent = null) {
 		$this->root = $root;
 		$this->parent = $parent;
 	}

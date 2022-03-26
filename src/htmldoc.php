@@ -3,6 +3,10 @@ declare(strict_types = 1);
 namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
+/**
+ * @property-read array $config
+ * @property-read int $length
+ */
 class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 	/**
@@ -88,11 +92,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param mixed $value The value of the array key in the children array to be updated
 	 */
 	public function offsetSet($i, $value) : void {
-		if (\is_null($i)) {
-			$this->children[] = $value;
-		} else {
-			$this->children[$i] = $value;
-		}
+		$this->children[$i] = $value;
 	}
 
 	/**
@@ -767,7 +767,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Compile the document as an HTML string and save it to the specified location
 	 *
 	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
-	 * @return string The compiled HTML
+	 * @return string|bool The compiled HTML
 	 */
 	public function save(string $file = null, array $options = []) {
 

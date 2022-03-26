@@ -3,6 +3,17 @@ declare(strict_types = 1);
 namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
+/**
+ * @property-write \hexydec\html\tag $parent
+ * @property-read htmldoc $root
+ * @property-read array $config
+ * @property-read tag|null $parent
+ * @property-read array $parenttags
+ * @property-read string|null $tagName
+ * @property-read array $attributes
+ * @property-read string|null $singleton
+ * @property-read array $children
+ */
 class tag implements token {
 
 	/**
@@ -16,14 +27,14 @@ class tag implements token {
 	protected array $config = [];
 
 	/**
-	 * @var tag The parent tag object
+	 * @var tag|null The parent tag object
 	 */
 	protected ?tag $parent = null;
 
 	/**
 	 * @var array Cache for the list of parent tags
 	 */
-	protected ?array $parenttags = null;
+	protected array $parenttags = [];
 
 	/**
 	 * @var string The type of tag
@@ -36,7 +47,7 @@ class tag implements token {
 	protected array $attributes = [];
 
 	/**
-	 * @var string If the tag is a singleton, this defines the closing string
+	 * @var string|null If the tag is a singleton, this defines the closing string
 	 */
 	protected ?string $singleton = null;
 
@@ -311,7 +322,7 @@ class tag implements token {
 
 		// insert the nodes
 		if ($index !== null) {
-			$this->chidren = \array_splice($this->children, $index, 0, $clones);
+			\array_splice($this->children, $index, 0, $clones);
 		}
 	}
 
@@ -335,9 +346,11 @@ class tag implements token {
 	 * @return int|null The index of the current element with the parent, or null if there is no parent
 	 */
 	protected function getIndex() : ?int {
-		foreach ($this->parent->children() AS $key => $item) {
-			if ($item === $this) {
-				return $key;
+		if ($this->parent) {
+			foreach ($this->parent->children() AS $key => $item) {
+				if ($item === $this) {
+					return $key;
+				}
 			}
 		}
 		return null;
@@ -394,7 +407,7 @@ class tag implements token {
 	public function minify(array $minify) : void {
 		$config = $this->config;
 		$attr = $config['attributes'];
-		if ($minify['lowercase']) {
+		if ($minify['lowercase'] && $this->tagName) {
 			$this->tagName = \mb_strtolower($this->tagName);
 		}
 		$folder = null;
@@ -404,6 +417,7 @@ class tag implements token {
 		// minify attributes
 		$tag = $this->tagName;
 		$attributes = $this->attributes;
+		$host = null;
 		foreach ($attributes AS $key => $value) {
 
 			// lowercase attribute key
@@ -433,7 +447,7 @@ class tag implements token {
 
 				// remove host for own domain
 				if ($minify['urls']['host'] && isset($_SERVER['HTTP_HOST'])) {
-					$host ??= ['//'.$_SERVER['HTTP_HOST'], $scheme.$_SERVER['HTTP_HOST']];
+					$host = $host ?? ['//'.$_SERVER['HTTP_HOST'], $scheme.$_SERVER['HTTP_HOST']];
 					foreach ($host AS $item) {
 
 						// check if link goes to root
@@ -570,7 +584,7 @@ class tag implements token {
 			}
 
 			// if last tag, remove closing tag
-			if (!$children || $next) {
+			if (empty($children) || $next) {
 				$this->close = false;
 			}
 		}
@@ -778,7 +792,7 @@ class tag implements token {
 	 *
 	 * @param string $key The key of the attribute whos value you wish to retrieve or update
 	 * @param string $value The value of the attribute to update
-	 * @return string The value of the attrbute or NULL if the attribute does not exist
+	 * @return string|null The value of the attrbute or NULL if the attribute does not exist
 	 */
 	public function attr(string $key, ?string $value = null) : ?string {
 
@@ -787,8 +801,8 @@ class tag implements token {
 			$this->attributes[$key] = $value;
 
 		// get the value
-		} elseif (\array_key_exists($key, $this->attributes)) {
-			return $this->attributes[$key] === null ? true : $this->attributes[$key];
+		} else {
+			return $this->attributes[$key] ?? null;
 		}
 		return null;
 	}

@@ -27,7 +27,7 @@ class custom implements token {
 	 * @param string $tag The name of the custom tag, note this cannot be null
 	 */
 	public function __construct(htmldoc $root, string $tagName = null) {
-		$this->tagName = $tagName = \mb_strtolower($tagName);
+		$this->tagName = $tagName = \mb_strtolower($tagName ?? '');
 		$this->config = $root->config['custom'][$tagName];
 	}
 

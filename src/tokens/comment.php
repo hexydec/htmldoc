@@ -39,8 +39,10 @@ class comment implements token {
 	 * @return void
 	 */
 	public function minify(array $minify) : void {
-		if (!empty($minify['comments']['remove']) && (empty($minify['comments']['ie']) || (\mb_strpos($this->content, '[if ') !== 0 && $this->content !== '<![endif]'))) {
-			$this->content = null;
+		if (!empty($minify['comments']['remove']) && $this->content) {
+			if (empty($minify['comments']['ie']) || (\mb_strpos($this->content, '[if ') !== 0 && $this->content !== '<![endif]')) {
+				$this->content = null;
+			}
 		}
 	}
 
