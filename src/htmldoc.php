@@ -4,7 +4,7 @@ namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
 /**
- * @property-read array $config
+ * @property array $config
  * @property-read int $length
  */
 class htmldoc extends config implements \ArrayAccess, \Iterator {
@@ -767,7 +767,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Compile the document as an HTML string and save it to the specified location
 	 *
 	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
-	 * @return string|bool The compiled HTML
+	 * @return string|bool The compiled HTML, or false on error
 	 */
 	public function save(string $file = null, array $options = []) {
 
@@ -783,7 +783,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			}
 
 			// convert to target charset
-			$html = \mb_convert_encoding($html, $options['charset']);
+			$html = (string) \mb_convert_encoding($html, $options['charset']);
 		}
 
 		// send back as string

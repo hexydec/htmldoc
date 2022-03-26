@@ -4,15 +4,15 @@ namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
 /**
- * @property-write \hexydec\html\tag $parent
- * @property-read htmldoc $root
- * @property-read array $config
- * @property-read tag|null $parent
- * @property-read array $parenttags
- * @property-read string|null $tagName
- * @property-read array $attributes
- * @property-read string|null $singleton
- * @property-read array $children
+ * @property \hexydec\html\tag $parent
+ * @property htmldoc $root
+ * @property array $config
+ * @property tag|null $parent
+ * @property array $parenttags
+ * @property string|null $tagName
+ * @property array $attributes
+ * @property string|null $singleton
+ * @property array $children
  */
 class tag implements token {
 
