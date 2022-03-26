@@ -555,7 +555,7 @@ class tag implements token {
 		}
 
 		// work out whether to omit the closing tag
-		if ($minify['close'] && \in_array($tag, $config['elements']['closeoptional']) && ($this->parent->tagName === null || !\in_array($this->parent->tagName, $config['elements']['inline'], true))) {
+		if ($minify['close'] && $this->parent !== null && \in_array($tag, $config['elements']['closeoptional']) && ($this->parent->tagName === null || !\in_array($this->parent->tagName, $config['elements']['inline'], true))) {
 			$children = $this->parent->toArray();
 			$next = false;
 			foreach ($children AS $item) {
