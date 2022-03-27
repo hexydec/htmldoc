@@ -4,7 +4,7 @@ namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
 /**
- * @property \hexydec\html\tag $parent
+ * @property tag|null $parent
  * @property htmldoc $root
  * @property array $config
  * @property tag|null $parent
@@ -744,7 +744,7 @@ class tag implements token {
 
 					// match first-child
 					case 'first-child':
-						$children =  !== null ? $this->parent->children() : [];
+						$children = $this->parent !== null ? $this->parent->children() : [];
 						if (!isset($children[0]) || $this !== $children[0]) {
 							$match = false;
 							break 2;

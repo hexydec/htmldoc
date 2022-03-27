@@ -127,7 +127,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieve the document node in the current position
 	 *
-	 * @return tag|text|comment|doctype The child node at the current pointer position
+	 * @return tag|text|comment|doctype|null The child node at the current pointer position or null if there are no children
 	 */
 	public function current() : mixed {
 		return $this->children[$this->pointer] ?? null;
