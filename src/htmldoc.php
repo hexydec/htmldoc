@@ -197,12 +197,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			// find charset in headers
 			$charset = null;
 			$meta = \stream_get_meta_data($handle);
-			if (!empty($meta['wrapper_data'])) {
-				foreach ($meta['wrapper_data'] AS $item) {
-					if (\mb_stripos($item, 'Content-Type:') === 0 && ($value = \mb_stristr($item, 'charset=')) !== false) {
-						$charset = \mb_substr($value, 8);
-						break;
-					}
+			foreach ($meta['wrapper_data'] ?? [] AS $item) {
+				if (\mb_stripos($item, 'Content-Type:') === 0 && ($value = \mb_stristr($item, 'charset=')) !== false) {
+					$charset = \mb_substr($value, 8);
+					break;
 				}
 			}
 
@@ -251,20 +249,19 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return string The defined or detected charset or null if the charset is not defined
 	 */
 	protected function getCharsetFromHtml(string $html) : ?string {
-		if (\preg_match('/<meta[^>]+charset[^>]+>/i', $html, $match)) {
-			$obj = new htmldoc($this->config);
-			if ($obj->load($match[0], \mb_internal_encoding())) {
+		$obj = new htmldoc($this->config);
+		$pat = '/<meta[^>]+charset[^>]+>/i';
+		if (\preg_match($pat, $html, $match) && $obj->load($match[0], \mb_internal_encoding())) {
 
-				// <meta charset="xxx" />
-				if (($charset = $obj->attr('charset')) !== null && $this->isEncodingValid($charset)) {
+			// <meta charset="xxx" />
+			if (($charset = $obj->attr('charset')) !== null && $this->isEncodingValid($charset)) {
+				return $charset;
+
+			// <meta http-equiv="Content-Type" content="text/html; charset=xxx" />
+			} elseif (($value = $obj->eq(0)->attr('content')) !== null && ($charset = \mb_stristr($value, 'charset=')) !== false) {
+				$charset = \mb_substr($charset, 8);
+				if ($this->isEncodingValid($charset)) {
 					return $charset;
-
-				// <meta http-equiv="Content-Type" content="text/html; charset=xxx" />
-				} elseif (($value = $obj->eq(0)->attr('content')) !== null && ($charset = \mb_stristr($value, 'charset=')) !== false) {
-					$charset = \mb_substr($charset, 8);
-					if ($this->isEncodingValid($charset)) {
-						return $charset;
-					}
 				}
 			}
 		}
@@ -303,110 +300,6 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// extract nodes from HTMLdoc
 		} elseif (\get_class($html) === 'hexydec\\html\\htmldoc') {
 			return $html->toArray();
-		}
-		return false;
-	}
-
-	/**
-	 * Parses a CSS selector string
-	 *
-	 * @param string $selector The CSS selector string to parse
-	 * @return array|bool An array of selector components
-	 */
-	protected function parseSelector(tokenise $tokens) {
-		if (($token = $tokens->next()) !== null) {
-			$selectors = $parts = [];
-			$join = null;
-			do {
-				switch ($token['type']) {
-					case 'id':
-						$parts[] = [
-							'id' => \mb_substr($token['value'], 1),
-							'join' => $join
-						];
-						$join = null;
-						break;
-
-					case 'class':
-						$parts[] = [
-							'class' => \mb_substr($token['value'], 1),
-							'join' => $join
-						];
-						$join = null;
-						break;
-
-					case 'string':
-						$parts[] = [
-							'tag' => $token['value'],
-							'join' => $join
-						];
-						$join = null;
-						break;
-
-					case 'squareopen':
-						$item = ['join' => $join, 'sensitive' => true];
-						while (($token = $tokens->next()) !== null) {
-							if ($token['type'] === 'squareclose') {
-								break;
-							} elseif (\in_array($token['type'], ['string', 'quotes'], true)) {
-								if ($token['type'] === 'quotes') {
-									$token['value'] = \stripslashes(\mb_substr($token['value'], 1, -1));
-								}
-								if (!isset($item['attribute'])) {
-									$item['attribute'] = $token['value'];
-								} elseif (!isset($item['value'])) {
-									$item['value'] = $token['value'];
-								} elseif ($token['value'] === 'i') {
-									$item['sensitive'] = false;
-								}
-							} elseif ($token['type'] === 'comparison') {
-								$item['comparison'] = $token['value'];
-							}
-						}
-						$parts[] = $item;
-						$join = null;
-						break;
-
-					case 'pseudo':
-						$sub = null;
-						if (($bracket = $tokens->next()) !== null && $bracket['type'] === 'bracketopen') {
-							$sub = $this->parseSelector($tokens);
-						} elseif ($bracket) {
-							$tokens->prev();
-						}
-						$parts[] = [
-							'pseudo' => \mb_substr($token['value'], 1),
-							'sub' => $sub,
-							'join' => $join
-						];
-						$join = null;
-						break;
-
-					case 'join':
-						$join = \trim($token['value']);
-						break;
-
-					case 'whitespace':
-						if ($parts) {
-							$join = ' ';
-						}
-						break;
-
-					case 'comma':
-						$selectors[] = $parts;
-						$parts = [];
-						break;
-
-					case 'bracketclose':
-						$selectors[] = $parts;
-						$parts = [];
-						break;
-				}
-			} while (($token = $tokens->next()) !== null);
-			if ($parts) {
-				$selectors[] = $parts;
-			}
-			return $selectors;
 		}
 		return false;
 	}
@@ -475,14 +368,14 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return htmldoc A new htmldoc object containing the found tag items
 	 */
 	public function find(string $selector) : htmldoc {
-		$tokens = new tokenise(self::$selectors, \trim($selector));
+		$obj = new selector();
 
 		// parse selector and find tags
 		$found = [];
-		if (($parsed = $this->parseSelector($tokens)) !== false) {
+		if (($tokens = $obj->get($selector)) !== false) {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
-					foreach ($parsed AS $value) {
+					foreach ($tokens AS $value) {
 						if (($items = $item->find($value)) !== false) {
 							$found = \array_merge($found, $items);
 						}
@@ -628,31 +521,38 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		}
 
 		// sort classes by occurence, then by string
-		if (\is_array($minify['attributes'])) {
-
-			// sort attribute values by most frequent
-			if ($minify['attributes']['sort'] && !empty($this->cache['attr'])) {
-				\arsort($this->cache['attr'], SORT_NUMERIC);
-				\arsort($this->cache['attrvalues'], SORT_NUMERIC);
-				$attr = [];
-				foreach ($this->cache['attrvalues'] AS $item => $occurences) {
-					if ($occurences > 5) {
-						$item = \mb_strstr($item, '=', true);
-						if (!\in_array($item, $attr, true)) {
-							$attr[] = $item;
-						}
-					} else {
-						break;
-					}
-				}
-				$minify['attributes']['sort'] = \array_unique(\array_merge($attr, \array_keys($this->cache['attr'])));
-			}
+		if (!empty($minify['attributes']['sort']) && !empty($this->cache['attr'])) {
+			$minify['attributes']['sort'] = $this->sortAttributes($this->cache['attr'], $this->cache['attrvalues']);
 		}
 
 		// minify children
 		foreach ($this->children AS $item) {
 			$item->minify($minify);
 		}
+	}
+
+	/**
+	 * Sort attributes in frequency order
+	 *
+	 * @param array $attr An array of attribute keys
+	 * @param array $values An array of attribute values
+	 * @return array An array of attributes ordered by frequency
+	 */
+	protected function sortAttributes(array $attr, array $values) : array {
+		\arsort($attr, SORT_NUMERIC);
+		\arsort($values, SORT_NUMERIC);
+		$items = [];
+		foreach ($values AS $item => $occurences) {
+			if ($occurences > 5) {
+				$item = \mb_strstr($item, '=', true);
+				if (!\in_array($item, $items, true)) {
+					$items[] = $item;
+				}
+			} else {
+				break;
+			}
+		}
+		return \array_unique(\array_merge($items, \array_keys($attr)));
 	}
 
 	/**

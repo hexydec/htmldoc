@@ -10,7 +10,8 @@ spl_autoload_register(function (string $class) : bool {
 		'hexydec\\html\\pre' => __DIR__.'/tokens/pre.php',
 		'hexydec\\html\\custom' => __DIR__.'/tokens/custom.php',
 		'hexydec\\html\\tag' => __DIR__.'/tokens/tag.php',
-		'hexydec\\html\\text' => __DIR__.'/tokens/text.php'
+		'hexydec\\html\\text' => __DIR__.'/tokens/text.php',
+		'hexydec\\html\\selector' => __DIR__.'/helpers/selector.php'
 	];
 	if (isset($classes[$class])) {
 		return (bool) require($classes[$class]);
