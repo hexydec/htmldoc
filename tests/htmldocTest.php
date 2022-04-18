@@ -152,7 +152,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			if (file_exists($file)) {
 				unlink($file);
 			}
-			$this->assertEquals(true, $doc->save($file), 'Can save document');
+			$this->assertEquals($doc->html(), $doc->save($file), 'Can save document');
 			$this->assertEquals(true, file_exists($file), 'Saved document ecists');
 			$this->assertEquals('<div>Hello world</div>', file_get_contents($file), 'Saved document has the correct content');
 			unlink($file);

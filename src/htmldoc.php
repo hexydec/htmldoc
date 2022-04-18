@@ -666,8 +666,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Compile the document as an HTML string and save it to the specified location
 	 *
+	 * @param string|null $file The file location to save the document to, or null to just return the compiled code
 	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
-	 * @return string|bool The compiled HTML, or false on error
+	 * @return string|bool The compiled HTML, or false if the file could not be saved
 	 */
 	public function save(string $file = null, array $options = []) {
 
@@ -686,17 +687,12 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			$html = (string) \mb_convert_encoding($html, $options['charset']);
 		}
 
-		// send back as string
-		if (!$file) {
-			return $html;
-
 		// save file
-		} elseif (\file_put_contents($file, $html) === false) {
+		if ($file && \file_put_contents($file, $html) === false) {
 			\trigger_error('File could not be written', E_USER_WARNING);
-		} else {
-			return true;
+			return false;
 		}
-		return false;
+		return $html;
 	}
 
 	/**
