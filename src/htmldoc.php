@@ -120,7 +120,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string|integer $i The key to be accessed, can be a string or integer
 	 * @return htmldoc|null The child node at the requested position or null if there is no child at the requested position
 	 */
-	public function offsetGet(mixed $i) : ?htmldoc { // return reference so you can set it like an array
+	public function offsetGet($i) : ?htmldoc { // return reference so you can set it like an array
 		if (isset($this->children[$i])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$i]]);
