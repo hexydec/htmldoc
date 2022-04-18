@@ -118,19 +118,29 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Retrieves a value from the configuration array with the specified key
 	 *
 	 * @param string|integer $i The key to be accessed, can be a string or integer
-	 * @return mixed The requested value or null if the key doesn't exist
+	 * @return htmldoc|null The child node at the requested position or null if there is no child at the requested position
 	 */
-	public function offsetGet(mixed $i) : mixed { // return reference so you can set it like an array
-		return $this->children[$i] ?? null;
+	public function offsetGet(mixed $i) : ?htmldoc { // return reference so you can set it like an array
+		if (isset($this->children[$i])) {
+			$obj = new htmldoc($this->config);
+			$obj->collection([$this->children[$i]]);
+			return $obj;
+		}
+		return null;
 	}
 
 	/**
 	 * Retrieve the document node in the current position
 	 *
-	 * @return tag|text|comment|doctype|null The child node at the current pointer position or null if there are no children
+	 * @return htmldoc|null The child node at the current pointer position or null if there are no children
 	 */
-	public function current() : mixed {
-		return $this->children[$this->pointer] ?? null;
+	public function current() : ?htmldoc {
+		if (isset($this->children[$this->pointer])) {
+			$obj = new htmldoc($this->config);
+			$obj->collection([$this->children[$this->pointer]]);
+			return $obj;
+		}
+		return null;
 	}
 
 	/**
