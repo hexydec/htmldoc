@@ -136,7 +136,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @return mixed An HTMLdoc object containing the child node at the current pointer position or null if there are no children
 	 */
-	public function current() : mixed {
+	#[\ReturnTypeWillChange]
+	public function current() {
 		if (isset($this->children[$this->pointer])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$this->pointer]]);
@@ -187,9 +188,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string $url The address of the HTML file to retrieve
 	 * @param resource $context A resource object made with stream_context_create()
 	 * @param string &$error A reference to any user error that is generated
-	 * @return mixed The loaded HTML, or false on error
+	 * @return string|false The loaded HTML, or false on error
 	 */
-	public function open(string $url, mixed $context = null, string &$error = null) {
+	public function open(string $url, $context = null, string &$error = null) {
 
 		// check resource
 		if ($context !== null && !\is_resource($context)) {
