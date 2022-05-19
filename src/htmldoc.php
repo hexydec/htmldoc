@@ -67,7 +67,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string $var The name of the property to retrieve, currently 'length' and output
 	 * @return mixed The number of children in the object for length, the output config, or null if the parameter doesn't exist
 	 */
-	public function __get(string $var) {
+	public function __get(string $var) : mixed {
 		if ($var === 'config') {
 			return $this->config;
 		} elseif ($var === 'length') {
@@ -88,39 +88,39 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Array access method allows you to set the object's configuration as properties
 	 *
-	 * @param string|integer $i The key to be updated, can be a string or integer
+	 * @param mixed $i The key to be updated, can be a string or integer
 	 * @param mixed $value The value of the array key in the children array to be updated
 	 */
-	public function offsetSet($i, $value) : void {
+	public function offsetSet(mixed $i, mixed $value) : void {
 		$this->children[$i] = $value;
 	}
 
 	/**
 	 * Array access method allows you to check that a key exists in the configuration array
 	 *
-	 * @param string|integer $i The key to be checked, can be a string or integer
+	 * @param mixed $i The key to be checked
 	 * @return bool Whether the key exists in the config array
 	 */
-	public function offsetExists($i) : bool {
+	public function offsetExists(mixed $i) : bool {
 		return isset($this->children[$i]);
 	}
 
 	/**
 	 * Removes a key from the configuration array
 	 *
-	 * @param string|integer $i The key to be removed, can be a string or integer
+	 * @param mixed $i The key to be removed
 	 */
-	public function offsetUnset($i) : void {
+	public function offsetUnset(mixed $i) : void {
 		unset($this->children[$i]);
 	}
 
 	/**
 	 * Retrieves a value from the configuration array with the specified key
 	 *
-	 * @param string|integer $i The key to be accessed, can be a string or integer
-	 * @return htmldoc|null The child node at the requested position or null if there is no child at the requested position
+	 * @param mixed $i The key to be accessed, can be a string or integer
+	 * @return mixed An HTMLdoc object containing the child node at the requested position or null if there is no child at the requested position
 	 */
-	public function offsetGet(mixed $i) : ?htmldoc { // return reference so you can set it like an array
+	public function offsetGet(mixed $i) : mixed { // return reference so you can set it like an array
 		if (isset($this->children[$i])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$i]]);
@@ -132,9 +132,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieve the document node in the current position
 	 *
-	 * @return htmldoc|null The child node at the current pointer position or null if there are no children
+	 * @return mixed An HTMLdoc object containing the child node at the current pointer position or null if there are no children
 	 */
-	public function current() : ?htmldoc {
+	public function current() : mixed {
 		if (isset($this->children[$this->pointer])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$this->pointer]]);
