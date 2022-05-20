@@ -67,6 +67,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string $var The name of the property to retrieve, currently 'length' and output
 	 * @return mixed The number of children in the object for length, the output config, or null if the parameter doesn't exist
 	 */
+	#[\ReturnTypeWillChange]
 	public function __get(string $var) {
 		if ($var === 'config') {
 			return $this->config;
@@ -88,7 +89,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Array access method allows you to set the object's configuration as properties
 	 *
-	 * @param string|integer $i The key to be updated, can be a string or integer
+	 * @param mixed $i The key to be updated, can be a string or integer
 	 * @param mixed $value The value of the array key in the children array to be updated
 	 */
 	public function offsetSet($i, $value) : void {
@@ -98,7 +99,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Array access method allows you to check that a key exists in the configuration array
 	 *
-	 * @param string|integer $i The key to be checked, can be a string or integer
+	 * @param mixed $i The key to be checked
 	 * @return bool Whether the key exists in the config array
 	 */
 	public function offsetExists($i) : bool {
@@ -108,7 +109,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Removes a key from the configuration array
 	 *
-	 * @param string|integer $i The key to be removed, can be a string or integer
+	 * @param mixed $i The key to be removed
 	 */
 	public function offsetUnset($i) : void {
 		unset($this->children[$i]);
@@ -117,10 +118,11 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieves a value from the configuration array with the specified key
 	 *
-	 * @param string|integer $i The key to be accessed, can be a string or integer
-	 * @return htmldoc|null The child node at the requested position or null if there is no child at the requested position
+	 * @param mixed $i The key to be accessed, can be a string or integer
+	 * @return mixed An HTMLdoc object containing the child node at the requested position or null if there is no child at the requested position
 	 */
-	public function offsetGet($i) : ?htmldoc { // return reference so you can set it like an array
+	#[\ReturnTypeWillChange]
+	public function offsetGet($i) { // return reference so you can set it like an array
 		if (isset($this->children[$i])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$i]]);
@@ -132,9 +134,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieve the document node in the current position
 	 *
-	 * @return htmldoc|null The child node at the current pointer position or null if there are no children
+	 * @return mixed An HTMLdoc object containing the child node at the current pointer position or null if there are no children
 	 */
-	public function current() : ?htmldoc {
+	#[\ReturnTypeWillChange]
+	public function current() {
 		if (isset($this->children[$this->pointer])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$this->pointer]]);
@@ -185,9 +188,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string $url The address of the HTML file to retrieve
 	 * @param resource $context A resource object made with stream_context_create()
 	 * @param string &$error A reference to any user error that is generated
-	 * @return mixed The loaded HTML, or false on error
+	 * @return string|false The loaded HTML, or false on error
 	 */
-	public function open(string $url, mixed $context = null, string &$error = null) {
+	public function open(string $url, $context = null, string &$error = null) {
 
 		// check resource
 		if ($context !== null && !\is_resource($context)) {
