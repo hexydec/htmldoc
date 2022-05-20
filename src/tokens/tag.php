@@ -94,7 +94,7 @@ class tag implements token {
 	 *
 	 * @return void
 	 */
-	public function __clone() : void {
+	public function __clone() {
 		foreach ($this->children AS &$item) {
 			$item = clone $item;
 		}
