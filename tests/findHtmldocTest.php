@@ -29,18 +29,22 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'[class$=heading]' => '<h1 class="find__heading">Heading</h1>',
 				'h1[class$=heading]' => '<h1 class="find__heading">Heading</h1>',
 				'html h1[class$=heading]' => '<h1 class="find__heading">Heading</h1>',
+				'a[href]' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
 				'a[href$="://github.com/hexydec/htmldoc/"]' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
 				'a[href$="://github.com/hexydec/htmldoc"]' => null,
-				'a[href$="://github.com/Hexydec/Htmldoc"]' => null,
+				'a[href$="://github.com/Hexydec/Htmldoc/"]' => null,
 				'a[href$="://github.com/Hexydec/Htmldoc/" i]' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
-				'div:first-child' => '<div id="first" class="first">First</div>',
-				// 'div:last-child' => '<div class="last">Last</div>',
+				'.positions div:first-child' => '<div id="first" class="first">First</div>',
+				'.positions div:last-child' => '<div class="last">Last</div>',
 				'.first, .find__heading, .find__paragraph' => '<div id="first" class="first">First</div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
 				'body .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
 				'body > .find__paragraph' => null,
 				'.find > .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
 				'title:not([class])' => '<title>Find</title>',
-				'div:not(.find)' => '<div id="first" class="first">First</div><div class="last">Last</div>',
+				'.positions div:not(.find)' => '<div id="first" class="first">First</div><div class="last">Last</div>',
+				'[data-attr]' => '<div data-attr>attr</div><div data-attr="">attr</div><div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
+				'[data-attr|=attr]' => '<div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
+				'[data-word~=three]' => '<div data-word="one two three four">attr</div>'
 			];
 			foreach ($tests AS $key => $item) {
 				$this->assertEquals($item, $doc->find($key)->html());
@@ -62,18 +66,18 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'close' => false // don't write close tags where possible
 			));
 
-			$this->assertEquals('<div id="first" class="first">First</div>', $doc->find('body > *')->first()->html(), 'Can find first element');
-			$this->assertEquals('<div class="last">Last</div>', $doc->find('body > *')->last()->html(), 'Can find last element');
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('body > *')->eq(1)->html(), 'Can specific element');
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('body > *')->eq(-2)->html(), 'Can specific element');
+			$this->assertEquals('<div id="first" class="first">First</div>', $doc->find('.positions > *')->first()->html(), 'Can find first element');
+			$this->assertEquals('<div class="last">Last</div>', $doc->find('.positions > *')->last()->html(), 'Can find last element');
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.positions > *')->eq(1)->html(), 'Can specific element');
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.positions > *')->eq(-2)->html(), 'Can specific element');
 			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.find')->children()->html(), 'Can specific element');
 
-			$this->assertEquals(3, count($doc->find('body > *')->get()));
-			$this->assertEquals('<div class="last">Last</div>', $doc->find('body > *')->get(2)->html());
-			$this->assertEquals('<div class="last">Last</div>', $doc->find('body > *')->get(-1)->html());
+			$this->assertEquals(3, count($doc->find('.positions > *')->get()));
+			$this->assertEquals('<div class="last">Last</div>', $doc->find('.positions > *')->get(2)->html());
+			$this->assertEquals('<div class="last">Last</div>', $doc->find('.positions > *')->get(-1)->html());
 
 			$cls = ['first', 'find', 'last'];
-			$divs = $doc->find('body > *');
+			$divs = $doc->find('.positions > *');
 			$this->assertTrue(isset($divs[0]), true);
 			$this->assertEquals($cls[0], $divs[0]->attr('class'));
 			foreach ($divs AS $key => $item) {

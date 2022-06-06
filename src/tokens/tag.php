@@ -677,64 +677,78 @@ class tag implements token {
 			} elseif (!empty($item['attribute'])) {
 
 				// check if attribute exists
-				if (empty($this->attributes[$item['attribute']])) {
+				if (!array_key_exists($item['attribute'], $this->attributes)) {
 					$match = false;
 					break;
 				} elseif (!empty($item['value'])) {
-					$current = $this->attributes[$item['attribute']];
-					switch ($item['comparison']) {
 
-						// exact match
-						case '=':
-							if ($item['sensitive']) {
-								if ($current !== $item['value']) {
+					// if current value is null, it won't match
+					if (($current = $this->attributes[$item['attribute']]) === null) {
+						$match = false;
+						break;
+
+					// compare
+					} else {
+						switch ($item['comparison']) {
+
+							// exact match
+							case '=':
+								if ($item['sensitive']) {
+									if ($current !== $item['value']) {
+										$match = false;
+										break;
+									}
+								} elseif (\mb_strtolower($current) !== \mb_strtolower($item['value'])) {
 									$match = false;
 									break;
 								}
-							} elseif (\mb_strtolower($current) !== \mb_strtolower($item['value'])) {
-								$match = false;
 								break;
-							}
-							break;
 
-						// match start
-						case '^=':
-							if ($item['sensitive']) {
-								if (\mb_strpos($current, $item['value']) !== 0) {
+							// match start
+							case '^=':
+								$pos = $item['sensitive'] ? \mb_strpos($current, $item['value']) : \mb_stripos($current, $item['value']);
+								if ($pos !== 0) {
 									$match = false;
 									break;
 								}
-							} elseif (\mb_stripos($current, $item['value']) !== 0) {
-								$match = false;
 								break;
-							}
-							break;
 
-						// match within
-						case '*=':
-							if ($item['sensitive']) {
-								if (\mb_strpos($current, $item['value']) === false) {
+							// match word
+							case '~=':
+								$current =' '.$current.' ';
+								$item['value'] = ' '.$item['value'].' ';
+
+							// match within
+							case '*=':
+								$pos = $item['sensitive'] ? \mb_strpos($current, $item['value']) : \mb_stripos($current, $item['value']);
+								if ($pos === false) {
 									$match = false;
 									break;
 								}
-							} elseif (\mb_stripos($current, $item['value']) === false) {
-								$match = false;
 								break;
-							}
-							break;
 
-						// match end
-						case '$=':
-							if ($item['sensitive']) {
-								if (\mb_strpos($current, $item['value']) !== \mb_strlen($current) - \mb_strlen($item['value'])) {
+							// match end
+							case '$=':
+								$pos = $item['sensitive'] ? \mb_strrpos($current, $item['value']) : \mb_strripos($current, $item['value']);
+								if ($pos !== \mb_strlen($current) - \mb_strlen($item['value'])) {
 									$match = false;
 									break;
 								}
-							} elseif (\mb_stripos($current, $item['value']) !== \mb_strlen($current) - \mb_strlen($item['value'])) {
-								$match = false;
 								break;
-							}
-							break;
+
+							// match subcode
+							case '|=':
+								if ($item['sensitive']) {
+									if ($current !== $item['value'] && \mb_strpos($current, $item['value'].'-') !== 0) {
+										$match = false;
+										break;
+									}
+								} elseif (\mb_strtolower($current) !== \mb_strtolower($item['value']) && \mb_stripos($current, $item['value'].'-') !== 0) {
+									$match = false;
+									break;
+								}
+								break;
+						}
 					}
 				}
 

@@ -10,8 +10,8 @@ class selector {
 	 */
 	protected static array $tokens = [
 		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
+		'comparison' => '[\\^*$<>|~]?=', // comparison operators for media queries or attribute selectors
 		'join' => '\\s*[>+~]\\s*',
-		'comparison' => '[\\^*$<>]?=', // comparison operators for media queries or attribute selectors
 		'squareopen' => '\\[',
 		'squareclose' => '\\]',
 		'bracketopen' => '\\(',
@@ -20,7 +20,7 @@ class selector {
 		'pseudo' => ':[A-Za-z-]++',
 		'id' => '#[^ +>\.#{\\[,]++',
 		'class' => '\.[^ +>\.#{\\[\\(\\),]++',
-		'string' => '\\*|[^\\[\\]{}\\(\\):;,>+=~\\^$!" #\\.*]++',
+		'string' => '\\*|[^\\[\\]{}\\(\\):;,>+=~|\\^$!" #\\.*]++',
 		'whitespace' => '\s++',
 	];
 
