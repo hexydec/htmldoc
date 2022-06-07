@@ -5,13 +5,19 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanAppendHtml() {
 		$obj = new htmldoc();
-		$obj->load('<h1>Appended</h1>');
+		$obj->load('Data to <span>append</span> here');
 		$tests = [
 			[
 				'input' => '<!DOCTYPE html><html><body></body></html>',
 				'find' => 'body',
-				'append' => '<h1>Appended</h1>',
-				'output' => '<!DOCTYPE html><html><body><h1>Appended</h1></body></html>',
+				'append' => 'Data to <span>append</span> here',
+				'output' => '<!DOCTYPE html><html><body>Data to <span>append</span> here</body></html>',
+			],
+			[
+				'input' => '<!DOCTYPE html><html><body></body></html>',
+				'find' => 'body',
+				'append' => $obj,
+				'output' => '<!DOCTYPE html><html><body>Data to <span>append</span> here</body></html>',
 			],
 			[
 				'input' => '<ul><li></li><li></li><li></li><li></li></ul>',
@@ -31,12 +37,6 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'append' => '<h3>Appended</h3><p>Test <span>this</span></p>',
 				'output' => '<div><div><h3>Appended</h3><p>Test <span>this</span></p></div><h3>Appended</h3><p>Test <span>this</span></p></div>',
 			],
-			[
-				'input' => '<!DOCTYPE html><html><body></body></html>',
-				'find' => 'body',
-				'append' => $obj,
-				'output' => '<!DOCTYPE html><html><body><h1>Appended</h1></body></html>',
-			],
 		];
 
 		$doc = new htmldoc();
@@ -49,19 +49,19 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanPrependHtml() {
 		$obj = new htmldoc();
-		$obj->load('<h1>Prepended</h1>');
+		$obj->load('Data to <span>prepend</span> here');
 		$tests = [
 			[
 				'input' => '<!DOCTYPE html><html><body></body></html>',
 				'find' => 'body',
-				'prepend' => '<h1>Prepended</h1>',
-				'output' => '<!DOCTYPE html><html><body><h1>Prepended</h1></body></html>',
+				'prepend' => 'Data to <span>prepend</span> here',
+				'output' => '<!DOCTYPE html><html><body>Data to <span>prepend</span> here</body></html>',
 			],
 			[
 				'input' => '<!DOCTYPE html><html><body></body></html>',
 				'find' => 'body',
 				'prepend' => $obj,
-				'output' => '<!DOCTYPE html><html><body><h1>Prepended</h1></body></html>',
+				'output' => '<!DOCTYPE html><html><body>Data to <span>prepend</span> here</body></html>',
 			],
 			[
 				'input' => '<ul><li></li><li></li><li></li><li></li></ul>',
@@ -92,19 +92,19 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanInserHtmlBefore() {
 		$obj = new htmldoc();
-		$obj->load('<h1>Insert Before</h1>');
+		$obj->load('Data to <span>insert</span> before');
 		$tests = [
 			[
 				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
 				'find' => 'p',
-				'before' => '<h1>Insert Before</h1>',
-				'output' => '<!DOCTYPE html><html><body><h1>Insert Before</h1><p>Test</p></body></html>',
+				'before' => 'Data to <span>insert</span> before',
+				'output' => '<!DOCTYPE html><html><body>Data to <span>insert</span> before<p>Test</p></body></html>',
 			],
 			[
 				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
 				'find' => 'p',
 				'before' => $obj,
-				'output' => '<!DOCTYPE html><html><body><h1>Insert Before</h1><p>Test</p></body></html>',
+				'output' => '<!DOCTYPE html><html><body>Data to <span>insert</span> before<p>Test</p></body></html>',
 			],
 			[
 				'input' => '<div><p>Test</p><p>Test</p><p>Test</p></div>',
@@ -135,19 +135,19 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 
 	public function testCanInserHtmlAfter() {
 		$obj = new htmldoc();
-		$obj->load('<h1>Insert After</h1>');
+		$obj->load('Data to <span>insert</span> after');
 		$tests = [
 			[
 				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
 				'find' => 'p',
-				'after' => '<h1>Insert After</h1>',
-				'output' => '<!DOCTYPE html><html><body><p>Test</p><h1>Insert After</h1></body></html>',
+				'after' => 'Data to <span>insert</span> after',
+				'output' => '<!DOCTYPE html><html><body><p>Test</p>Data to <span>insert</span> after</body></html>',
 			],
 			[
 				'input' => '<!DOCTYPE html><html><body><p>Test</p></body></html>',
 				'find' => 'p',
 				'after' => $obj,
-				'output' => '<!DOCTYPE html><html><body><p>Test</p><h1>Insert After</h1></body></html>',
+				'output' => '<!DOCTYPE html><html><body><p>Test</p>Data to <span>insert</span> after</body></html>',
 			],
 			[
 				'input' => '<div><p>Test</p><p>Test</p><p>Test</p></div>',
