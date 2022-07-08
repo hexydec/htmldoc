@@ -187,10 +187,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @param string $url The address of the HTML file to retrieve
 	 * @param resource $context A resource object made with stream_context_create()
-	 * @param string &$error A reference to any user error that is generated
+	 * @param ?string &$error A reference to any user error that is generated
 	 * @return string|false The loaded HTML, or false on error
 	 */
-	public function open(string $url, $context = null, string &$error = null) {
+	public function open(string $url, $context = null, ?string &$error = null) {
 
 		// check resource
 		if ($context !== null && !\is_resource($context)) {
@@ -230,10 +230,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @param string $html A string containing valid HTML
 	 * @param string $charset The charset of the document
-	 * @param string &$error A reference to any user error that is generated
+	 * @param ?string &$error A reference to any user error that is generated
 	 * @return bool Whether the input HTML was parsed
 	 */
-	public function load(string $html, string $charset = null, &$error = null) : bool {
+	public function load(string $html, string $charset = null, ?string &$error = null) : bool {
 
 		// detect the charset
 		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== null) {
