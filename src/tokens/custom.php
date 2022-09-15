@@ -24,9 +24,9 @@ class custom implements token {
 	 * Constructs the script object
 	 *
 	 * @param htmldoc $root The parent htmldoc object
-	 * @param string $tag The name of the custom tag, note this cannot be null
+	 * @param string $tagName A string specifying the parent tag name
 	 */
-	public function __construct(htmldoc $root, string $tagName = null) {
+	public function __construct(htmldoc $root, ?string $tagName = null) {
 		$this->tagName = $tagName = \mb_strtolower($tagName ?? '');
 		$this->config = $root->config['custom'][$tagName];
 	}

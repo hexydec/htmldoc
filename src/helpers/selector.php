@@ -6,7 +6,7 @@ use \hexydec\tokens\tokenise;
 class selector {
 
 	/**
-	 * @var array $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
+	 * @var array<string> $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
 	 */
 	protected static array $tokens = [
 		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
@@ -24,6 +24,12 @@ class selector {
 		'whitespace' => '\s++',
 	];
 
+	/**
+	 * Get a selector string parsed into an array
+	 * 
+	 * @param string $selector The CSS selector string to parse
+	 * @return array|false An array of selector components or false if the selector was not parsable
+	 */
 	public function get(string $selector) {
 		$tokens = new tokenise(self::$tokens, \trim($selector));
 		return $this->parse($tokens);
@@ -32,7 +38,7 @@ class selector {
 	/**
 	 * Parses a CSS selector string
 	 *
-	 * @param string $selector The CSS selector string to parse
+	 * @param tokenise $tokens A tokenise object loaded with the selector to parse
 	 * @return array|bool An array of selector components
 	 */
 	public function parse(tokenise $tokens) {
@@ -114,7 +120,14 @@ class selector {
 		return false;
 	}
 
-	protected function parseAttributes(tokenise $tokens, ?string $join = null) {
+	/**
+	 * Parses the attributes of a CSS selector
+	 * 
+	 * @param tokenise $tokens A tokenise object loaded with the selector to be parsed
+	 * @param ?string $join The joining command from the last CSS selector component
+	 * @return array An array representing the attribute
+	 */
+	protected function parseAttributes(tokenise $tokens, ?string $join = null) : array {
 		$item = ['join' => $join, 'sensitive' => true];
 		while (($token = $tokens->next()) !== null && $token['type'] !== 'squareclose') {
 

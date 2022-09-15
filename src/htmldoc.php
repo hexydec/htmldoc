@@ -149,9 +149,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieve the the current pointer position for the object
 	 *
-	 * @return scalar The current pointer position
+	 * @return mixed The current pointer position
 	 */
-	public function key() : int {
+	public function key() {
 		return $this->pointer;
 	}
 

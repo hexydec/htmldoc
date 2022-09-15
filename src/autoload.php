@@ -1,5 +1,5 @@
 <?php
-spl_autoload_register(function (string $class) : bool {
+\spl_autoload_register(function (string $class) : void {
 	$classes = [
 		'hexydec\\html\\htmldoc' => __DIR__.'/htmldoc.php',
 		'hexydec\\html\\config' => __DIR__.'/config.php',
@@ -14,7 +14,6 @@ spl_autoload_register(function (string $class) : bool {
 		'hexydec\\html\\selector' => __DIR__.'/helpers/selector.php'
 	];
 	if (isset($classes[$class])) {
-		return (bool) require($classes[$class]);
+		require($classes[$class]);
 	}
-	return false;
 });
