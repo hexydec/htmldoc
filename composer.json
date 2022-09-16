@@ -1,8 +1,9 @@
 {
     "name": "hexydec/htmldoc",
-    "description": "A token based HTML Document parser and minifier written in PHP",
+    "description": "A token based HTML document parser and minifier written in PHP",
     "type": "library",
     "license": "MIT",
+	"homepage": "https://github.com/hexydec/htmldoc",
     "authors": [
         {
             "name": "Will Earp",
@@ -10,6 +11,7 @@
 			"homepage": "https://github.com/hexydec"
         }
     ],
+	"keywords": ["html", "minify", "minifier", "parser", "compiler", "dom", "simplehtmldom", "css", "javascript", "xml", "svg"],
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.4",
