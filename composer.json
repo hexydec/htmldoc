@@ -16,7 +16,7 @@
     "require": {
         "php": ">=7.4",
 		"hexydec/tokenise": "1.0.1",
-		"hexydec/cssdoc": "1.0.3",
+		"hexydec/cssdoc": "1.0.4",
 		"hexydec/jslite": "0.6.1"
 	},
 	"autoload": {

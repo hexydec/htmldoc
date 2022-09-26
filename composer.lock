@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "07a41cb8679aae918c1d8d823b8df21a",
+    "content-hash": "954230d2cd5f29837ed0234209b5d776",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "b71d2186f81822645e7fdb8f19d0e3e86417b243"
+                "reference": "4e6469094b4a9e0569400dcda3808bf96276f7a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/b71d2186f81822645e7fdb8f19d0e3e86417b243",
-                "reference": "b71d2186f81822645e7fdb8f19d0e3e86417b243",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/4e6469094b4a9e0569400dcda3808bf96276f7a9",
+                "reference": "4e6469094b4a9e0569400dcda3808bf96276f7a9",
                 "shasum": ""
             },
             "require": {
@@ -25,7 +25,7 @@
                 "php": ">=7.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "9.5"
+                "phpunit/phpunit": "9.5.24"
             },
             "type": "library",
             "autoload": {
@@ -41,15 +41,24 @@
                 {
                     "name": "Will Earp",
                     "email": "will@hexydec.com",
-                    "homepage": "https://github.com/hexydec/cssdoc"
+                    "homepage": "https://github.com/hexydec"
                 }
             ],
             "description": "A token based CSS Document parser and minifier written in PHP",
+            "homepage": "https://github.com/hexydec/cssdoc",
+            "keywords": [
+                "compiler",
+                "css",
+                "minifier",
+                "minify",
+                "parser",
+                "stylesheet"
+            ],
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/1.0.3"
+                "source": "https://github.com/hexydec/cssdoc/tree/1.0.4"
             },
-            "time": "2022-09-15T21:03:15+00:00"
+            "time": "2022-09-26T11:12:13+00:00"
         },
         {
             "name": "hexydec/jslite",

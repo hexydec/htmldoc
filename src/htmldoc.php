@@ -151,6 +151,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @return mixed The current pointer position
 	 */
+	#[\ReturnTypeWillChange]
 	public function key() {
 		return $this->pointer;
 	}
