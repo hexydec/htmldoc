@@ -1,6 +1,6 @@
 {
     "name": "hexydec/htmldoc",
-    "description": "A token based HTML document parser and minifier written in PHP",
+    "description": "A token based HTML document parser and minifier. Minify HTML documents including inline CSS, Javascript, and SVG's on the fly. Extract document text, attributes, and fragments. Full test suite.",
     "type": "library",
     "license": "MIT",
 	"homepage": "https://github.com/hexydec/htmldoc",
