@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "954230d2cd5f29837ed0234209b5d776",
+    "content-hash": "82c6f99f2b2946e0933d91016cffdf03",
     "packages": [
         {
             "name": "hexydec/cssdoc",
@@ -62,16 +62,16 @@
         },
         {
             "name": "hexydec/jslite",
-            "version": "0.6.1",
+            "version": "0.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "41f9c7c1460fd6f8f4f696921593343bcfac639d"
+                "reference": "f0c824c4d541b5d4eedb1778c135d9375f439e4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/41f9c7c1460fd6f8f4f696921593343bcfac639d",
-                "reference": "41f9c7c1460fd6f8f4f696921593343bcfac639d",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/f0c824c4d541b5d4eedb1778c135d9375f439e4c",
+                "reference": "f0c824c4d541b5d4eedb1778c135d9375f439e4c",
                 "shasum": ""
             },
             "require": {
@@ -79,7 +79,7 @@
                 "php": ">=7.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "9.5"
+                "phpunit/phpunit": "9.5.24"
             },
             "type": "library",
             "autoload": {
@@ -95,15 +95,24 @@
                 {
                     "name": "Will Earp",
                     "email": "will@hexydec.com",
-                    "homepage": "https://github.com/hexydec/jslite"
+                    "homepage": "https://github.com/hexydec"
                 }
             ],
             "description": "A token based Javascript parser/minifier designed for compressing inline scripts on the fly, written in PHP",
+            "homepage": "https://github.com/hexydec/jslite",
+            "keywords": [
+                "JS",
+                "compiler",
+                "javascript",
+                "minifier",
+                "minify",
+                "parser"
+            ],
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/0.6.1"
+                "source": "https://github.com/hexydec/jslite/tree/0.6.2"
             },
-            "time": "2022-09-15T20:11:14+00:00"
+            "time": "2022-11-11T17:58:27+00:00"
         },
         {
             "name": "hexydec/tokenise",
@@ -449,16 +458,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.2.17",
+            "version": "9.2.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "aa94dc41e8661fe90c7316849907cba3007b10d8"
+                "reference": "12fddc491826940cf9b7e88ad9664cf51f0f6d0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/aa94dc41e8661fe90c7316849907cba3007b10d8",
-                "reference": "aa94dc41e8661fe90c7316849907cba3007b10d8",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/12fddc491826940cf9b7e88ad9664cf51f0f6d0a",
+                "reference": "12fddc491826940cf9b7e88ad9664cf51f0f6d0a",
                 "shasum": ""
             },
             "require": {
@@ -514,7 +523,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.17"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.18"
             },
             "funding": [
                 {
@@ -522,7 +531,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-08-30T12:24:04+00:00"
+            "time": "2022-10-27T13:35:33+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
