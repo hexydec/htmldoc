@@ -516,7 +516,7 @@ class tag implements token {
 					$attributes[$key] = null;
 
 				// minify style tag
-				} elseif ($key === 'style' && $minify['attributes']['style']) {
+				} elseif ($key === 'style' && $minify['attributes']['style'] && !empty($attributes[$key])) {
 					$attributes[$key] = \trim(\str_replace(
 						['  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '],
 						[' ', ':', ':', ':', ';', ';', ';'],
