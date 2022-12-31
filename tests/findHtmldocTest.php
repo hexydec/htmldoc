@@ -42,6 +42,7 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'.find > .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
 				'title:not([class])' => '<title>Find</title>',
 				'.positions div:not(.find)' => '<div id="first" class="first">First</div><div class="last">Last</div>',
+				'body section:not(:first-child) div:last-child' => '<div data-word="one two three four">attr</div>',
 				'[data-attr]' => '<div data-attr>attr</div><div data-attr="">attr</div><div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
 				'[data-attr|=attr]' => '<div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
 				'[data-word~=three]' => '<div data-word="one two three four">attr</div>'

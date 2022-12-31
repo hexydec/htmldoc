@@ -644,9 +644,10 @@ class tag implements token {
 			// pass rest of selector to level below
 			if ($item['join'] && $i) {
 				$match = false;
+				$childselector = \array_slice($selector, $i);
 				foreach ($this->children AS $child) {
 					if (\get_class($child) === 'hexydec\\html\\tag') {
-						$found = \array_merge($found, $child->find(\array_slice($selector, $i)));
+						$found = \array_merge($found, $child->find($childselector));
 					}
 				}
 				break;
