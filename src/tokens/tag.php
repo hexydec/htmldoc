@@ -506,44 +506,43 @@ class tag implements token {
 			// minify attributes
 			if ($minify['attributes']) {
 
+				// cache attributes
+				$min = $minify['attributes'];
+
 				// trim attribute
-				if ($minify['attributes']['trim'] && $attributes[$key]) {
+				if ($min['trim'] && $attributes[$key]) {
 					$attributes[$key] = \trim($attributes[$key], " \r\n\t");
 				}
 
 				// boolean attributes
-				if ($minify['attributes']['boolean'] && \in_array($key, $attr['boolean'], true)) {
+				if ($min['boolean'] && \in_array($key, $attr['boolean'], true)) {
 					$attributes[$key] = null;
 
+				// remove empty attributes
+				} elseif (\in_array($attributes[$key], ['', null], true) && $min['empty'] && \in_array($key, $attr['empty'], true)) {
+					unset($attributes[$key]);
+
 				// minify style tag
-				} elseif ($key === 'style' && $minify['attributes']['style']) {
+				} elseif ($key === 'style' && $min['style'] && $attributes[$key]) {
 					$attributes[$key] = \trim(\str_replace(
-						['  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '],
-						[' ', ':', ':', ':', ';', ';', ';'],
+						["\t", "\r", "\n", '  ', ' : ', ': ', ' :', ' ; ', ' ;', '; '],
+						[' ', '', ' ', ' ', ':', ':', ':', ';', ';', ';'],
 						$attributes[$key]
 					), '; ');
 
 				// trim classes
-				} elseif ($key === 'class' && $minify['attributes']['class'] && \mb_strpos($attributes[$key], ' ') !== false) {
+				} elseif ($key === 'class' && $min['class'] && \mb_strpos($attributes[$key] ?? '', ' ') !== false) {
 					$attributes[$key] = \trim(\preg_replace('/\s+/', ' ', $attributes[$key]));
 
 				// minify option tag, always capture the tag to prevent it being removed as a default
 				} elseif ($key === 'value' && $tag === 'option') {
-					if ($minify['attributes']['option'] && isset($this->children[0]) && $this->children[0]->text() === $attributes[$key]) {
+					if ($min['option'] && isset($this->children[0]) && $this->children[0]->text() === $attributes[$key]) {
 						unset($attributes[$key]);
 					}
-					continue;
 
 				// remove tag specific default attribute
-				} elseif ($minify['attributes']['default'] && isset($attr['default'][$tag][$key]) && ($attr['default'][$tag][$key] === true || $attr['default'][$tag][$key] === $attributes[$key])) {
+				} elseif ($min['default'] && isset($attr['default'][$tag][$key]) && ($attr['default'][$tag][$key] === true || $attr['default'][$tag][$key] === $attributes[$key])) {
 					unset($attributes[$key]);
-					continue;
-				}
-
-				// remove other attributes
-				if ($attributes[$key] === '' && $minify['attributes']['empty'] && \in_array($key, $attr['empty'], true)) {
-					unset($attributes[$key]);
-					continue;
 				}
 			}
 		}
