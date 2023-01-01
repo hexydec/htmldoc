@@ -94,7 +94,7 @@ class tag implements token {
 	 *
 	 * @return void
 	 */
-	public function __clone() {
+	public function __clone() : void {
 		foreach ($this->children AS &$item) {
 			$item = clone $item;
 		}
@@ -287,7 +287,7 @@ class tag implements token {
 	/**
 	 * Returns the parent of the current object
 	 *
-	 * @return tag The parent tag
+	 * @return ?tag The parent tag
 	 */
 	public function parent() : ?tag {
 		return $this->parent;
@@ -918,8 +918,7 @@ class tag implements token {
 	 *
 	 * @return mixed The value of the requested property
 	 */
-	#[\ReturnTypeWillChange]
-	public function __get(string $var) {
+	public function __get(string $var) : mixed {
 		return $this->$var;
 	}
 }

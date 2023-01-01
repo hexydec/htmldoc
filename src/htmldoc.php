@@ -67,8 +67,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string $var The name of the property to retrieve, currently 'length' and output
 	 * @return mixed The number of children in the object for length, the output config, or null if the parameter doesn't exist
 	 */
-	#[\ReturnTypeWillChange]
-	public function __get(string $var) {
+	public function __get(string $var) : mixed {
 		if ($var === 'config') {
 			return $this->config;
 		} elseif ($var === 'length') {
@@ -92,7 +91,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param mixed $i The key to be updated, can be a string or integer
 	 * @param mixed $value The value of the array key in the children array to be updated
 	 */
-	public function offsetSet($i, $value) : void {
+	public function offsetSet(mixed $i, mixed $value) : void {
 		$this->children[$i] = $value;
 	}
 
@@ -102,7 +101,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param mixed $i The key to be checked
 	 * @return bool Whether the key exists in the config array
 	 */
-	public function offsetExists($i) : bool {
+	public function offsetExists(mixed $i) : bool {
 		return isset($this->children[$i]);
 	}
 
@@ -111,7 +110,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @param mixed $i The key to be removed
 	 */
-	public function offsetUnset($i) : void {
+	public function offsetUnset(mixed $i) : void {
 		unset($this->children[$i]);
 	}
 
@@ -121,8 +120,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param mixed $i The key to be accessed, can be a string or integer
 	 * @return mixed An HTMLdoc object containing the child node at the requested position or null if there is no child at the requested position
 	 */
-	#[\ReturnTypeWillChange]
-	public function offsetGet($i) { // return reference so you can set it like an array
+	public function offsetGet(mixed $i) : mixed { // return reference so you can set it like an array
 		if (isset($this->children[$i])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$i]]);
@@ -136,8 +134,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @return mixed An HTMLdoc object containing the child node at the current pointer position or null if there are no children
 	 */
-	#[\ReturnTypeWillChange]
-	public function current() {
+	public function current() : mixed {
 		if (isset($this->children[$this->pointer])) {
 			$obj = new htmldoc($this->config);
 			$obj->collection([$this->children[$this->pointer]]);
@@ -151,8 +148,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @return mixed The current pointer position
 	 */
-	#[\ReturnTypeWillChange]
-	public function key() {
+	public function key() : mixed {
 		return $this->pointer;
 	}
 
@@ -191,7 +187,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param ?string &$error A reference to any user error that is generated
 	 * @return string|false The loaded HTML, or false on error
 	 */
-	public function open(string $url, $context = null, ?string &$error = null) {
+	public function open(string $url, $context = null, ?string &$error = null) : string|false {
 
 		// check resource
 		if ($context !== null && !\is_resource($context)) {
@@ -295,9 +291,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Parses an array of tokens into an HTML document
 	 *
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
-	 * @return bool|array An array of node objects or false on error
+	 * @return array|false An array of node objects or false on error
 	 */
-	protected function parse($html) {
+	protected function parse(string|htmldoc $html) : array|false {
 
 		// convert string to nodes
 		if (\is_string($html)) {
@@ -346,9 +342,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Retrieves the tag object at the specified index, or all children of type tag
 	 *
 	 * @param int $index The index of the child tag to retrieve
-	 * @return mixed A tag object if index is specified, or an array of tag objects, or null if the specified index doesn't exist or the object is empty
+	 * @return tag|array|null A tag object if index is specified, or an array of tag objects, or null if the specified index doesn't exist or the object is empty
 	 */
-	public function get(int $index = null) {
+	public function get(int $index = null) : tag|array|null {
 
 		// build children that are tags
 		$children = [];
@@ -599,7 +595,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
 	 * @return htmldoc The current htmldoc object with the nodes appended
 	 */
-	public function append($html) : htmldoc {
+	public function append(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
@@ -616,7 +612,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
 	 * @return htmldoc The current htmldoc object with the nodes appended
 	 */
-	public function prepend($html) : htmldoc {
+	public function prepend(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
@@ -633,7 +629,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
 	 * @return htmldoc The current htmldoc object with the nodes appended
 	 */
-	public function before($html) : htmldoc {
+	public function before(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
@@ -650,7 +646,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
 	 * @return htmldoc The current htmldoc object with the nodes appended
 	 */
-	public function after($html) : htmldoc {
+	public function after(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
@@ -664,10 +660,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Removes all top level nodes, or if $selector is specified, the nodes matched by the selector
 	 *
-	 * @param string $selector A CSS selector to refine the nodes to delete or null to delete top level nodes
+	 * @param ?string $selector A CSS selector to refine the nodes to delete or null to delete top level nodes
 	 * @return htmldoc The current htmldoc object with the requested nodes deleted
 	 */
-	public function remove(string $selector = null) : htmldoc {
+	public function remove(?string $selector = null) : htmldoc {
 		$obj = $selector ? $this->find($selector) : $this;
 		foreach ($obj->children AS $item) {
 			if (\get_class($item) === 'hexydec\\html\\tag') {
@@ -682,9 +678,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 *
 	 * @param string|null $file The file location to save the document to, or null to just return the compiled code
 	 * @param array $options An array indicating output options, this is merged with htmldoc::$output
-	 * @return string|bool The compiled HTML, or false if the file could not be saved
+	 * @return string|false The compiled HTML, or false if the file could not be saved
 	 */
-	public function save(string $file = null, array $options = []) {
+	public function save(?string $file = null, array $options = []) : string|false {
 
 		// compile html
 		$html = $this->html($options);

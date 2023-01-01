@@ -38,7 +38,7 @@ class text implements token {
 	 * @param mixed $value The value of the property to set
 	 * @return void
 	 */
-	public function __set(string $name, $value) : void {
+	public function __set(string $name, mixed $value) : void {
 		if ($name === 'parent' && \get_class($value) === 'hexydec\\html\\tag') {
 			$this->parent = $value;
 		}
@@ -117,7 +117,7 @@ class text implements token {
 		}
 	}
 
-	protected function getIndex($children) {
+	protected function getIndex(array $children) : int|false {
 		foreach ($children AS $key => $value) {
 			if ($value === $this) {
 				return $key;
