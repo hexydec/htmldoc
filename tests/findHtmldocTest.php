@@ -19,9 +19,23 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals($doc->length, 4, 'Can count elements');
 			// var_dump($doc->find('title'));
 			$tests = [
+
+				// basic selectors
 				'title' => '<title>Find</title>',
 				'.find' => '<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>',
 				'#first' => '<div id="first" class="first">First</div>',
+				'.first, .find__heading, .find__paragraph' => '<div id="first" class="first">First</div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
+
+				// combination selectors
+				'body .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
+				'body > .find__paragraph' => null,
+				'.find > .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
+				'.find__paragraph + a' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
+				'div[data-attr] ~ div' => '<div data-attr="">attr</div><div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div><div data-word="one two three four">attr</div>',
+				'.find h1 ~ a' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
+				'.attributes div ~ div' => '<div data-attr="">attr</div><div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div><div data-word="one two three four">attr</div>',
+
+				// attribute selectors
 				'#first[class]' => '<div id="first" class="first">First</div>',
 				'[class=first]' => '<div id="first" class="first">First</div>',
 				'[class^=find]' => '<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
@@ -34,18 +48,16 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'a[href$="://github.com/hexydec/htmldoc"]' => null,
 				'a[href$="://github.com/Hexydec/Htmldoc/"]' => null,
 				'a[href$="://github.com/Hexydec/Htmldoc/" i]' => '<a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>',
+				'[data-attr]' => '<div data-attr>attr</div><div data-attr="">attr</div><div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
+				'[data-attr|=attr]' => '<div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
+				'[data-word~=three]' => '<div data-word="one two three four">attr</div>',
+
+				// pseudo selectors
 				'.positions div:first-child' => '<div id="first" class="first">First</div>',
 				'.positions div:last-child' => '<div class="last">Last</div>',
-				'.first, .find__heading, .find__paragraph' => '<div id="first" class="first">First</div><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
-				'body .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
-				'body > .find__paragraph' => null,
-				'.find > .find__paragraph' => '<p class="find__paragraph" title="This is a paragraph">Paragraph</p>',
 				'title:not([class])' => '<title>Find</title>',
 				'.positions div:not(.find)' => '<div id="first" class="first">First</div><div class="last">Last</div>',
 				'body section:not(:first-child) div:last-child' => '<div data-word="one two three four">attr</div>',
-				'[data-attr]' => '<div data-attr>attr</div><div data-attr="">attr</div><div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
-				'[data-attr|=attr]' => '<div data-attr="attr">attr</div><div data-attr="attr-value1">attr</div><div data-attr="attr-value2">attr</div>',
-				'[data-word~=three]' => '<div data-word="one two three four">attr</div>'
 			];
 			foreach ($tests AS $key => $item) {
 				$this->assertEquals($item, $doc->find($key)->html());

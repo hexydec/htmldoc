@@ -490,7 +490,15 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return void
 	 */
 	protected function collection(array $nodes) : void {
-		$this->children = $nodes;
+
+		// only store unique nodes as some find operations can produce the same node multiple times
+		$unique = [];
+		foreach ($nodes AS $item) {
+			if (!\in_array($item, $unique, true)) {
+				$unique[] = $item;
+			}
+		}
+		$this->children = $unique;
 	}
 
 	/**
