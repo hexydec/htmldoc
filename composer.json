@@ -14,10 +14,10 @@
 	"keywords": ["html", "minify", "minifier", "parser", "compiler", "dom", "simplehtmldom", "css", "javascript", "xml", "svg"],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
 		"hexydec/tokenise": "1.0.1",
-		"hexydec/cssdoc": "1.0.4",
-		"hexydec/jslite": "0.6.3"
+		"hexydec/cssdoc": "1.1.0",
+		"hexydec/jslite": "1.0.0"
 	},
 	"autoload": {
 		"classmap": ["src/"]
