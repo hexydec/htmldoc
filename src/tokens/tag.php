@@ -94,7 +94,7 @@ class tag implements token {
 	 *
 	 * @return void
 	 */
-	public function __clone() {
+	public function __clone() : void {
 		foreach ($this->children AS &$item) {
 			$item = clone $item;
 		}
@@ -287,7 +287,7 @@ class tag implements token {
 	/**
 	 * Returns the parent of the current object
 	 *
-	 * @return tag The parent tag
+	 * @return ?tag The parent tag
 	 */
 	public function parent() : ?tag {
 		return $this->parent;
@@ -641,11 +641,29 @@ class tag implements token {
 			}
 
 			// pass rest of selector to level below
-			if ($item['join'] && $i) {
+			if (\in_array($item['join'], [' ', '>'], true) && $i) {
 				$match = false;
+				$childselector = \array_slice($selector, $i);
 				foreach ($this->children AS $child) {
 					if (\get_class($child) === 'hexydec\\html\\tag') {
-						$found = \array_merge($found, $child->find(\array_slice($selector, $i)));
+						$found = \array_merge($found, $child->find($childselector));
+					}
+				}
+				break;
+
+			// find siblings
+			} elseif (\in_array($item['join'], ['+', '~'], true) && $i) {
+				$match = false;
+				$siblingselector = \array_slice($selector, $i);
+				$search = false;
+				foreach ($this->parent->children AS $sibling) {
+					if (!$search && $sibling === $this) {
+						$search = true;
+					} elseif ($search && \get_class($sibling) === 'hexydec\\html\\tag') {
+						$found = \array_merge($found, $sibling->find($siblingselector));
+						if ($item['join'] === '+') {
+							break;
+						}
 					}
 				}
 				break;
@@ -917,8 +935,7 @@ class tag implements token {
 	 *
 	 * @return mixed The value of the requested property
 	 */
-	#[\ReturnTypeWillChange]
-	public function __get(string $var) {
+	public function __get(string $var) : mixed {
 		return $this->$var;
 	}
 }

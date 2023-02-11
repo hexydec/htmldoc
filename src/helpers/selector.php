@@ -109,7 +109,7 @@ class selector {
 					case 'bracketclose':
 						$selectors[] = $parts;
 						$parts = [];
-						break;
+						break 2;
 				}
 			} while (($token = $tokens->next()) !== null);
 			if ($parts) {

@@ -95,7 +95,7 @@ $ vendor/bin/phpunit
 
 ## Support
 
-HTMLdoc supports PHP version 7.4+.
+HTMLdoc supports PHP version 8.0+.
 
 ## Contributing
 
