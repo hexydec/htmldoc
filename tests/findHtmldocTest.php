@@ -103,6 +103,16 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
+	public function testCanReadTagNames() {
+		$doc = new htmldoc();
+		if ($doc->open(__DIR__.'/templates/find.html')) {
+			$this->assertEquals('div', $doc->find('.find')->tag());
+			$this->assertEquals('p', $doc->find('.find__paragraph')->tag());
+			$this->assertEquals('h1', $doc->find('.find__heading')->tag());
+			$this->assertEquals(null, $doc->find('.find__nothing')->tag());
+		}
+	}
+
 	public function testCanReadAttributes() {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {
