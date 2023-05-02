@@ -1,12 +1,6 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="vendor/autoload.php" backupGlobals="false" colors="true" convertErrorsToExceptions="true" convertNoticesToExceptions="true" convertWarningsToExceptions="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">src</directory>
-    </include>
-	<exclude>
-		<file>src/autoload.php</file>
-	</exclude>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="vendor/autoload.php" backupGlobals="false" colors="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd" cacheDirectory=".phpunit.cache">
+  <coverage>
     <report>
       <clover outputFile="./coverage/result.xml"/>
       <html outputDirectory="./coverage/result"/>
@@ -28,4 +22,12 @@
     </testsuite>
   </testsuites>
   <logging/>
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude>
+      <file>src/autoload.php</file>
+    </exclude>
+  </source>
 </phpunit>
