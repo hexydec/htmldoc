@@ -72,6 +72,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			return $this->config;
 		} elseif ($var === 'length') {
 			return \count($this->children);
+		} else {
+			return $this->children[0]->{$var};
 		}
 		return null;
 	}
@@ -123,8 +125,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	public function offsetGet(mixed $i) : mixed { // return reference so you can set it like an array
 		if (isset($this->children[$i])) {
 			$obj = new htmldoc($this->config);
-			$obj->collection([$this->children[$i]]);
-			return $obj;
+			return $obj->collection([$this->children[$i]]);
 		}
 		return null;
 	}
@@ -137,8 +138,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	public function current() : mixed {
 		if (isset($this->children[$this->pointer])) {
 			$obj = new htmldoc($this->config);
-			$obj->collection([$this->children[$this->pointer]]);
-			return $obj;
+			return $obj->collection([$this->children[$this->pointer]]);
 		}
 		return null;
 	}
@@ -357,16 +357,17 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// return all children if no index
 		if ($index === null) {
 			return $children;
-		}
+		} else {
 
-		// check if index is minus
-		if ($index < 0) {
-			$index = \count($children) + $index;
-		}
+			// check if index is minus
+			if ($index < 0) {
+				$index = \count($children) + $index;
+			}
 
-		// return index if set
-		if (isset($children[$index])) {
-			return $children[$index];
+			// return index if set
+			if (isset($children[$index])) {
+				return $children[$index];
+			}
 		}
 		return null;
 	}
@@ -443,7 +444,23 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return htmldoc A new htmldoc object
 	 */
 	public function children() : htmldoc {
-		return $this->find('>*');
+		return $this->find('*>*');
+	}
+
+	/**
+	 * Generate a new htmldoc object containing all the child tags of the parents
+	 *
+	 * @return htmldoc A new htmldoc object
+	 */
+	public function parent() : htmldoc {
+		$doc = new htmldoc($this->config);
+		$nodes = [];
+		foreach ($this->children AS $item) {
+			if (\get_class($item) === 'hexydec\\html\\tag' && ($parent = $this->children[0]->parent) !== null) {
+				$nodes[] = $parent;
+			}
+		}
+		return $doc->collection($nodes);
 	}
 
 	/**
@@ -489,7 +506,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param array $nodes An array of nodes to add to the collection
 	 * @return void
 	 */
-	protected function collection(array $nodes) : void {
+	protected function collection(array $nodes) : htmldoc {
 
 		// only store unique nodes as some find operations can produce the same node multiple times
 		$unique = [];
@@ -499,6 +516,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			}
 		}
 		$this->children = $unique;
+		return $this;
 	}
 
 	/**

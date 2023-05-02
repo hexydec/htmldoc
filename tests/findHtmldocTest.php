@@ -81,11 +81,12 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 
 			$this->assertEquals('<div id="first" class="first">First</div>', $doc->find('.positions > *')->first()->html(), 'Can find first element');
 			$this->assertEquals('<div class="last">Last</div>', $doc->find('.positions > *')->last()->html(), 'Can find last element');
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.positions > *')->eq(1)->html(), 'Can specific element');
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.positions > *')->eq(-2)->html(), 'Can specific element');
-			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.find')->children()->html(), 'Can specific element');
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.positions > *')->eq(1)->html(), 'Can find specific element');
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.positions > *')->eq(-2)->html(), 'Can find specific element');
+			$this->assertEquals('<h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a>', $doc->find('.find')->children()->html(), 'Can extract children of an element');
+			$this->assertEquals('<div class="find"><h1 class="find__heading">Heading</h1><p class="find__paragraph" title="This is a paragraph">Paragraph</p><a class="find__anchor" href="https://github.com/hexydec/htmldoc/">Anchor</a></div>', $doc->find('.find__heading')->parent()->html(), 'Can specific element');
 
-			$this->assertEquals(3, count($doc->find('.positions > *')->get()));
+			$this->assertEquals(3, \count($doc->find('.positions > *')->get()));
 			$this->assertEquals('<div class="last">Last</div>', $doc->find('.positions > *')->get(2)->html());
 			$this->assertEquals('<div class="last">Last</div>', $doc->find('.positions > *')->get(-1)->html());
 
