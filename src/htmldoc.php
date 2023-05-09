@@ -75,7 +75,6 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		} else {
 			return $this->children[0]->{$var};
 		}
-		return null;
 	}
 
 	/**
@@ -518,7 +517,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Adds the specified nodes to the htmldoc object
 	 *
 	 * @param array $nodes An array of nodes to add to the collection
-	 * @return void
+	 * @return htmldoc The current instance of this object
 	 */
 	protected function collection(array $nodes) : htmldoc {
 

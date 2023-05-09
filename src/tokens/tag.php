@@ -479,7 +479,7 @@ class tag implements token {
 				}
 
 				// use parent folders if it is shorter
-				if ($minify['urls']['parent'] && $dirs && \mb_strpos($attributes[$key], '/') === 0 && \mb_strpos($attributes[$key], '//') === false) {
+				if ($minify['urls']['parent'] && $dirs && \mb_strpos($attributes[$key], '/') === 0 && !\str_contains($attributes[$key], '//')) {
 					$isDir = \mb_strrpos($attributes[$key], '/') === \mb_strlen($attributes[$key])-1;
 					$compare = \explode('/', \trim($isDir ? $attributes[$key] : \dirname($attributes[$key]), '/'));
 					$update = false;
@@ -531,7 +531,7 @@ class tag implements token {
 					), '; ');
 
 				// trim classes
-				} elseif ($key === 'class' && $min['class'] && \mb_strpos($attributes[$key] ?? '', ' ') !== false) {
+				} elseif ($key === 'class' && $min['class'] && \str_contains($attributes[$key] ?? '', ' ')) {
 					$attributes[$key] = \trim(\preg_replace('/\s+/', ' ', $attributes[$key]));
 
 				// minify option tag, always capture the tag to prevent it being removed as a default
@@ -879,7 +879,7 @@ class tag implements token {
 					$html .= '='.$value;
 
 				// single quotes || swap when minimal and there are double quotes in the string
-				} elseif ($options['quotestyle'] === 'single' || ($options['quotestyle'] === 'minimal' && \mb_strpos($value, '"') !== false)) {
+				} elseif ($options['quotestyle'] === 'single' || ($options['quotestyle'] === 'minimal' && \str_contains($value, '"'))) {
 					$html .= "='".\str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value)."'";
 
 				// double quotes
