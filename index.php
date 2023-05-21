@@ -1,5 +1,5 @@
 <?php
-require(__DIR__.'/vendor/autoload.php');
+require __DIR__.'/vendor/autoload.php';
 
 $error = null;
 \set_error_handler(function (int $type, string $msg) use (&$error) {
@@ -13,13 +13,13 @@ $error = null;
 $base = $_POST['base'] ?? null;
 $input = '';
 $output = '';
-$minify = Array();
-$timing = Array(
+$minify = [];
+$timing = [
 	'start' => \microtime(true)
-);
-$mem = Array(
+];
+$mem = [
 	'start' => \memory_get_peak_usage()
-);
+];
 
 // create object and retrieve config
 $doc = new hexydec\html\htmldoc();
@@ -132,7 +132,7 @@ if (!empty($_POST['action'])) {
 			.minify__form-error {
 				padding: 10px;
 				background: red;
-				font-weight bold;
+				font-weight: bold;
 				color: #FFF;
 				margin: 10px 10px 0 10px;
 			}
@@ -262,9 +262,11 @@ if (!empty($_POST['action'])) {
 					</table>
 				<?php } ?>
 			</div>
-			<?php if ($output) { ?>
-				<input type="hidden" name="base" value="<?= \htmlspecialchars($base); ?>" />
-				<iframe class="minify__preview" srcdoc="<?= \htmlspecialchars(\preg_replace('/<head[^>]*>/i', '$0<base href="'.\htmlspecialchars($base).'">', $output)); ?>"></iframe>
+			<?php if ($output) {
+				if ($base) { ?>
+					<input type="hidden" name="base" value="<?= \htmlspecialchars($base); ?>" />
+				<?php } ?>
+				<iframe class="minify__preview" srcdoc="<?= \htmlspecialchars($base === null ? $output : \preg_replace('/<head[^>]*>/i', '$0<base href="'.\htmlspecialchars($base).'">', $output)); ?>"></iframe>
 			<?php } ?>
 			<div class="minify__options">
 				<h3>Options</h3>

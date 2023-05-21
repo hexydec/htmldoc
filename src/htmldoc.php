@@ -541,12 +541,28 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	public function minify(array $minify = []) : void {
 
 		// merge config
-		$minify = \array_replace_recursive($this->config['minify'], $minify);
+		$minify = $this->getMinifyOptions($minify);
 
 		// set minify output parameters
 		if ($minify['quotes']) {
 			$this->config['output']['quotestyle'] = 'minimal';
 		}
+
+		// sort classes by occurence, then by string
+		if (!empty($minify['attributes']['sort']) && !empty($this->cache['attr'])) {
+			$minify['attributes']['sort'] = $this->sortAttributes($this->cache['attr'], $this->cache['attrvalues']);
+		}
+
+		// minify children
+		foreach ($this->children AS $item) {
+			$item->minify($minify);
+		}
+	}
+
+	protected function getMinifyOptions(array $minify) : array {
+
+		// merge config
+		$minify = \array_replace_recursive($this->config['minify'], $minify);
 
 		// set safe options
 		if ($minify['safe']) {
@@ -568,16 +584,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			}
 			$minify['close'] = false;
 		}
-
-		// sort classes by occurence, then by string
-		if (!empty($minify['attributes']['sort']) && !empty($this->cache['attr'])) {
-			$minify['attributes']['sort'] = $this->sortAttributes($this->cache['attr'], $this->cache['attrvalues']);
-		}
-
-		// minify children
-		foreach ($this->children AS $item) {
-			$item->minify($minify);
-		}
+		return $minify;
 	}
 
 	/**
