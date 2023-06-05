@@ -1,14 +1,14 @@
 <?php
-ini_set('memory_limit', '256M');
-$file = dirname(__DIR__).'/vendor/autoload.php';
-require(file_exists($file) ? $file : dirname(__DIR__).'/src/autoload.php');
+\ini_set('memory_limit', '256M');
+$file = \dirname(__DIR__).'/vendor/autoload.php';
+require (\file_exists($file) ? $file : \dirname(__DIR__).'/src/autoload.php');
 
 function fetch($url) {
-	$cache = __DIR__.'/cache/'.preg_replace('/[^0-9a-z]++/i', '-', $url).'.cache';
+	$cache = __DIR__.'/cache/'.\preg_replace('/[^0-9a-z]++/i', '-', $url).'.cache';
 	if (file_exists($cache)) {
 		$url = $cache;
 	}
-	$context = stream_context_create([
+	$context = \stream_context_create([
 		'http' => [
 			'headers' => [
 				'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -18,13 +18,13 @@ function fetch($url) {
 			]
 		]
 	]);
-	$html = file_get_contents($url, false, $context);
+	$html = \file_get_contents($url, false, $context);
 	if ($url != $cache) {
-		$dir = dirname($cache);
-		if (!is_dir($dir)) {
-			mkdir($dir, 0755, true);
+		$dir = \dirname($cache);
+		if (!\is_dir($dir)) {
+			\mkdir($dir, 0755, true);
 		}
-		file_put_contents($cache, $html);
+		\file_put_contents($cache, $html);
 	}
 	return $html ? $html : false;
 }
@@ -58,17 +58,17 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 
 	// test the performance
 	foreach ($urls AS $item) {
-		set_time_limit(30);
-		$start = microtime(true);
+		\set_time_limit(30);
+		$start = \microtime(true);
 		if (($input = fetch($item)) !== false) {
 
 			// Setup the environment
-			$_SERVER['HTTP_HOST'] = parse_url($item, PHP_URL_HOST);
-			$_SERVER['REQUEST_URI'] = parse_url($item, PHP_URL_PATH);
-			$_SERVER['HTTPS'] = mb_strpos($item, 'https://') === 0 ? 'on' : '';
+			$_SERVER['HTTP_HOST'] = \parse_url($item, PHP_URL_HOST);
+			$_SERVER['REQUEST_URI'] = \parse_url($item, PHP_URL_PATH);
+			$_SERVER['HTTPS'] = \mb_strpos($item, 'https://') === 0 ? 'on' : '';
 
 			// setup timing
-			$fetch = microtime(true);
+			$fetch = \microtime(true);
 			$results[$item] = [
 				'load' => $fetch - $start
 			];
@@ -76,25 +76,25 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 			// create the object
 			$obj = new \hexydec\html\htmldoc($config);
 			if ($obj->load($input)) {
-				$load = microtime(true);
+				$load = \microtime(true);
 				$results[$item]['parse'] = $load - $fetch;
 
 				// minify
 				$obj->minify();
-				$minify = microtime(true);
+				$minify = \microtime(true);
 				$results[$item]['minify'] = $minify - $load;
 
 				// output
 				$output = $obj->html();
-				$save = microtime(true);
+				$save = \microtime(true);
 
 				// compile timings
 				$results[$item]['compile'] = $save - $minify;
 				$results[$item]['total'] = $save - $fetch;
-				$results[$item]['input'] = strlen($input);
-				$results[$item]['inputgz'] = strlen(gzencode($input));
-				$results[$item]['output'] = strlen($output);
-				$results[$item]['outputgz'] = strlen(gzencode($output));
+				$results[$item]['input'] = \strlen($input);
+				$results[$item]['inputgz'] = \strlen(\gzencode($input));
+				$results[$item]['output'] = \strlen($output);
+				$results[$item]['outputgz'] = \strlen(\gzencode($output));
 			}
 		} else {
 			unset($results[$item]);
@@ -156,47 +156,47 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 					 foreach ($results AS $key => $item) { ?>
 						<tr>
 							<td><?= $i++; ?></td>
-							<td><h3><a href="<?= htmlspecialchars($key); ?>" target="_blank"><?= htmlspecialchars($key); ?></td>
-							<td><?= htmlspecialchars(number_format($item['input'])); ?></td>
-							<td><?= htmlspecialchars(number_format($item['output'])); ?></td>
-							<td><?= htmlspecialchars(number_format($item['input'] - $item['output'])); ?></td>
-							<td><?= htmlspecialchars(number_format((100 / $item['input']) * $item['output'], 2)); ?>%</td>
-							<td><?= htmlspecialchars(number_format($item['inputgz'])); ?></td>
-							<td><?= htmlspecialchars(number_format($item['outputgz'])); ?></td>
-							<td><?= htmlspecialchars(number_format($item['inputgz'] - $item['outputgz'])); ?></td>
-							<td><?= htmlspecialchars(number_format((100 / $item['inputgz']) * $item['outputgz'], 2)); ?>%</td>
-							<td><?= htmlspecialchars(number_format($item['load'], 4)); ?>s</td>
-							<td><?= htmlspecialchars(number_format($item['parse'], 4)); ?>s</td>
-							<td><?= htmlspecialchars(number_format($item['minify'], 4)); ?>s</td>
-							<td><?= htmlspecialchars(number_format($item['compile'], 4)); ?>s</td>
-							<td><?= htmlspecialchars(number_format($item['total'], 4)); ?>s</td>
+							<td><h3><a href="<?= \htmlspecialchars($key); ?>" target="_blank"><?= \htmlspecialchars($key); ?></td>
+							<td><?= \htmlspecialchars(\number_format($item['input'])); ?></td>
+							<td><?= \htmlspecialchars(\number_format($item['output'])); ?></td>
+							<td><?= \htmlspecialchars(\number_format($item['input'] - $item['output'])); ?></td>
+							<td><?= \htmlspecialchars(\number_format((100 / $item['input']) * $item['output'], 2)); ?>%</td>
+							<td><?= \htmlspecialchars(\number_format($item['inputgz'])); ?></td>
+							<td><?= \htmlspecialchars(\number_format($item['outputgz'])); ?></td>
+							<td><?= \htmlspecialchars(\number_format($item['inputgz'] - $item['outputgz'])); ?></td>
+							<td><?= \htmlspecialchars(\number_format((100 / $item['inputgz']) * $item['outputgz'], 2)); ?>%</td>
+							<td><?= \htmlspecialchars(\number_format($item['load'], 4)); ?>s</td>
+							<td><?= \htmlspecialchars(\number_format($item['parse'], 4)); ?>s</td>
+							<td><?= \htmlspecialchars(\number_format($item['minify'], 4)); ?>s</td>
+							<td><?= \htmlspecialchars(\number_format($item['compile'], 4)); ?>s</td>
+							<td><?= \htmlspecialchars(\number_format($item['total'], 4)); ?>s</td>
 						</tr>
 					<?php }
-					$count = count($results);
-					$input = array_sum(array_column($results, 'input'));
-					$output = array_sum(array_column($results, 'output'));
-					$inputgz = array_sum(array_column($results, 'inputgz'));
-					$outputgz = array_sum(array_column($results, 'outputgz'));
-					$load = array_sum(array_column($results, 'load'));
-					$parse = array_sum(array_column($results, 'parse'));
-					$minify = array_sum(array_column($results, 'minify'));
-					$compile = array_sum(array_column($results, 'compile'));
-					$total = array_sum(array_column($results, 'total')); ?>
+					$count = \count($results);
+					$input = \array_sum(\array_column($results, 'input'));
+					$output = \array_sum(\array_column($results, 'output'));
+					$inputgz = \array_sum(\array_column($results, 'inputgz'));
+					$outputgz = \array_sum(\array_column($results, 'outputgz'));
+					$load = \array_sum(\array_column($results, 'load'));
+					$parse = \array_sum(\array_column($results, 'parse'));
+					$minify = \array_sum(\array_column($results, 'minify'));
+					$compile = \array_sum(\array_column($results, 'compile'));
+					$total = \array_sum(\array_column($results, 'total')); ?>
 					<tr style="font-weight:bold">
 						<td colspan="2">Total</td>
-						<td><?= htmlspecialchars(number_format($input)); ?></td>
-						<td><?= htmlspecialchars(number_format($output)); ?></td>
-						<td><?= htmlspecialchars(number_format($input - $output)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $input) * $output, 2)); ?>%</td>
-						<td><?= htmlspecialchars(number_format($inputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format($outputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format($inputgz - $outputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz, 2)); ?>%</td>
-						<td><?= htmlspecialchars(number_format($load, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($parse, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($minify, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($compile, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($total, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($input)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($output)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($input - $output)); ?></td>
+						<td><?= \htmlspecialchars(\number_format((100 / $input) * $output, 2)); ?>%</td>
+						<td><?= \htmlspecialchars(\number_format($inputgz)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($outputgz)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($inputgz - $outputgz)); ?></td>
+						<td><?= \htmlspecialchars(\number_format((100 / $inputgz) * $outputgz, 2)); ?>%</td>
+						<td><?= \htmlspecialchars(\number_format($load, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($parse, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($minify, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($compile, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($total, 4)); ?>s</td>
 					</tr>
 					<?php
 					$count = count($results);
@@ -212,19 +212,19 @@ if (($html = fetch('https://kinsta.com/blog/wordpress-site-examples/')) !== fals
 					?>
 					<tr style="font-weight:bold">
 						<td colspan="2">Average</td>
-						<td><?= htmlspecialchars(number_format($input)); ?></td>
-						<td><?= htmlspecialchars(number_format($output)); ?></td>
-						<td><?= htmlspecialchars(number_format($input - $output)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $input) * $output, 2)); ?>%</td>
-						<td><?= htmlspecialchars(number_format($inputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format($outputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format($inputgz - $outputgz)); ?></td>
-						<td><?= htmlspecialchars(number_format((100 / $inputgz) * $outputgz, 2)); ?>%</td>
-						<td><?= htmlspecialchars(number_format($load, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($parse, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($minify, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($compile, 4)); ?>s</td>
-						<td><?= htmlspecialchars(number_format($total, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($input)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($output)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($input - $output)); ?></td>
+						<td><?= \htmlspecialchars(\number_format((100 / $input) * $output, 2)); ?>%</td>
+						<td><?= \htmlspecialchars(\number_format($inputgz)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($outputgz)); ?></td>
+						<td><?= \htmlspecialchars(\number_format($inputgz - $outputgz)); ?></td>
+						<td><?= \htmlspecialchars(\number_format((100 / $inputgz) * $outputgz, 2)); ?>%</td>
+						<td><?= \htmlspecialchars(\number_format($load, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($parse, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($minify, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($compile, 4)); ?>s</td>
+						<td><?= \htmlspecialchars(\number_format($total, 4)); ?>s</td>
 					</tr>
 				</tbody>
 			</table>
