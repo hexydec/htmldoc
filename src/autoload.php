@@ -14,6 +14,6 @@
 		'hexydec\\html\\selector' => __DIR__.'/helpers/selector.php'
 	];
 	if (isset($classes[$class])) {
-		require($classes[$class]);
+		require $classes[$class];
 	}
 });
