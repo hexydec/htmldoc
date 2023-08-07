@@ -346,7 +346,7 @@ class tag implements token {
 	 */
 	protected function getIndex() : ?int {
 		if ($this->parent) {
-			foreach ($this->parent->children() AS $key => $item) {
+			foreach ($this->parent->children AS $key => $item) {
 				if ($item === $this) {
 					return $key;
 				}

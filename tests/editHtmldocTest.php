@@ -90,7 +90,7 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanInserHtmlBefore() {
+	public function testCanInsertHtmlBefore() {
 		$obj = new htmldoc();
 		$obj->load('Data to <span>insert</span> before');
 		$tests = [
@@ -133,7 +133,7 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanInserHtmlAfter() {
+	public function testCanInsertHtmlAfter() {
 		$obj = new htmldoc();
 		$obj->load('Data to <span>insert</span> after');
 		$tests = [
@@ -166,6 +166,20 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'find' => 'div',
 				'after' => '<h3>After</h3><p>Test <span>this</span></p>',
 				'output' => '<body><div><div></div><h3>After</h3><p>Test <span>this</span></p></div><h3>After</h3><p>Test <span>this</span></p></body>',
+			],
+			[ // test with text nodes
+				'input' => '<body>
+						<div>
+							<div>Text Node</div>
+						</div>
+					</body>',
+				'find' => 'div',
+				'after' => '<h3>After</h3><p>Test <span>this</span></p>',
+				'output' => '<body>
+						<div>
+							<div>Text Node</div><h3>After</h3><p>Test <span>this</span></p>
+						</div><h3>After</h3><p>Test <span>this</span></p>
+					</body>',
 			]
 		];
 		$doc = new htmldoc();
