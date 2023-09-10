@@ -35,7 +35,7 @@ if ($doc->load($html) {
 }
 ```
 
-You can test out the minifier online at [https://hexydec.com/htmldoc/](https://hexydec.com/htmldoc/), or run the supplied `index.php` file after installation.
+You can test out the minifier online at [https://hexydec.com/apps/minify-html/](https://hexydec.com/apps/minify-html/), or run the supplied `index.php` file after installation.
 
 To extract data from an HTML document:
 
