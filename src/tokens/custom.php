@@ -80,7 +80,7 @@ class custom implements token {
 					if ($file) {
 						$dir = \dirname($file);
 						if (!\is_dir($dir)) {
-							\mkdir($dir, 0755);
+							\mkdir($dir, 0755, true);
 						}
 						\file_put_contents($file, $content);
 					}
