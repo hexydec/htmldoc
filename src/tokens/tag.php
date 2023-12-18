@@ -430,8 +430,8 @@ class tag implements token {
 			if ($minify['urls'] && $attributes[$key] && \in_array($key, $attr['urls'], true) && (!\in_array($tag, \array_keys($attr['urlskip']), true) || $this->hasAttribute($attributes, $attr['urlskip'][$tag]))) {
 
 				// make folder variables
-				if ($folder === null && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
-					if (($folder = \parse_url('//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== null) {
+				if ($folder === null && isset($_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'])) {
+					if (($folder = \parse_url('//'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== null) {
 						if (\mb_substr($folder, -1) !== '/') {
 							$folder = \dirname($folder).'/';
 						}
