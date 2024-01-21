@@ -110,10 +110,13 @@ if (!empty($_POST['action'])) {
 	<head>
 		<title>Hexydec HTML Minifier</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<link rel="shortcut icon" type="image/svg" href="docs/htmldoc.svg" />
 		<style>
 			html, body {
 				margin: 0;
-				font-family: Segoe UI;
+			}
+			body, input {
+				font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
 			}
 			.minify__form {
 				height: 100vh;
@@ -128,6 +131,9 @@ if (!empty($_POST['action'])) {
 			.minify__form-heading {
 				margin: 10px 10px 0 10px;
 				flex: 0 0 auto;
+				display: flex;
+				align-items: center;
+				gap: 0 10px;
 			}
 			.minify__form-error {
 				padding: 10px;
@@ -191,7 +197,10 @@ if (!empty($_POST['action'])) {
 	<body>
 		<form action="<?= \htmlspecialchars($_SERVER['REQUEST_URI']); ?>" method="post" accept-charset="<?= \htmlspecialchars(\mb_internal_encoding()); ?>" class="minify__form">
 			<div class="minify__form-wrap">
-				<h1 class="minify__form-heading">HTML Minifier</h1>
+				<h1 class="minify__form-heading">
+					<img src="docs/htmldoc.svg" alt="HTMLdoc" height="50" />
+					HTML Minifier
+				</h1>
 				<?php if ($error) { ?>
 					<div class="minify__form-error"><?= \htmlspecialchars($error); ?></div>
 				<?php } ?>
