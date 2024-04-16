@@ -136,8 +136,8 @@ class tag implements token {
 				case 'attributevalue':
 					if ($attr) {
 						$value = \trim($token['value'], "= \t\r\n");
-						if (($pos = \strpos($value, '"')) === 0 || \strpos($value, "'") === 0) {
-							$value = \trim($value, $pos === 0 ? '"' : "'");
+						if (($double = \str_starts_with($value, '"')) === true || \str_starts_with($value, "'")) {
+							$value = \trim($value, $double ? '"' : "'");
 						}
 						$attributes[$attr] = \html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 						$attr = null;
@@ -416,6 +416,7 @@ class tag implements token {
 		// minify attributes
 		$tag = $this->tagName;
 		$attributes = $this->attributes;
+		$skipurl = isset($attr['urlskip'][$tag]) && !$this->hasAttribute($attributes, $attr['urlskip'][$tag]);
 		$host = null;
 		foreach ($attributes AS $key => $value) {
 
@@ -427,7 +428,7 @@ class tag implements token {
 			}
 
 			// minify url attributes when not in list or match attribute
-			if ($minify['urls'] && $attributes[$key] && \in_array($key, $attr['urls'], true) && (!\in_array($tag, \array_keys($attr['urlskip']), true) || $this->hasAttribute($attributes, $attr['urlskip'][$tag]))) {
+			if ($minify['urls'] && $value && \in_array($key, $attr['urls'], true) && !$skipurl) {
 
 				// make folder variables
 				if ($folder === null && isset($_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'])) {
@@ -440,7 +441,7 @@ class tag implements token {
 				}
 
 				// strip scheme from absolute URL's if the same as current scheme
-				if ($minify['urls']['scheme'] && \mb_strpos($attributes[$key], $scheme) === 0) {
+				if ($minify['urls']['scheme'] && \str_starts_with($attributes[$key], $scheme)) {
 					$attributes[$key] = \mb_substr($attributes[$key], \mb_strlen($scheme)-2);
 				}
 
@@ -469,7 +470,7 @@ class tag implements token {
 				if ($minify['urls']['relative'] && $folder) {
 
 					// minify
-					if (\mb_strpos($attributes[$key], $folder) === 0 && ($folder !== '/' || \mb_strpos($attributes[$key], '//') !== 0)) {
+					if (\str_starts_with($attributes[$key], $folder) && ($folder !== '/' || !\str_starts_with($attributes[$key], '//'))) {
 						if ($attributes[$key] === $folder && $attributes[$key] !== $_SERVER['REQUEST_URI']) {
 							$attributes[$key] = './';
 						} else {
@@ -479,7 +480,7 @@ class tag implements token {
 				}
 
 				// use parent folders if it is shorter
-				if ($minify['urls']['parent'] && $dirs && \mb_strpos($attributes[$key], '/') === 0 && !\str_contains($attributes[$key], '//')) {
+				if ($minify['urls']['parent'] && $dirs && \str_starts_with($attributes[$key], '/') && !\str_contains($attributes[$key], '//')) {
 					$isDir = \mb_strrpos($attributes[$key], '/') === \mb_strlen($attributes[$key])-1;
 					$compare = \explode('/', \trim($isDir ? $attributes[$key] : \dirname($attributes[$key]), '/'));
 					$update = false;
@@ -617,7 +618,8 @@ class tag implements token {
 
 	protected function hasAttribute(array $attr, array $items) {
 		foreach ($items AS $key => $item) {
-			if (!isset($attr[$key]) || !\in_array($attr[$key], $item, true)) {
+			$lower = \mb_strtolower($key);
+			if (!isset($attr[$lower]) || !\in_array($attr[$lower], $item, true)) {
 				return false;
 			}
 		}
@@ -755,7 +757,7 @@ class tag implements token {
 							// match subcode
 							case '|=':
 								if ($item['sensitive']) {
-									if ($current !== $item['value'] && \mb_strpos($current, $item['value'].'-') !== 0) {
+									if ($current !== $item['value'] && !\str_starts_with($current, $item['value'].'-')) {
 										$match = false;
 										break;
 									}
