@@ -336,4 +336,17 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 		$doc->minify();
 		$this->assertEquals($output, $doc->html(), 'Can load minified CSS and Javascript from cache');
 	}
+
+	public function testCanMinifyDifficultHtml() {
+		$tests = [
+			'<a href="الشركاء/شركاء-الصناعة/">هنا</a>' => '<a href=الشركاء/شركاء-الصناعة/>هنا</a>'
+		];
+		$doc = new htmldoc();
+		foreach ($tests AS $input => $output) {
+			if ($doc->load($input, \mb_internal_encoding())) {
+				$doc->minify();
+				$this->assertEquals($output, $doc->html());
+			}
+		}
+	}
 }

@@ -66,7 +66,8 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 				//-->
 			</script>',
 			'<p data-attr="attribute"data-another="too close">No space between attributes</p>' => '<p data-attr="attribute" data-another="too close">No space between attributes</p>',
-			'<p class="test""><span class="something">Extra Quote</span></p>' => '<p class="test"><span class="something">Extra Quote</span></p>'
+			'<p class="test""><span class="something">Extra Quote</span></p>' => '<p class="test"><span class="something">Extra Quote</span></p>',
+			'<a href="الشركاء/شركاء-الصناعة/">هنا</a>' => '<a href="الشركاء/شركاء-الصناعة/">هنا</a>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
