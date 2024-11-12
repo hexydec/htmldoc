@@ -731,16 +731,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// compile html
 		$html = $this->html($options);
 
-		// convert charset
-		if (!empty($options['charset'])) {
-
-			// if not UTF-8, convert all applicable HTML entities
-			if ($options['charset'] !== 'UTF-8') {
-				$html = $this->htmlentities($html, $options['charset']);
-			}
-
-			// convert to target charset
-			$html = (string) \mb_convert_encoding($html, $options['charset']);
+		// if not UTF-8, convert all applicable HTML entities
+		if (!empty($options['charset']) && $options['charset'] !== \mb_internal_encoding()) {
+			$html = $this->convertCharset($html, $options['charset']);
 		}
 
 		// save file
@@ -758,26 +751,25 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param string $charset The target charset
 	 * @return string The input HTML with the out of range characters in the selected charset converted to HTML entities
 	 */
-	protected function htmlentities(string $html, string $charset) : string {
+	protected function convertCharset(string $html, string $charset) : string {
+		$encoding = \mb_internal_encoding();
 
-		// generate single-byte characters
-		$str = '';
-		for ($i = 1; $i < 256; $i++) {
-			$str .= \chr($i);
-		}
-		$str = (string) \mb_convert_encoding($str, \mb_internal_encoding(), $charset);
+		// check whole string first
+		if (\mb_strlen(\iconv($encoding, $charset.'//IGNORE', $html)) !== \mb_strlen($html)) {
 
-		// build html entities conversion map
-		$replace = [];
-		foreach (\preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY) AS $chr) {
-			$ent = \mb_convert_encoding($chr, 'HTML-ENTITIES');
-			if ($ent !== $chr) {
-				$replace[$chr] = $ent;
+			// check for out of range characters
+			$map = [];
+			$replace = [];
+			foreach (\mb_str_split($html) AS $chr) {
+				if (!\in_array($chr, $map)) {
+					$map[] = $chr;
+					if (\iconv($encoding, $charset.'//IGNORE', $chr) === '') {
+						$replace[$chr] = '&#'.\mb_ord($chr).';';
+					}
+				}
 			}
+			$html = \str_replace(\array_keys($replace), \array_values($replace), $html);
 		}
-
-		// convert entities
-		$html = (string) \mb_convert_encoding($html, 'HTML-ENTITIES');
-		return \str_replace(\array_values($replace), \array_keys($replace), $html);
+		return \mb_convert_encoding($html, $charset);
 	}
 }

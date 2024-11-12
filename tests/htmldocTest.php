@@ -122,7 +122,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 		$doc = new htmldoc();
 
 		// test input encoding conversion
-		$input = mb_convert_encoding('<p title="Héllo ÿ &#128512;">Héllo ÿ &#129315;</p>', 'iso-8859-1');
+		$input = \mb_convert_encoding('<p title="Héllo ÿ &#128512;">Héllo ÿ &#129315;</p>', 'iso-8859-1');
 		$output = '<p title="Héllo ÿ 😀">Héllo ÿ 🤣</p>';
 		if ($doc->load($input, 'iso-8859-1')) {
 			$this->assertEquals($output, $doc->html());
