@@ -15,9 +15,9 @@
     "minimum-stability": "stable",
     "require": {
         "php": ">=8.0",
-		"hexydec/tokenise": "1.0.1",
-		"hexydec/cssdoc": "1.2.0",
-		"hexydec/jslite": "1.0.3"
+		"hexydec/tokenise": "dev-master",
+		"hexydec/cssdoc": "dev-master",
+		"hexydec/jslite": "dev-master"
 	},
 	"autoload": {
 		"classmap": ["src/"]
