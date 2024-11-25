@@ -229,7 +229,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param ?string &$error A reference to any user error that is generated
 	 * @return bool Whether the input HTML was parsed
 	 */
-	public function load(string $html, string $charset = null, ?string &$error = null) : bool {
+	public function load(string $html, ?string $charset = null, ?string &$error = null) : bool {
 
 		// detect the charset
 		if ($charset || ($charset = $this->getCharsetFromHtml($html)) !== null) {
@@ -343,7 +343,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @param int $index The index of the child tag to retrieve
 	 * @return tag|array|null A tag object if index is specified, or an array of tag objects, or null if the specified index doesn't exist or the object is empty
 	 */
-	public function get(int $index = null) : tag|array|null {
+	public function get(?int $index = null) : tag|array|null {
 
 		// build children that are tags
 		$children = [];

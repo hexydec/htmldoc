@@ -20,7 +20,7 @@ class config {
 				case 'style':
 					$obj = new \hexydec\css\cssdoc();
 					break;
-				case  'script':
+				case 'script':
 					$obj = new \hexydec\jslite\jslite();
 					break;
 				default:

@@ -68,7 +68,7 @@ class tag implements token {
 	 * @param string $tag The HTML tag this object will represent
 	 * @param tag $parent The parent tag object
 	 */
-	public function __construct(htmldoc $root, string $tag = null, tag $parent = null) {
+	public function __construct(htmldoc $root, ?string $tag = null, ?tag $parent = null) {
 		$this->root = $root;
 		$this->tagName = $tag;
 		$this->parent = $parent;
@@ -300,7 +300,7 @@ class tag implements token {
 	 * @param int $index To insert the nodes at a particular position, set the index
 	 * @return void
 	 */
-	public function append(array $nodes, int $index = null) : void {
+	public function append(array $nodes, ?int $index = null) : void {
 
 		// reset the index if it doesn't exist
 		if ($index !== null && !isset($this->children[$index])) {
