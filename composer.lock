@@ -124,12 +124,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "11db1574d621d9b38afdb5b45e15ad53827e0ef2"
+                "reference": "7ff9e8efdda4ccc2fbd080d1dbb24aa727b8faa9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/11db1574d621d9b38afdb5b45e15ad53827e0ef2",
-                "reference": "11db1574d621d9b38afdb5b45e15ad53827e0ef2",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/7ff9e8efdda4ccc2fbd080d1dbb24aa727b8faa9",
+                "reference": "7ff9e8efdda4ccc2fbd080d1dbb24aa727b8faa9",
                 "shasum": ""
             },
             "require": {
@@ -172,7 +172,7 @@
                 "issues": "https://github.com/hexydec/tokenise/issues",
                 "source": "https://github.com/hexydec/tokenise/tree/master"
             },
-            "time": "2024-09-20T21:19:28+00:00"
+            "time": "2024-11-25T15:08:41+00:00"
         }
     ],
     "packages-dev": [
