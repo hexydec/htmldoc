@@ -68,12 +68,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "2e038a878663fec7e10728a90e194157448a595e"
+                "reference": "b3cf2e1fff2f4a82cd03cdec989d8eb7a8963608"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/2e038a878663fec7e10728a90e194157448a595e",
-                "reference": "2e038a878663fec7e10728a90e194157448a595e",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/b3cf2e1fff2f4a82cd03cdec989d8eb7a8963608",
+                "reference": "b3cf2e1fff2f4a82cd03cdec989d8eb7a8963608",
                 "shasum": ""
             },
             "require": {
@@ -116,7 +116,7 @@
                 "issues": "https://github.com/hexydec/jslite/issues",
                 "source": "https://github.com/hexydec/jslite/tree/master"
             },
-            "time": "2024-11-25T15:00:28+00:00"
+            "time": "2024-11-25T15:04:32+00:00"
         },
         {
             "name": "hexydec/tokenise",
