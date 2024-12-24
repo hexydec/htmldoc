@@ -4,29 +4,31 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "96b4f40e1fad754ef94d5c841106d514",
+    "content-hash": "979fd7bf1b179094dcde3f2e8b21c24b",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "1.2.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "1adf237674be2ec589a627ddab6b7f522a25341b"
+                "reference": "14007fe82d4e80ff8860f6a85e24d5d0058c5fd3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/1adf237674be2ec589a627ddab6b7f522a25341b",
-                "reference": "1adf237674be2ec589a627ddab6b7f522a25341b",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/14007fe82d4e80ff8860f6a85e24d5d0058c5fd3",
+                "reference": "14007fe82d4e80ff8860f6a85e24d5d0058c5fd3",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "1.0.1",
+                "hexydec/tokenise": "dev-master",
                 "php": ">=8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "10.1.2"
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.5"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -56,31 +58,33 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/1.2.0"
+                "source": "https://github.com/hexydec/cssdoc/tree/master"
             },
-            "time": "2023-12-18T08:44:11+00:00"
+            "time": "2024-11-25T14:59:05+00:00"
         },
         {
             "name": "hexydec/jslite",
-            "version": "1.0.3",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "f2b7d65b345f5ceec5e2d8070164eb1af056a3dd"
+                "reference": "b3cf2e1fff2f4a82cd03cdec989d8eb7a8963608"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/f2b7d65b345f5ceec5e2d8070164eb1af056a3dd",
-                "reference": "f2b7d65b345f5ceec5e2d8070164eb1af056a3dd",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/b3cf2e1fff2f4a82cd03cdec989d8eb7a8963608",
+                "reference": "b3cf2e1fff2f4a82cd03cdec989d8eb7a8963608",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "1.0.1",
+                "hexydec/tokenise": "dev-master",
                 "php": ">=8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "10.1.2"
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.5"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -110,30 +114,32 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/1.0.3"
+                "source": "https://github.com/hexydec/jslite/tree/master"
             },
-            "time": "2024-01-09T21:33:31+00:00"
+            "time": "2024-11-25T15:04:32+00:00"
         },
         {
             "name": "hexydec/tokenise",
-            "version": "1.0.1",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "51f2f476fabb77c0033df3fd51d6e36dae446a97"
+                "reference": "7ff9e8efdda4ccc2fbd080d1dbb24aa727b8faa9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/51f2f476fabb77c0033df3fd51d6e36dae446a97",
-                "reference": "51f2f476fabb77c0033df3fd51d6e36dae446a97",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/7ff9e8efdda4ccc2fbd080d1dbb24aa727b8faa9",
+                "reference": "7ff9e8efdda4ccc2fbd080d1dbb24aa727b8faa9",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.4"
+                "php": ">=8.1"
             },
             "require-dev": {
-                "phpunit/phpunit": "9.5"
+                "phpstan/phpstan": "^1.12",
+                "phpunit/phpunit": "^10.5"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "classmap": [
@@ -152,11 +158,21 @@
                 }
             ],
             "description": "A program for performing lexical analysis, written in PHP",
+            "homepage": "https://github.com/hexydec/tokenise",
+            "keywords": [
+                "lexical",
+                "lexing",
+                "parser",
+                "tokenisation",
+                "tokeniser",
+                "tokenization",
+                "tokenizer"
+            ],
             "support": {
                 "issues": "https://github.com/hexydec/tokenise/issues",
-                "source": "https://github.com/hexydec/tokenise/tree/1.0.1"
+                "source": "https://github.com/hexydec/tokenise/tree/master"
             },
-            "time": "2022-09-15T19:52:08+00:00"
+            "time": "2024-11-25T15:08:41+00:00"
         }
     ],
     "packages-dev": [
@@ -398,16 +414,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.9",
+            "version": "1.12.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "ceb937fb39a92deabc02d20709cf14b2c452502c"
+                "reference": "0d1fc20a962a91be578bcfe7cf939e6e1a2ff733"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ceb937fb39a92deabc02d20709cf14b2c452502c",
-                "reference": "ceb937fb39a92deabc02d20709cf14b2c452502c",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/0d1fc20a962a91be578bcfe7cf939e6e1a2ff733",
+                "reference": "0d1fc20a962a91be578bcfe7cf939e6e1a2ff733",
                 "shasum": ""
             },
             "require": {
@@ -452,7 +468,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-11-10T17:10:04+00:00"
+            "time": "2024-11-17T14:08:01+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1845,7 +1861,11 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "hexydec/tokenise": 20,
+        "hexydec/cssdoc": 20,
+        "hexydec/jslite": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
