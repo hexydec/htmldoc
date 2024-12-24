@@ -14,8 +14,8 @@
 	"keywords": ["html", "minify", "minifier", "parser", "compiler", "dom", "simplehtmldom", "css", "javascript", "xml", "svg"],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=8.0",
-		"hexydec/tokenise": "1.0.1",
+        "php": ">=8.1",
+		"hexydec/tokenise": "1.0.2",
 		"hexydec/cssdoc": "1.2.0",
 		"hexydec/jslite": "1.0.3"
 	},
