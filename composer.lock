@@ -4,24 +4,24 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b198b062bc1a5b6e766959a384b878fb",
+    "content-hash": "6eef91b89fb3d77ac4e7cb2d185fea03",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "7e06e7dabb807f2591213f54ab4af00b5f713cb2"
+                "reference": "c955fa047217cf76d730744722fef3839b22ff42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/7e06e7dabb807f2591213f54ab4af00b5f713cb2",
-                "reference": "7e06e7dabb807f2591213f54ab4af00b5f713cb2",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/c955fa047217cf76d730744722fef3839b22ff42",
+                "reference": "c955fa047217cf76d730744722fef3839b22ff42",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "1.0.2",
+                "hexydec/tokenise": "1.0.3",
                 "php": ">=8.0"
             },
             "require-dev": {
@@ -57,26 +57,26 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/1.2.1"
+                "source": "https://github.com/hexydec/cssdoc/tree/1.2.2"
             },
-            "time": "2024-12-25T00:20:31+00:00"
+            "time": "2025-07-15T21:23:58+00:00"
         },
         {
             "name": "hexydec/jslite",
-            "version": "1.0.5",
+            "version": "1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "b7a03c9cc7a3092edfa1050a9d2424167002cf60"
+                "reference": "c480981002591c7cde13eea9547a204723953055"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/b7a03c9cc7a3092edfa1050a9d2424167002cf60",
-                "reference": "b7a03c9cc7a3092edfa1050a9d2424167002cf60",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/c480981002591c7cde13eea9547a204723953055",
+                "reference": "c480981002591c7cde13eea9547a204723953055",
                 "shasum": ""
             },
             "require": {
-                "hexydec/tokenise": "1.0.2",
+                "hexydec/tokenise": "1.0.3",
                 "php": ">=8.1"
             },
             "require-dev": {
@@ -112,22 +112,22 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/1.0.5"
+                "source": "https://github.com/hexydec/jslite/tree/1.0.6"
             },
-            "time": "2024-12-25T11:47:34+00:00"
+            "time": "2025-07-15T21:30:06+00:00"
         },
         {
             "name": "hexydec/tokenise",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/tokenise.git",
-                "reference": "8ff0288d9edcf44292477ebccb9062aec8be24e5"
+                "reference": "39e8f98ebb420dbfeb3bf0e41fbaf1cc1c3eef50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/8ff0288d9edcf44292477ebccb9062aec8be24e5",
-                "reference": "8ff0288d9edcf44292477ebccb9062aec8be24e5",
+                "url": "https://api.github.com/repos/hexydec/tokenise/zipball/39e8f98ebb420dbfeb3bf0e41fbaf1cc1c3eef50",
+                "reference": "39e8f98ebb420dbfeb3bf0e41fbaf1cc1c3eef50",
                 "shasum": ""
             },
             "require": {
@@ -167,9 +167,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/tokenise/issues",
-                "source": "https://github.com/hexydec/tokenise/tree/1.0.2"
+                "source": "https://github.com/hexydec/tokenise/tree/1.0.3"
             },
-            "time": "2024-09-17T19:42:17+00:00"
+            "time": "2025-07-15T16:08:27+00:00"
         }
     ],
     "packages-dev": [

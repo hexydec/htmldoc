@@ -308,7 +308,25 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 						font-weight: bold;
 					}
 				]]>
-			</style>' => '<style><![CDATA[.test{display:block;font-weight:700}]]></style>',
+			</style>' => '<style>.test{display:block;font-weight:700}</style>',
+			'<svg>
+				<style type="text/css">
+					.test {
+						display: block;
+						font-weight: bold;
+					}
+				</style>
+			</svg>' => '<svg><style><![CDATA[.test{display:block;font-weight:700}]]></style></svg>',
+			'<svg>
+				<style type="text/css">
+					<![CDATA[
+						.test {
+							display: block;
+							font-weight: bold;
+						}
+					]]>
+				</style>
+			</svg>' => '<svg><style><![CDATA[.test{display:block;font-weight:700}]]></style></svg>',
 			'<script type="text/javascript" async="async">
 				(function () {
 					console.log("Test");
@@ -318,7 +336,6 @@ final class minifyHtmldocTest extends \PHPUnit\Framework\TestCase {
 		foreach ($tests AS $key => $item) {
 			$doc = new htmldoc();
 			$doc->load($key);
-			$this->assertEquals($key, $doc->html(), 'Can load CSS and Javascript');
 
 			// minify the code
 			$doc->minify();

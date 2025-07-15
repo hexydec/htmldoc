@@ -124,7 +124,6 @@ class config {
 					'svg' => [
 						'lowercase' => false,
 						'attributes' => [
-							'default' => false,
 							'empty' => false,
 							'option' => false,
 							'boolean' => false
