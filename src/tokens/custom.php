@@ -66,7 +66,7 @@ class custom implements token {
 				if (empty($config['cache'])) {
 					$file = null;
 				} else {
-					$file = sprintf($config['cache'], md5($content));
+					$file = \sprintf($config['cache'], \md5($content));
 					if (\file_exists($file) && ($output = \file_get_contents($file)) !== false) {
 						$this->content = $output;
 						return;
