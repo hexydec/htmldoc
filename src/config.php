@@ -43,7 +43,7 @@ class config {
 					'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr',
 
 					// SVG singletons
-					'animate', 'animateMotion', 'animateTransform', 'circle', 'ellipse', 'feBlend', 'feColorMatrix', 'feComposite', 'feConvolveMatrix', 'feDisplacementMap', 'feDistantLight', 'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpotLight', 'feTile', 'feTurbulence', 'hatchpath', 'image', 'line', 'mpath', 'path', 'polygon', 'polyline', 'rect', 'set', 'stop', 'use', 'view'
+					'animate', 'animateMotion', 'animateTransform', 'circle', 'ellipse', 'feBlend', 'feColorMatrix', 'feComposite', 'feConvolveMatrix', 'feDisplacementMap', 'feDistantLight', 'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpotLight', 'feTile', 'feTurbulence', 'hatchpath', 'image', 'line', 'mpath', 'polygon', 'polyline', 'rect', 'set', 'stop', 'use', 'view'
 				],
 				'closeoptional' => [
 					'html', 'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup'
