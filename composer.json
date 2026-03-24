@@ -16,8 +16,8 @@
     "require": {
         "php": ">=8.1",
 		"hexydec/tokenise": "1.0.3",
-		"hexydec/cssdoc": "1.2.2",
-		"hexydec/jslite": "1.0.6"
+		"hexydec/cssdoc": "1.2.3",
+		"hexydec/jslite": "1.0.7"
 	},
 	"autoload": {
 		"classmap": ["src/"]

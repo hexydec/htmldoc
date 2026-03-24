@@ -4,25 +4,25 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6eef91b89fb3d77ac4e7cb2d185fea03",
+    "content-hash": "dcd8c0bd8a20a999109be487e9afe10f",
     "packages": [
         {
             "name": "hexydec/cssdoc",
-            "version": "1.2.2",
+            "version": "1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/cssdoc.git",
-                "reference": "c955fa047217cf76d730744722fef3839b22ff42"
+                "reference": "25782129735491e3632eea09ad458e2b701bdd5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/c955fa047217cf76d730744722fef3839b22ff42",
-                "reference": "c955fa047217cf76d730744722fef3839b22ff42",
+                "url": "https://api.github.com/repos/hexydec/cssdoc/zipball/25782129735491e3632eea09ad458e2b701bdd5d",
+                "reference": "25782129735491e3632eea09ad458e2b701bdd5d",
                 "shasum": ""
             },
             "require": {
                 "hexydec/tokenise": "1.0.3",
-                "php": ">=8.0"
+                "php": ">=8.1"
             },
             "require-dev": {
                 "phpstan/phpstan": "^1.10",
@@ -57,22 +57,22 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/cssdoc/issues",
-                "source": "https://github.com/hexydec/cssdoc/tree/1.2.2"
+                "source": "https://github.com/hexydec/cssdoc/tree/1.2.3"
             },
-            "time": "2025-07-15T21:23:58+00:00"
+            "time": "2026-03-24T22:27:45+00:00"
         },
         {
             "name": "hexydec/jslite",
-            "version": "1.0.6",
+            "version": "1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/hexydec/jslite.git",
-                "reference": "c480981002591c7cde13eea9547a204723953055"
+                "reference": "5ac2ac94cf92fc892a85f02e2d7f2163b36280f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hexydec/jslite/zipball/c480981002591c7cde13eea9547a204723953055",
-                "reference": "c480981002591c7cde13eea9547a204723953055",
+                "url": "https://api.github.com/repos/hexydec/jslite/zipball/5ac2ac94cf92fc892a85f02e2d7f2163b36280f7",
+                "reference": "5ac2ac94cf92fc892a85f02e2d7f2163b36280f7",
                 "shasum": ""
             },
             "require": {
@@ -112,9 +112,9 @@
             ],
             "support": {
                 "issues": "https://github.com/hexydec/jslite/issues",
-                "source": "https://github.com/hexydec/jslite/tree/1.0.6"
+                "source": "https://github.com/hexydec/jslite/tree/1.0.7"
             },
-            "time": "2025-07-15T21:30:06+00:00"
+            "time": "2026-03-24T22:28:36+00:00"
         },
         {
             "name": "hexydec/tokenise",
@@ -235,16 +235,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.6.2",
+            "version": "v5.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "3a454ca033b9e06b63282ce19562e892747449bb"
+                "reference": "dca41cd15c2ac9d055ad70dbfd011130757d1f82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/3a454ca033b9e06b63282ce19562e892747449bb",
-                "reference": "3a454ca033b9e06b63282ce19562e892747449bb",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/dca41cd15c2ac9d055ad70dbfd011130757d1f82",
+                "reference": "dca41cd15c2ac9d055ad70dbfd011130757d1f82",
                 "shasum": ""
             },
             "require": {
@@ -287,9 +287,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.6.2"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.7.0"
             },
-            "time": "2025-10-21T19:32:17+00:00"
+            "time": "2025-12-06T11:56:16+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -411,11 +411,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.12.32",
+            "version": "1.12.33",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/2770dcdf5078d0b0d53f94317e06affe88419aa8",
-                "reference": "2770dcdf5078d0b0d53f94317e06affe88419aa8",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/37982d6fc7cbb746dda7773530cda557cdf119e1",
+                "reference": "37982d6fc7cbb746dda7773530cda557cdf119e1",
                 "shasum": ""
             },
             "require": {
@@ -460,7 +460,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-30T10:16:31+00:00"
+            "time": "2026-02-28T20:30:03+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1054,16 +1054,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "5.0.4",
+            "version": "5.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "e8e53097718d2b53cfb2aa859b06a41abf58c62e"
+                "reference": "55dfef806eb7dfeb6e7a6935601fef866f8ca48d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/e8e53097718d2b53cfb2aa859b06a41abf58c62e",
-                "reference": "e8e53097718d2b53cfb2aa859b06a41abf58c62e",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/55dfef806eb7dfeb6e7a6935601fef866f8ca48d",
+                "reference": "55dfef806eb7dfeb6e7a6935601fef866f8ca48d",
                 "shasum": ""
             },
             "require": {
@@ -1119,7 +1119,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/5.0.4"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/5.0.5"
             },
             "funding": [
                 {
@@ -1139,7 +1139,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-07T05:25:07+00:00"
+            "time": "2026-01-24T09:25:16+00:00"
         },
         {
             "name": "sebastian/complexity",
