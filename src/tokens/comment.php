@@ -15,6 +15,7 @@ class comment implements token {
 	 *
 	 * @param htmldoc $root The parent htmldoc object
 	 */
+	// @phpstan-ignore-next-line
 	public function __construct(htmldoc $root) {
 
 	}
