@@ -386,9 +386,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			foreach ($this->children AS $item) {
 				if (\get_class($item) === 'hexydec\\html\\tag') {
 					foreach ($tokens AS $value) {
-						if (($items = $item->find($value)) !== false) {
-							$found = \array_merge($found, $items);
-						}
+						$found = \array_merge($found, $item->find($value));
 					}
 				}
 			}
