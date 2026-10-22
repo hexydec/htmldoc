@@ -11,12 +11,18 @@ class comment implements token {
 	protected ?string $content = null;
 
 	/**
+	 * @var tag|null The parent tag object
+	 */
+	public ?tag $parent = null;
+
+	/**
 	 * Constructs the comment object
 	 *
 	 * @param htmldoc $root The parent htmldoc object
+	 * @param tag $parent The parent tag object
 	 */
-	public function __construct(htmldoc $root) {
-
+	public function __construct(htmldoc $root, ?tag $parent = null) {
+		$this->parent = $parent;
 	}
 
 	/**

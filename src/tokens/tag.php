@@ -4,12 +4,11 @@ namespace hexydec\html;
 use \hexydec\tokens\tokenise;
 
 /**
- * @property tag|null $parent
  * @property htmldoc $root
  * @property array $config
- * @property tag|null $parent
  * @property array $parenttags
  * @property string|null $tagName
+ * @property string|null $tagNameLower
  * @property array $attributes
  * @property string|null $singleton
  * @property array $children
@@ -29,7 +28,7 @@ class tag implements token {
 	/**
 	 * @var tag|null The parent tag object
 	 */
-	protected ?tag $parent = null;
+	public ?tag $parent = null;
 
 	/**
 	 * @var array Cache for the list of parent tags
@@ -40,6 +39,11 @@ class tag implements token {
 	 * @var string The type of tag
 	 */
 	protected ?string $tagName = null;
+
+	/**
+	 * @var string The lowercase tag name, for case-insensitive comparison
+	 */
+	protected ?string $tagNameLower = null;
 
 	/**
 	 * @var array An array of attributes where the key is the name of the attribute and the value is the value
@@ -71,9 +75,10 @@ class tag implements token {
 	public function __construct(htmldoc $root, ?string $tag = null, ?tag $parent = null) {
 		$this->root = $root;
 		$this->tagName = $tag;
+		$this->tagNameLower = $tag === null ? null : \strtolower($tag);
 		$this->parent = $parent;
 		$this->config = $this->root->config; // cache the config
-		$this->close = !\in_array($tag, $this->config['elements']['closeoptional'], true);
+		$this->close = $tag === null || $root->lookup('closeoptional', $this->tagNameLower) === null;
 	}
 
 	/**
@@ -84,8 +89,8 @@ class tag implements token {
 	 * @return void
 	 */
 	public function __set(string $name, $value) : void {
-		if ($name === 'parent' && \get_class($value) === 'hexydec\\html\\tag') {
-			$this->parent = $value;
+		if ($name === 'children' && \is_array($value)) {
+			$this->children = $value;
 		}
 	}
 
@@ -97,6 +102,7 @@ class tag implements token {
 	public function __clone() : void {
 		foreach ($this->children AS &$item) {
 			$item = clone $item;
+			$item->parent = $this;
 		}
 		unset($item);
 	}
@@ -110,7 +116,8 @@ class tag implements token {
 	public function parse(tokenise $tokens) : void {
 
 		// cache vars
-		$tag = $this->tagName;
+		$tag = $this->tagNameLower;
+		$singleton = $this->root->lookup('singleton', $tag) !== null;
 		$attributes = [];
 
 		// parse tokens
@@ -123,11 +130,10 @@ class tag implements token {
 					$tokens->prev();
 					break 2;
 
-				// remember attribute
+				// remember attribute, recording the previous one without a value, duplicates keep the first as browsers do
 				case 'attribute':
-					if ($attr) {
+					if ($attr && !\array_key_exists($attr, $attributes)) {
 						$attributes[$attr] = null;
-						$attr = null;
 					}
 					$attr = \ltrim($token['value']);
 					break;
@@ -135,17 +141,19 @@ class tag implements token {
 				// record attribute and value
 				case 'attributevalue':
 					if ($attr) {
-						$value = \trim($token['value'], "= \t\r\n");
-						if (($double = \str_starts_with($value, '"')) === true || \str_starts_with($value, "'")) {
-							$value = \trim($value, $double ? '"' : "'");
+						if (!\array_key_exists($attr, $attributes)) {
+							$value = \ltrim(\substr($token['value'], \strpos($token['value'], '=') + 1), " \t\r\n\f");
+							if (($double = \str_starts_with($value, '"')) === true || \str_starts_with($value, "'")) {
+								$value = \trim($value, $double ? '"' : "'");
+							}
+							$attributes[$attr] = \html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 						}
-						$attributes[$attr] = \html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
 						$attr = null;
 					}
 					break;
 
 				case 'tagopenend':
-					if (!\in_array($tag, $this->config['elements']['singleton'], true)) {
+					if (!$singleton) {
 						$this->children = $this->parseChildren($tokens);
 						break;
 					} else {
@@ -154,13 +162,13 @@ class tag implements token {
 					}
 
 				case 'tagselfclose':
-					if (\in_array($tag, $this->config['elements']['singleton'], true)) {
+					if ($singleton) {
 						$this->singleton = $token['value'];
 					}
 					break 2;
 
 				case 'tagclose':
-					$close = \mb_strtolower(\trim($token['value'], "</ \r\n\t>"));
+					$close = \strtolower(\trim($token['value'], "</ \r\n\t>"));
 
 					// if tags same, we are closing this tag, go back to parent
 					if (\in_array($close, $this->getParentTagNames(), true)) {
@@ -181,7 +189,7 @@ class tag implements token {
 					}
 			}
 		}
-		if ($attr) {
+		if ($attr && !\array_key_exists($attr, $attributes)) {
 			$attributes[$attr] = null;
 		}
 		if ($attributes) {
@@ -205,8 +213,8 @@ class tag implements token {
 	protected function getParentTagNames() : array {
 		if (empty($this->parenttags)) {
 			$this->parenttags = $this->parent ? $this->parent->getParentTagNames() : [];
-			if ($this->tagName !== null) {
-				$this->parenttags[] = \mb_strtolower($this->tagName);
+			if ($this->tagNameLower !== null) {
+				$this->parenttags[] = $this->tagNameLower;
 			}
 		}
 		return $this->parenttags;
@@ -220,32 +228,33 @@ class tag implements token {
 	 */
 	public function parseChildren(tokenise $tokens) : array {
 		$root = $this->root;
-		$parenttag = $this->tagName;
+		$parenttag = $this->tagNameLower;
 		$children = [];
 
 		// process custom tags
-		if ($parenttag && isset($this->config['custom'][$parenttag])) {
-			$item = new $this->config['custom'][$parenttag]['class']($root, $parenttag);
+		if ($parenttag && ($custom = $root->lookup('custom', $parenttag)) !== null) {
+			$item = new $custom['class']($root, $parenttag, $this);
 			$item->parse($tokens);
 			$children[] = $item;
 			$this->close = true;
 
 		// parse children
 		} else {
-			$optional = $this->config['elements']['closeoptional'];
+			$closers = $parenttag === null ? [] : ($root->lookup('closeoptional', $parenttag) ?? []);
 			while (($token = $tokens->next()) !== null) {
 				switch ($token['type']) {
 					case 'doctype':
-						$item = new doctype($root);
+						$item = new doctype($root, $this);
 						$item->parse($tokens);
 						$children[] = $item;
 						break;
 
 					case 'tagopenstart':
 						$tag = \trim($token['value'], '<');
+						$lower = \strtolower($tag);
 
-						// unnestable tag, pass back to parent
-						if ($parenttag && \strcasecmp($tag, $parenttag) === 0 && \in_array($tag, $optional, true)) {
+						// a tag that implicitly closes the parent, pass back to the parent
+						if (\in_array($lower, $closers, true)) {
 							$tokens->prev();
 							break 2;
 						} else {
@@ -261,7 +270,7 @@ class tag implements token {
 						$close = \trim($token['value'], "</ \r\n\t>");
 
 						// prevent dropping down a level when tags don't match or close is optional
-						if (\in_array(\mb_strtolower($close), $this->getParentTagNames(), true)) {
+						if (\in_array(\strtolower($close), $this->getParentTagNames(), true)) {
 							$tokens->prev(); // let the parent parse() method handle it
 							break 2;
 						}
@@ -274,7 +283,13 @@ class tag implements token {
 						break;
 
 					case 'comment':
-						$item = new comment($root);
+						$item = new comment($root, $this);
+						$item->parse($tokens);
+						$children[] = $item;
+						break;
+
+					case 'cdata':
+						$item = new cdata($root, $this);
 						$item->parse($tokens);
 						$children[] = $item;
 						break;
@@ -407,17 +422,13 @@ class tag implements token {
 		$config = $this->config;
 		$attr = $config['attributes'];
 		if ($minify['lowercase'] && $this->tagName) {
-			$this->tagName = \mb_strtolower($this->tagName);
+			$this->tagName = $this->tagNameLower;
 		}
-		$folder = null;
-		$dirs = null;
-		$scheme = 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 's' : '').'://';
 
 		// minify attributes
-		$tag = $this->tagName;
+		$tag = $this->tagNameLower;
 		$attributes = $this->attributes;
 		$skipurl = isset($attr['urlskip'][$tag]) && !$this->hasAttribute($attributes, $attr['urlskip'][$tag]);
-		$host = null;
 		foreach ($attributes AS $key => $value) {
 
 			// lowercase attribute key
@@ -428,80 +439,8 @@ class tag implements token {
 			}
 
 			// minify url attributes when not in list or match attribute
-			if ($minify['urls'] && $value && \in_array($key, $attr['urls'], true) && !$skipurl) {
-
-				// make folder variables
-				if ($folder === null && isset($_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'])) {
-					if (($folder = \parse_url('//'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], PHP_URL_PATH)) !== null) {
-						if (\mb_substr($folder, -1) !== '/') {
-							$folder = \dirname($folder).'/';
-						}
-						$dirs = \explode('/', \trim($folder, '/'));
-					}
-				}
-
-				// strip scheme from absolute URL's if the same as current scheme
-				if ($minify['urls']['scheme'] && \str_starts_with($attributes[$key], $scheme)) {
-					$attributes[$key] = \mb_substr($attributes[$key], \mb_strlen($scheme)-2);
-				}
-
-				// remove host for own domain
-				if ($minify['urls']['host'] && isset($_SERVER['HTTP_HOST'])) {
-					$host = $host ?? ['//'.$_SERVER['HTTP_HOST'], $scheme.$_SERVER['HTTP_HOST']];
-					foreach ($host AS $item) {
-
-						// check if link goes to root
-						if ($item === $attributes[$key]) {
-							$attributes[$key] = $_SERVER['REQUEST_URI'] ? '/' : '';
-							break;
-
-						// remove host
-						} else {
-							$len = \mb_strlen($item);
-							if (\mb_stripos($attributes[$key], $item) === 0 && (\mb_strlen($attributes[$key]) === $len || \mb_strpos($attributes[$key], '/', 2) === $len)) {
-								$attributes[$key] = \mb_substr($attributes[$key], $len);
-								break;
-							}
-						}
-					}
-				}
-
-				// make absolute URLs relative
-				if ($minify['urls']['relative'] && $folder) {
-
-					// minify
-					if (\str_starts_with($attributes[$key], $folder) && ($folder !== '/' || !\str_starts_with($attributes[$key], '//'))) {
-						if ($attributes[$key] === $folder && $attributes[$key] !== $_SERVER['REQUEST_URI']) {
-							$attributes[$key] = './';
-						} else {
-							$attributes[$key] = \mb_substr($attributes[$key], \mb_strlen($folder));
-						}
-					}
-				}
-
-				// use parent folders if it is shorter
-				if ($minify['urls']['parent'] && $dirs && \str_starts_with($attributes[$key], '/') && !\str_contains($attributes[$key], '//')) {
-					$isDir = \mb_strrpos($attributes[$key], '/') === \mb_strlen($attributes[$key])-1;
-					$compare = \explode('/', \trim($isDir ? $attributes[$key] : \dirname($attributes[$key]), '/'));
-					$update = false;
-					$count = 0;
-					foreach ($compare AS $i => $item) {
-						if (isset($dirs[$i]) && $item === $dirs[$i]) {
-							\array_shift($compare);
-							$update = true;
-							$count++;
-						} else {
-							break;
-						}
-					}
-					if ($update) {
-						$compare = \array_merge(\array_fill(0, \count($dirs) - $count, '..'), $compare);
-						$url = \implode('/', $compare).'/'.($isDir ? '' : \basename($attributes[$key]));
-						if (\strlen($url) <= \strlen($attributes[$key])) { // compare as bytes
-							$attributes[$key] = $url;
-						}
-					}
-				}
+			if ($minify['urls'] && $value && \in_array($key, $attr['urls'], true) && !$skipurl && ($page = $this->root->getCurrentUrl()) !== null) {
+				$attributes[$key] = $this->minifyUrl($attributes[$key], $page, $minify['urls']);
 			}
 
 			// minify attributes
@@ -517,6 +456,10 @@ class tag implements token {
 
 				// boolean attributes
 				if ($min['boolean'] && \in_array($key, $attr['boolean'], true)) {
+					$attributes[$key] = null;
+
+				// boolean attributes that also take keyword values, minified only when the value is empty or the attribute name
+				} elseif ($min['boolean'] && \in_array($key, $attr['booleanvalues'], true) && \in_array(\strtolower($attributes[$key] ?? ''), ['', $key], true)) {
 					$attributes[$key] = null;
 
 				// remove empty attributes
@@ -554,7 +497,8 @@ class tag implements token {
 		}
 
 		// work out whether to omit the closing tag
-		if ($minify['close'] && $this->parent !== null && \in_array($tag, $config['elements']['closeoptional']) && ($this->parent->tagName === null || !\in_array($this->parent->tagName, $config['elements']['inline'], true))) {
+		$parent = $this->parent?->tagNameLower;
+		if ($minify['close'] && $this->parent !== null && ($closers = $this->root->lookup('closeoptional', $tag)) !== null && ($parent === null || ($this->root->lookup('inline', $parent) === null && $this->root->lookup('inlineblock', $parent) === null))) {
 			$children = $this->parent->toArray();
 			$next = false;
 			foreach ($children AS $item) {
@@ -565,13 +509,12 @@ class tag implements token {
 
 				// find next tag
 				} elseif ($next) {
-					$type = \get_class($item);
 
-					// if type is not text or the text content is empty
-					if ($type !== 'hexydec\\html\\text' || !$item->text()) {
+					// stop at the next node that is not whitespace only text
+					if (!$item instanceof text || \trim($item->text(), " \t\r\n") !== '') {
 
-						// if the next tag is optinally closable too, then we can remove the closing tag of this
-						if ($type === 'hexydec\\html\\tag' && \in_array($item->tagName, $config['elements']['closeoptional'], true)) {
+						// if the next tag implicitly closes this one, the closing tag can be removed
+						if ($item instanceof tag && \in_array($item->tagNameLower, $closers, true)) {
 							$this->close = false;
 						}
 
@@ -616,7 +559,89 @@ class tag implements token {
 		}
 	}
 
-	protected function hasAttribute(array $attr, array $items) {
+	/**
+	 * Shortens a URL relative to the current page
+	 *
+	 * @param string $url The URL to minify
+	 * @param array $page The parsed URL of the current page, as returned by htmldoc::getCurrentUrl()
+	 * @param array $options The URL minification options
+	 * @return string The minified URL
+	 */
+	protected function minifyUrl(string $url, array $page, array $options) : string {
+
+		// strip the scheme if it is the same as the current page
+		$scheme = $page['scheme'];
+		if ($options['scheme'] && \strncasecmp($url, $scheme, \strlen($scheme)) === 0) {
+			$url = \substr($url, \strlen($scheme) - 2);
+		}
+
+		// remove the host for the current domain, leaving an absolute path
+		if ($options['host']) {
+			foreach (['//'.$page['host'], $scheme.$page['host']] AS $item) {
+				$len = \strlen($item);
+				if (\strncasecmp($url, $item, $len) === 0 && \in_array($url[$len] ?? '', ['', '/', '?', '#'], true)) {
+					$url = \substr($url, $len);
+					if (!\str_starts_with($url, '/')) {
+						$url = '/'.$url;
+					}
+					break;
+				}
+			}
+		}
+
+		// make absolute paths relative to the current page
+		if (($options['relative'] || $options['parent']) && \str_starts_with($url, '/') && !\str_starts_with($url, '//')) {
+
+			// split the path into folders and a file, keeping the query string and fragment separate
+			$split = \strcspn($url, '?#');
+			$path = \substr($url, 0, $split);
+			$suffix = \substr($url, $split);
+			$pos = \strrpos($path, '/');
+			$dirs = $pos === 0 ? [] : \explode('/', \substr($path, 1, $pos - 1));
+			$file = \substr($path, $pos + 1);
+
+			// count the folders in common with the current page
+			$common = 0;
+			foreach ($page['dirs'] AS $i => $item) {
+				if (($dirs[$i] ?? null) === $item) {
+					$common++;
+				} else {
+					break;
+				}
+			}
+			$up = \count($page['dirs']) - $common;
+
+			// build the relative URL when within the current folder, or the parent URL when above it
+			if ($up ? $options['parent'] : $options['relative']) {
+				$remaining = \array_slice($dirs, $common);
+				$relative = \str_repeat('../', $up).($remaining ? \implode('/', $remaining).'/' : '').$file.$suffix;
+
+				// a URL to the current page can be just the query string or fragment, as these resolve against the page
+				if ($path === $page['path'] && (\str_starts_with($suffix, '?') || $page['query'] === null)) {
+					$relative = $suffix;
+
+				// otherwise a URL with no path resolves against the page rather than its folder, so needs ./
+				} elseif (!$up && !$remaining && $file === '') {
+					$relative = './'.$suffix;
+				}
+
+				// use the relative URL if it is not longer, compared as bytes
+				if (\strlen($relative) <= \strlen($url)) {
+					$url = $relative;
+				}
+			}
+		}
+		return $url;
+	}
+
+	/**
+	 * Determines whether each of the specified attributes has one of its allowed values
+	 *
+	 * @param array $attr The attributes of the tag
+	 * @param array $items An array of allowed values, keyed by attribute name
+	 * @return bool Whether every attribute is present with an allowed value
+	 */
+	protected function hasAttribute(array $attr, array $items) : bool {
 		foreach ($items AS $key => $item) {
 			$lower = \mb_strtolower($key);
 			if (!isset($attr[$lower]) || !\in_array($attr[$lower], $item, true)) {
@@ -626,197 +651,223 @@ class tag implements token {
 		return true;
 	}
 	/**
-	 * Determine whether this tag or any of its child tokens match a selector
+	 * Adds this tag and any of its descendants that match the selectors to the found tags, in document order
 	 *
-	 * @param array $selector An array of CSS selectors
-	 * @param bool $searchChildren Denotes whether to search child tags as well as this tag
-	 * @return array An array of tag objects that match $selector
+	 * @param array $groups An array of compiled selector groups, as returned by selector::get()
+	 * @param array &$found A reference to the array the matching tags are added to
+	 * @param bool $start Whether this tag is where the search starts, which a leading child combinator is relative to
+	 * @return void
 	 */
-	public function find(array $selector, bool $searchChildren = true) : array {
-		$found = [];
-		$match = true;
-		foreach ($selector AS $i => $item) {
+	public function find(array $groups, array &$found, bool $start = true) : void {
 
-			// only search this level
-			if ($item['join'] === '>' && !$i) {
-				$searchChildren = false;
+		// add this tag if it matches any of the selectors, a leading child combinator only matches where the search starts
+		foreach ($groups AS $compounds) {
+			if (($start || $compounds[0]['join'] !== '>') && $this->matches($compounds)) {
+				$found[] = $this;
+				break;
 			}
+		}
 
-			// pass rest of selector to level below
-			if (\in_array($item['join'], [' ', '>'], true) && $i) {
-				$match = false;
-				$childselector = \array_slice($selector, $i);
-				foreach ($this->children AS $child) {
-					if (\get_class($child) === 'hexydec\\html\\tag') {
-						$found = \array_merge($found, $child->find($childselector));
+		// search the child tags
+		foreach ($this->children AS $child) {
+			if ($child instanceof tag) {
+				$child->find($groups, $found, false);
+			}
+		}
+	}
+
+	/**
+	 * Determines whether this tag matches a compiled selector group, matching the last compound against this tag and the earlier ones against the tags its combinators point to
+	 *
+	 * @param array $compounds An array of compounds, each with the combinator that precedes it and its simple selectors
+	 * @param ?int $index The index of the compound to match against this tag, or null for the last
+	 * @return bool Whether this tag matches
+	 */
+	public function matches(array $compounds, ?int $index = null) : bool {
+		$index ??= \count($compounds) - 1;
+		$match = false;
+
+		// the document root is not a tag so never matches
+		if ($this->tagName !== null && $this->matchesCompound($compounds[$index]['selectors'])) {
+
+			// the first compound has nothing before it to check
+			if ($index === 0) {
+				$match = true;
+
+			// the parent must match the previous compound
+			} elseif ($compounds[$index]['join'] === '>') {
+				$match = $this->parent?->matches($compounds, $index - 1) ?? false;
+
+			// the previous sibling, or any earlier sibling, must match the previous compound
+			} elseif (\in_array($compounds[$index]['join'], ['+', '~'], true)) {
+				foreach (\array_reverse($this->getPreviousSiblings()) AS $sibling) {
+					if ($sibling->matches($compounds, $index - 1)) {
+						$match = true;
+						break;
+					} elseif ($compounds[$index]['join'] === '+') {
+						break;
 					}
 				}
-				break;
 
-			// find siblings
-			} elseif (\in_array($item['join'], ['+', '~'], true) && $i) {
+			// any ancestor must match the previous compound
+			} else {
+				$parent = $this->parent;
+				while ($parent !== null && !$match) {
+					$match = $parent->matches($compounds, $index - 1);
+					$parent = $parent->parent;
+				}
+			}
+		}
+		return $match;
+	}
+
+	/**
+	 * Retrieves the sibling tags that come before this tag
+	 *
+	 * @return array An array of tag objects in document order
+	 */
+	protected function getPreviousSiblings() : array {
+		$siblings = [];
+		foreach ($this->parent?->children() ?? [] AS $item) {
+			if ($item === $this) {
+				break;
+			}
+			$siblings[] = $item;
+		}
+		return $siblings;
+	}
+
+	/**
+	 * Determines whether this tag matches all the simple selectors in a compound
+	 *
+	 * @param array $selectors An array of simple selectors
+	 * @return bool Whether this tag matches every simple selector
+	 */
+	protected function matchesCompound(array $selectors) : bool {
+		$match = true;
+		foreach ($selectors AS $item) {
+			if (!$this->matchesPart($item)) {
 				$match = false;
-				$siblingselector = \array_slice($selector, $i);
-				$search = false;
-				foreach ($this->parent->children AS $sibling) {
-					if (!$search && $sibling === $this) {
-						$search = true;
-					} elseif ($search && \get_class($sibling) === 'hexydec\\html\\tag') {
-						$found = \array_merge($found, $sibling->find($siblingselector));
-						if ($item['join'] === '+') {
-							break;
-						}
-					}
-				}
+				break;
+			}
+		}
+		return $match;
+	}
+
+	/**
+	 * Determines whether this tag matches a simple selector
+	 *
+	 * @param array $item A simple selector, specifying a tag, id, class, attribute, or pseudo selector
+	 * @return bool Whether this tag matches the simple selector
+	 */
+	protected function matchesPart(array $item) : bool {
+
+		// match tag
+		if (isset($item['tag'])) {
+			$match = $item['tag'] === '*' || $item['tag'] === $this->tagNameLower;
+
+		// match id
+		} elseif (isset($item['id'])) {
+			$match = ($this->attributes['id'] ?? null) === $item['id'];
+
+		// match class, which can be separated by any whitespace
+		} elseif (isset($item['class'])) {
+			$match = ($class = $this->attributes['class'] ?? null) !== null && \in_array($item['class'], \preg_split('/[ \\t\\n\\r\\f]++/', $class), true);
+
+		// match attribute
+		} elseif (isset($item['attribute'])) {
+			$match = $this->matchesAttribute($item);
+
+		// match pseudo selector
+		} elseif (isset($item['pseudo'])) {
+			$match = $this->matchesPseudo($item);
+
+		// a selector with nothing to compare, such as [], matches anything
+		} else {
+			$match = true;
+		}
+		return $match;
+	}
+
+	/**
+	 * Determines whether this tag matches an attribute selector
+	 *
+	 * @param array $item An attribute selector, with the attribute name, and optionally a comparison, value, and case sensitivity
+	 * @return bool Whether this tag matches the attribute selector
+	 */
+	protected function matchesAttribute(array $item) : bool {
+		$name = $item['attribute'];
+		$comparison = $item['comparison'] ?? null;
+
+		// the attribute must exist, and when a value is compared, have a value
+		if (!\array_key_exists($name, $this->attributes)) {
+			$match = false;
+		} elseif (!isset($item['value'])) {
+			$match = true;
+		} elseif (($current = $this->attributes[$name]) === null) {
+			$match = false;
+
+		// an empty value never matches the start, end, within, or word comparisons
+		} elseif ($item['value'] === '' && \in_array($comparison, ['^=', '$=', '*=', '~='], true)) {
+			$match = false;
+
+		// compare the value, lowercasing both when case insensitive
+		} else {
+			$value = $item['value'];
+			if (!$item['sensitive']) {
+				$current = \mb_strtolower($current);
+				$value = \mb_strtolower($value);
+			}
+			$match = match ($comparison) {
+				'=' => $current === $value,
+				'^=' => \str_starts_with($current, $value),
+				'$=' => \str_ends_with($current, $value),
+				'*=' => \str_contains($current, $value),
+				'~=' => \in_array($value, \preg_split('/[ \\t\\n\\r\\f]++/', $current), true),
+				'|=' => $current === $value || \str_starts_with($current, $value.'-'),
+				default => false
+			};
+		}
+		return $match;
+	}
+
+	/**
+	 * Determines whether this tag matches a pseudo selector
+	 *
+	 * @param array $item A pseudo selector, with the pseudo class name and any compiled selector groups it contains
+	 * @return bool Whether this tag matches the pseudo selector
+	 */
+	protected function matchesPseudo(array $item) : bool {
+		switch ($item['pseudo']) {
+
+			// match first child
+			case 'first-child':
+				$siblings = $this->parent?->children() ?? [];
+				$match = ($siblings[0] ?? null) === $this;
 				break;
 
-			// match tag
-			} elseif (!empty($item['tag']) && $item['tag'] !== '*') {
-				if ($item['tag'] !== $this->tagName) {
-					$match = false;
-					break;
-				}
+			// match last child
+			case 'last-child':
+				$siblings = $this->parent?->children() ?? [];
+				$match = ($siblings[\count($siblings) - 1] ?? null) === $this;
+				break;
 
-			// match id
-			} elseif (!empty($item['id'])) {
-				if (empty($this->attributes['id']) || $item['id'] !== $this->attributes['id']) {
-					$match = false;
-					break;
-				}
-
-			// match class
-			} elseif (!empty($item['class'])) {
-				if (empty($this->attributes['class']) || !\in_array($item['class'], \explode(' ', $this->attributes['class']), true)) {
-					$match = false;
-					break;
-				}
-
-			// attribute selector
-			} elseif (!empty($item['attribute'])) {
-
-				// check if attribute exists
-				if (!array_key_exists($item['attribute'], $this->attributes)) {
-					$match = false;
-					break;
-				} elseif (!empty($item['value'])) {
-
-					// if current value is null, it won't match
-					if (($current = $this->attributes[$item['attribute']]) === null) {
+			// match none of the selectors
+			case 'not':
+				$match = true;
+				foreach ($item['sub'] ?? [] AS $compounds) {
+					if ($this->matches($compounds)) {
 						$match = false;
 						break;
-
-					// compare
-					} else {
-						switch ($item['comparison']) {
-
-							// exact match
-							case '=':
-								if ($item['sensitive']) {
-									if ($current !== $item['value']) {
-										$match = false;
-										break;
-									}
-								} elseif (\mb_strtolower($current) !== \mb_strtolower($item['value'])) {
-									$match = false;
-									break;
-								}
-								break;
-
-							// match start
-							case '^=':
-								$pos = $item['sensitive'] ? \mb_strpos($current, $item['value']) : \mb_stripos($current, $item['value']);
-								if ($pos !== 0) {
-									$match = false;
-									break;
-								}
-								break;
-
-							// match word
-							case '~=':
-								$current =' '.$current.' ';
-								$item['value'] = ' '.$item['value'].' ';
-
-							// match within
-							case '*=':
-								$pos = $item['sensitive'] ? \mb_strpos($current, $item['value']) : \mb_stripos($current, $item['value']);
-								if ($pos === false) {
-									$match = false;
-									break;
-								}
-								break;
-
-							// match end
-							case '$=':
-								$pos = $item['sensitive'] ? \mb_strrpos($current, $item['value']) : \mb_strripos($current, $item['value']);
-								if ($pos !== \mb_strlen($current) - \mb_strlen($item['value'])) {
-									$match = false;
-									break;
-								}
-								break;
-
-							// match subcode
-							case '|=':
-								if ($item['sensitive']) {
-									if ($current !== $item['value'] && !\str_starts_with($current, $item['value'].'-')) {
-										$match = false;
-										break;
-									}
-								} elseif (\mb_strtolower($current) !== \mb_strtolower($item['value']) && \mb_stripos($current, $item['value'].'-') !== 0) {
-									$match = false;
-									break;
-								}
-								break;
-						}
 					}
 				}
+				break;
 
-			// match pseudo selector
-			} elseif (!empty($item['pseudo'])) {
-				switch ($item['pseudo']) {
-
-					// match first-child
-					case 'first-child':
-						$children = $this->parent !== null ? $this->parent->children() : [];
-						if (!isset($children[0]) || $this !== $children[0]) {
-							$match = false;
-							break 2;
-						}
-						break;
-
-					// match last child
-					case 'last-child':
-						$children = $this->parent !== null ? $this->parent->children() : [];
-						if (($last = \end($children)) === false || $this !== $last) {
-							$match = false;
-							break 2;
-						}
-						break;
-
-					// match not
-					case 'not':
-						if (!empty($item['sub'])) {
-							foreach ($item['sub'] AS $sub) {
-								if ($this->find($sub, false) !== []) {
-									$match = false;
-									break 3;
-								}
-							}
-						}
-						break;
-				}
-			}
+			// unsupported pseudo selectors never match
+			default:
+				$match = false;
 		}
-		if ($match) {
-			$found[] = $this;
-		}
-		if ($searchChildren && $this->children) {
-			foreach ($this->children AS $child) {
-				if (\get_class($child) === 'hexydec\\html\\tag') {
-					$found = \array_merge($found, $child->find($selector));
-				}
-			}
-		}
-		return $found;
+		return $match;
 	}
 
 	/**
@@ -849,7 +900,7 @@ class tag implements token {
 		foreach ($this->children AS $item) {
 
 			// only get text from these objects
-			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'])) {
+			if ($item instanceof tag || $item instanceof text || $item instanceof cdata) {
 				$text[] = $item->text();
 			}
 		}
@@ -867,7 +918,7 @@ class tag implements token {
 
 		// merge output options + custom
 		$output = $this->config['output'];
-		$options = \array_merge($output, $options, $output['elements'][$tag] ?? []);
+		$options = \array_merge($output, $options, $output['elements'][$this->tagNameLower] ?? []);
 
 		// compile attributes
 		$html = '<'.$tag;
@@ -876,17 +927,20 @@ class tag implements token {
 			if ($value !== null || $options['xml']) {
 				$empty = \in_array($value, [null, ''], true);
 
+				// encode the value for every quote style, each style then only escapes its own quote character
+				$value = \str_replace(['&', '<'], ['&amp;', '&lt;'], \strval($value));
+
 				// unquoted
-				if (!$empty && !$options['xml'] && $options['quotestyle'] === 'minimal' && \strpbrk($value, " =\"'`<>\n\r\t") === false) {
+				if (!$empty && !$options['xml'] && $options['quotestyle'] === 'minimal' && \strpbrk($value, " =\"'`<>\n\r\t\f") === false) {
 					$html .= '='.$value;
 
 				// single quotes || swap when minimal and there are double quotes in the string
 				} elseif ($options['quotestyle'] === 'single' || ($options['quotestyle'] === 'minimal' && \str_contains($value, '"'))) {
-					$html .= "='".\str_replace(['&', "'", '<'], ['&amp;', '&#39;', '&lt;'], $value)."'";
+					$html .= "='".\str_replace("'", '&#39;', $value)."'";
 
 				// double quotes
 				} else {
-					$html .= '="'.\str_replace(['&', '"', '<'], ['&amp;', '&quot;', '&lt;'], \strval($value)).'"';
+					$html .= '="'.\str_replace('"', '&quot;', $value).'"';
 				}
 			}
 		}
@@ -894,6 +948,10 @@ class tag implements token {
 		// close singleton tags
 		if ($this->singleton) {
 			$html .= empty($options['singletonclose']) ? $this->singleton : $options['singletonclose'];
+
+		// self-close elements with no children in XML
+		} elseif ($options['xml'] && !$this->children) {
+			$html .= '/>';
 
 		// close opening tag and compile contents
 		} else {
@@ -925,7 +983,7 @@ class tag implements token {
 	public function children() : array {
 		$children = [];
 		foreach ($this->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag') {
+			if ($item instanceof tag) {
 				$children[] = $item;
 			}
 		}

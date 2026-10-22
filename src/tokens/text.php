@@ -13,7 +13,7 @@ class text implements token {
 	/**
 	 * @var tag|null The parent tag object
 	 */
-	protected ?tag $parent = null;
+	public ?tag $parent = null;
 
 	/**
 	 * @var string The text content of this object
@@ -32,19 +32,6 @@ class text implements token {
 	}
 
 	/**
-	 * Magic method to set protected variables
-	 *
-	 * @param string $name The name of the property to set
-	 * @param mixed $value The value of the property to set
-	 * @return void
-	 */
-	public function __set(string $name, mixed $value) : void {
-		if ($name === 'parent' && \get_class($value) === 'hexydec\\html\\tag') {
-			$this->parent = $value;
-		}
-	}
-
-	/**
 	 * Parses the next HTML component from a tokenise object
 	 *
 	 * @param tokenise $tokens A tokenise object
@@ -52,7 +39,7 @@ class text implements token {
 	 */
 	public function parse(tokenise $tokens) : void {
 		if (($token = $tokens->current()) !== null) {
-			$this->content = \html_entity_decode($token['value'], ENT_QUOTES);
+			$this->content = \html_entity_decode($token['value'], ENT_QUOTES | ENT_HTML5);
 		}
 	}
 
@@ -74,22 +61,22 @@ class text implements token {
 			$this->content = \preg_replace('/[\\n\\t ]++/u', ' ', \str_replace("\r", '', $this->content));
 
 			if ($parent) {
-				$children = $parent->tagName ? $parent->toArray() : $this->root->toArray();
+				$children = $parent->toArray();
 				if (($index = $this->getIndex($children)) !== false) {
 					$keys = \array_keys($children);
 					$i = \array_search($index, $keys, true);
-					$inline = $this->root->config['elements']['inline'];
-					$min = ['hexydec\\html\\comment', 'hexydec\\html\\doctype'];
+					$root = $this->root;
+					$parentInline = $parent->tagNameLower !== null && $root->lookup('inline', $parent->tagNameLower) !== null;
 
-					// if previous tag is a block element, ltrim the textnode
+					// if previous tag is a block element, or a comment or doctype, ltrim the textnode
 					$trim = false;
 					if (!$i) {
-						$trim = !\in_array($parent->tagName, $inline, true);
+						$trim = !$parentInline;
 					} else {
-						$class = \get_class($children[$i - 1]);
-						if ($class === 'hexydec\\html\\tag') {
-							$trim = !\in_array($children[$i - 1]->tagName, $inline, true);
-						} elseif (\in_array($class, $min, true)) {
+						$item = $children[$i - 1];
+						if ($item instanceof tag) {
+							$trim = $root->lookup('inline', $item->tagNameLower) === null && $root->lookup('inlineblock', $item->tagNameLower) === null;
+						} elseif ($item instanceof comment || $item instanceof doctype) {
 							$trim = true;
 						}
 					}
@@ -97,15 +84,15 @@ class text implements token {
 						$this->content = \ltrim($this->content, " \t\r\n");
 					}
 
-					// if next tag is a block element, rtrim the textnode
+					// if next tag is a block element, or a comment or doctype, rtrim the textnode
 					$trim = false;
 					if (!isset($keys[$i + 1])) {
-						$trim = !\in_array($parent->tagName, $inline, true);
+						$trim = !$parentInline;
 					} else {
-						$class = \get_class($children[$i + 1]);
-						if ($class === 'hexydec\\html\\tag') {
-							$trim = !\in_array($children[$i + 1]->tagName, $inline, true);
-						} elseif (\in_array($class, $min, true)) {
+						$item = $children[$i + 1];
+						if ($item instanceof tag) {
+							$trim = $root->lookup('inline', $item->tagNameLower) === null && $root->lookup('inlineblock', $item->tagNameLower) === null;
+						} elseif ($item instanceof comment || $item instanceof doctype) {
 							$trim = true;
 						}
 					}

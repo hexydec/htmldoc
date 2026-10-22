@@ -9,6 +9,11 @@ use \hexydec\tokens\tokenise;
 interface token {
 
 	/**
+	 * @var ?tag $parent The parent tag object
+	 */
+	public ?tag $parent { get; set; }
+
+	/**
 	 * Constructs the token
 	 *
 	 * @param htmldoc $root The parent HTMLdoc object
