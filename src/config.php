@@ -15,7 +15,7 @@ class config {
 	 * @param array $config An array of configuration parameters that is recursively merged with the default config
 	 */
 	public function __construct(array $config = []) {
-		$minify = function (string $code, array $minify, string $tag) {
+		$minify = function (string $code, array $minify, string $tag) : string|false {
 			switch ($tag) {
 				case 'style':
 					$obj = new \hexydec\css\cssdoc();
@@ -35,23 +35,39 @@ class config {
 		$default = [
 			'elements' => [
 				'inline' => [
-					'b', 'u', 'big', 'i', 'small', 'ttspan', 'em', 'a', 'strong', 'sub', 'sup', 'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp', 'var', 'span', 's'
+					'a', 'abbr', 'acronym', 'b', 'bdi', 'bdo', 'big', 'cite', 'code', 'data', 'del', 'dfn', 'em', 'font', 'i', 'ins', 'kbd', 'label', 'map', 'mark', 'noscript', 'output', 'picture', 'q', 'ruby', 's', 'samp', 'small', 'span', 'strike', 'strong', 'sub', 'sup', 'time', 'tt', 'u', 'var', 'wbr'
+				],
+				'inlineblock' => [ // whitespace around these is kept, but whitespace at the edges of their content is not visible
+					'audio', 'button', 'canvas', 'embed', 'iframe', 'img', 'input', 'math', 'meter', 'object', 'progress', 'select', 'svg', 'textarea', 'video'
 				],
 				'singleton' => [
-
-					// html singletons
-					'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr',
-
-					// SVG singletons
-					'animate', 'animateMotion', 'animateTransform', 'circle', 'ellipse', 'feBlend', 'feColorMatrix', 'feComposite', 'feConvolveMatrix', 'feDisplacementMap', 'feDistantLight', 'feDropShadow', 'feFlood', 'feFuncA', 'feFuncB', 'feFuncG', 'feFuncR', 'feGaussianBlur', 'feImage', 'feMergeNode', 'feMorphology', 'feOffset', 'fePointLight', 'feSpotLight', 'feTile', 'feTurbulence', 'hatchpath', 'image', 'line', 'mpath', 'polygon', 'polyline', 'rect', 'set', 'stop', 'use', 'view'
+					'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'
 				],
-				'closeoptional' => [
-					'html', 'head', 'body', 'p', 'dt', 'dd', 'li', 'option', 'thead', 'th', 'tbody', 'tr', 'td', 'tfoot', 'colgroup'
+				'closeoptional' => [ // elements whose closing tag is optional, and the opening tags that close them implicitly
+					'html' => [],
+					'head' => ['body'],
+					'body' => [],
+					'p' => ['address', 'article', 'aside', 'blockquote', 'details', 'div', 'dl', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'main', 'menu', 'nav', 'ol', 'p', 'pre', 'section', 'ul'], // not table, which does not close a paragraph in quirks mode
+					'li' => ['li'],
+					'dt' => ['dt', 'dd'],
+					'dd' => ['dt', 'dd'],
+					'option' => ['option', 'optgroup'],
+					'optgroup' => ['optgroup'],
+					'colgroup' => ['colgroup', 'thead', 'tbody', 'tfoot', 'tr'],
+					'thead' => ['tbody', 'tfoot'],
+					'tbody' => ['tbody', 'tfoot'],
+					'tfoot' => ['tbody'],
+					'tr' => ['tr', 'tbody', 'tfoot'],
+					'td' => ['td', 'th', 'tr', 'tbody', 'tfoot'],
+					'th' => ['td', 'th', 'tr', 'tbody', 'tfoot']
 				]
 			],
 			'attributes' => [
 				'boolean' => [
-					'allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'controls', 'default', 'defer', 'disabled', 'formnovalidate', 'hidden', 'inert', 'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nomodule', 'novalidate', 'open', 'playsinline', 'readonly', 'required', 'reversed', 'selected', 'typemustmatch', 'shadowrootclonable', 'shadowrootdelegatesfocus', 'shadowrootserializable'
+					'allowfullscreen', 'async', 'autofocus', 'autoplay', 'checked', 'controls', 'default', 'defer', 'disabled', 'formnovalidate', 'inert', 'ismap', 'itemscope', 'loop', 'multiple', 'muted', 'nomodule', 'novalidate', 'open', 'playsinline', 'readonly', 'required', 'reversed', 'selected', 'typemustmatch', 'shadowrootclonable', 'shadowrootdelegatesfocus', 'shadowrootserializable'
+				],
+				'booleanvalues' => [ // boolean attributes that also take keyword values, only minified when empty or set to the attribute name
+					'hidden'
 				],
 				'default' => [ // default attributes that can be removed
 					'style' => [
@@ -80,7 +96,7 @@ class config {
 						'size' => '0'
 					]
 				],
-				'empty' => ['id', 'class', 'style', 'title', 'action', 'lang', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup', 'target'], // attributes to remove if empty
+				'empty' => ['id', 'class', 'style', 'action', 'dir', 'onfocus', 'onblur', 'onchange', 'onclick', 'ondblclick', 'onmousedown', 'onmouseup', 'onmouseover', 'onmousemove', 'onmouseout', 'onkeypress', 'onkeydown', 'onkeyup', 'target'], // attributes to remove if empty
 				'urls' => ['href', 'src', 'action', 'poster'], // attributes to minify URLs in
 				'urlskip' => [
 					'link' => [
@@ -145,11 +161,11 @@ class config {
 				'singleton' => true, // minify singleton element by removing slash
 				'quotes' => true, // sets the output option 'quotestyle' to 'minimal'
 				'close' => true, // don't write close tags where possible
+				'cdata' => true, // remove CDATA wrappers where they are not needed
 				'safe' => false, // sets the minification presets to CSS safe options
 				'email' => false, // sets the minification presets to email safe options
 				'style' => [], // specify CSS minifier options
-				'script' => [], // specify CSS javascript options
-				'cache' => null // for style and scipt tags, the folder to cache the minified code in (Assuming you are using the default callback)
+				'script' => [] // specify CSS javascript options
 			],
 			'output' => [
 				'charset' => null, // set the output charset

@@ -2,12 +2,12 @@
 require __DIR__.'/vendor/autoload.php';
 
 $error = null;
-\set_error_handler(function (int $type, string $msg) use (&$error) {
+\set_error_handler(function (int $type, string $msg) use (&$error) : bool {
 	if (\in_array($type, [E_USER_WARNING, E_USER_NOTICE])) {
 		$error = $msg;
-	} else {
-		return false;
+		return true;
 	}
+	return false;
 });
 
 $base = $_POST['base'] ?? null;
@@ -34,6 +34,10 @@ if (!empty($_POST['action'])) {
 		// parse the URL
 		if (($url = \parse_url($_POST['url'])) === false) {
 			\trigger_error('Could not parse URL: The URL is not valid', E_USER_WARNING);
+
+		// only fetch web addresses, so other stream wrappers cannot read local files
+		} elseif (!\in_array(\strtolower($url['scheme'] ?? ''), ['http', 'https'], true)) {
+			\trigger_error('Could not parse URL: Only http and https URLs are supported', E_USER_WARNING);
 
 		// check the host name
 		} elseif (!isset($url['host'])) {
@@ -275,7 +279,7 @@ if (!empty($_POST['action'])) {
 				if ($base) { ?>
 					<input type="hidden" name="base" value="<?= \htmlspecialchars($base); ?>" />
 				<?php } ?>
-				<iframe class="minify__preview" srcdoc="<?= \htmlspecialchars($base === null ? $output : \preg_replace('/<head[^>]*>/i', '$0<base href="'.\htmlspecialchars($base).'">', $output)); ?>"></iframe>
+				<iframe class="minify__preview" sandbox="allow-scripts" srcdoc="<?= \htmlspecialchars($base === null ? $output : \preg_replace('/<head[^>]*>/i', '$0<base href="'.\htmlspecialchars($base).'">', $output)); ?>"></iframe>
 			<?php } ?>
 			<div class="minify__options">
 				<h3>Options</h3>

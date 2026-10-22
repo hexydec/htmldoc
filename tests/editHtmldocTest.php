@@ -3,7 +3,7 @@ use hexydec\html\htmldoc;
 
 final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 
-	public function testCanAppendHtml() {
+	public function testCanAppendHtml() : void {
 		$obj = new htmldoc();
 		$obj->load('Data to <span>append</span> here');
 		$tests = [
@@ -47,7 +47,7 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanPrependHtml() {
+	public function testCanPrependHtml() : void {
 		$obj = new htmldoc();
 		$obj->load('Data to <span>prepend</span> here');
 		$tests = [
@@ -90,7 +90,7 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanInsertHtmlBefore() {
+	public function testCanInsertHtmlBefore() : void {
 		$obj = new htmldoc();
 		$obj->load('Data to <span>insert</span> before');
 		$tests = [
@@ -123,6 +123,12 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'find' => 'div',
 				'before' => '<h3>Before</h3><p>Test <span>this</span></p>',
 				'output' => '<body><h3>Before</h3><p>Test <span>this</span></p><div><h3>Before</h3><p>Test <span>this</span></p><div></div></div></body>',
+			],
+			[ // top level nodes
+				'input' => '<p>Test</p><p>Test</p>',
+				'find' => 'p',
+				'before' => '<hr>',
+				'output' => '<hr><p>Test</p><hr><p>Test</p>',
 			]
 		];
 		$doc = new htmldoc();
@@ -133,7 +139,7 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanInsertHtmlAfter() {
+	public function testCanInsertHtmlAfter() : void {
 		$obj = new htmldoc();
 		$obj->load('Data to <span>insert</span> after');
 		$tests = [
@@ -180,6 +186,12 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 							<div>Text Node</div><h3>After</h3><p>Test <span>this</span></p>
 						</div><h3>After</h3><p>Test <span>this</span></p>
 					</body>',
+			],
+			[ // top level nodes
+				'input' => '<div></div>',
+				'find' => 'div',
+				'after' => '<p>Test</p>',
+				'output' => '<div></div><p>Test</p>',
 			]
 		];
 		$doc = new htmldoc();
@@ -190,7 +202,35 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanRemoveNodes() {
+	public function testCanEditAppendedNodes() : void {
+		$doc = new htmldoc();
+
+		// insert next to a node nested inside appended content
+		$doc->load('<div id="target"></div>');
+		$doc->find('#target')->append('<section><span></span></section>');
+		$doc->find('span')->after('<b></b>');
+		$this->assertEquals('<div id="target"><section><span></span><b></b></section></div>', $doc->html());
+
+		// remove nodes nested inside content appended to multiple nodes
+		$doc->load('<ul><li></li><li></li></ul>');
+		$doc->find('li')->append('<section><span></span></section>');
+		$doc->remove('span');
+		$this->assertEquals('<ul><li><section></section></li><li><section></section></li></ul>', $doc->html());
+
+		// every node type accepts a parent without raising a deprecation
+		$deprecations = [];
+		\set_error_handler(function (int $type, string $msg) use (&$deprecations) : bool {
+			$deprecations[] = $msg;
+			return true;
+		}, E_DEPRECATED);
+		$doc->load('<div></div>');
+		$doc->find('div')->append('<!-- comment --><div><script>var a = 1;</script><!-- nested --></div>');
+		\restore_error_handler();
+		$this->assertEquals([], $deprecations);
+		$this->assertEquals('<div><!-- comment --><div><script>var a = 1;</script><!-- nested --></div></div>', $doc->html());
+	}
+
+	public function testCanRemoveNodes() : void {
 		$tests = [
 			[
 				'input' => '<!DOCTYPE html><html><body><h1>Remove</h1></body></html>',
@@ -211,6 +251,11 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 				'input' => '<div><h3>Remove</h3><p>Test <span>this</span></p><div><h3>Remove</h3><p>Test <span>this</span></p></div></div>',
 				'remove' => 'h3, p',
 				'output' => '<div><div></div></div>',
+			],
+			[ // top level nodes
+				'input' => '<div></div><p>Remove</p>',
+				'remove' => 'p',
+				'output' => '<div></div>',
 			]
 		];
 		$doc = new htmldoc();
@@ -219,5 +264,10 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 			$doc->remove($item['remove']);
 			$this->assertEquals($item['output'], $doc->html());
 		}
+
+		// on a collection, the selector matches the collection's own tags as well as their contents
+		$doc->load('<div class="a"></div><div class="b"><p class="a"></p></div><div class="c"></div>');
+		$doc->find('div')->remove('.a');
+		$this->assertEquals('<div class="b"></div><div class="c"></div>', $doc->html());
 	}
 }

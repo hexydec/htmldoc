@@ -3,7 +3,7 @@ use hexydec\html\htmldoc;
 
 final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 
-	public function testCanFindElements() {
+	public function testCanFindElements() : void {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {
 			$doc->minify(Array(
@@ -65,7 +65,7 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanTraverseElements() {
+	public function testCanTraverseElements() : void {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {
 			$doc->minify(Array(
@@ -101,9 +101,89 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 			unset($divs[2]);
 			$this->assertEquals(isset($divs[2]), false);
 		}
+
+		// each tag gives its own parent, shared parents are returned once, and top level tags have none
+		$doc->load('<div id="a"><i></i><u></u></div><div id="b"><b></b></div>');
+		$this->assertEquals('<div id="a"><i></i><u></u></div><div id="b"><b></b></div>', $doc->find('i, b')->parent()->html());
+		$this->assertEquals('<div id="a"><i></i><u></u></div>', $doc->find('i, u')->parent()->html());
+		$this->assertEquals(0, $doc->find('#a')->parent()->length);
+
+		// children are direct children only, and a collection is searched inside its tags but a document includes its top level
+		$doc->load('<div class="a"><p><span></span></p><div class="b"></div></div>');
+		$this->assertEquals('<p><span></span></p><div class="b"></div>', $doc->find('.a')->children()->html());
+		$this->assertEquals('<div class="b"></div>', $doc->find('.a')->find('div')->html());
+		$this->assertEquals('<div class="a"><p><span></span></p><div class="b"></div></div><div class="b"></div>', $doc->find('div')->html());
+
+		// sibling selectors match the sibling itself, not tags inside it
+		$doc->load('<section><h1></h1><div id="x"><div id="y"><p></p></div></div><div id="z"></div></section>');
+		$this->assertEquals(['x'], \array_map(fn ($item) => $item->attr('id'), $doc->find('h1 + div')->get()));
+		$this->assertEquals(['x', 'z'], \array_map(fn ($item) => $item->attr('id'), $doc->find('h1 ~ div')->get()));
+		$this->assertEquals('<p></p>', $doc->find('h1 + div p')->html());
 	}
 
-	public function testCanReadTagNames() {
+	public function testCanFindTopLevelElements() : void {
+		$doc = new htmldoc();
+		$doc->load('<h1>Heading</h1><p class="first">First</p><p class="last">Last</p>');
+		$tests = [
+			'h1 + p' => '<p class="first">First</p>',
+			'h1 ~ p' => '<p class="first">First</p><p class="last">Last</p>',
+			'p:first-child' => '',
+			'h1:first-child' => '<h1>Heading</h1>',
+			'p:last-child' => '<p class="last">Last</p>'
+		];
+		foreach ($tests AS $key => $item) {
+			$this->assertEquals($item, $doc->find($key)->html());
+		}
+	}
+
+	public function testCanMatchSelectorEdgeCases() : void {
+		$doc = new htmldoc();
+		$doc->load('<ul><li class="a">1</li><li class="a b">2</li><li class="md:flex'."\n".'0" id="0">3</li></ul><p id="a" data-x="0"></p><p id="b" data-x=""></p><input id="c" disabled><input id="d" disabled="">');
+		$tests = [
+
+			// identifiers end where the next selector component starts
+			'.a:first-child' => '<li class="a">1</li>',
+			'p:not(#a)' => '<p id="b" data-x=""></p>',
+			'.a.b' => '<li class="a b">2</li>',
+			'.md\\:flex' => '<li class="md:flex'."\n".'0" id="0">3</li>',
+
+			// unsupported pseudo selectors match nothing
+			'li:nth-child(2)' => '',
+			'p:hover' => '',
+
+			// zero and empty values are values, and valueless attributes are not empty values
+			'[data-x="0"]' => '<p id="a" data-x="0"></p>',
+			'[data-x=""]' => '<p id="b" data-x=""></p>',
+			'[disabled=""]' => '<input id="d" disabled="">',
+			'[data-x^=""]' => '',
+			'[data-x*=""]' => '',
+			'#0' => '<li class="md:flex'."\n".'0" id="0">3</li>',
+			'.0' => '<li class="md:flex'."\n".'0" id="0">3</li>'
+		];
+		foreach ($tests AS $selector => $output) {
+			$this->assertEquals($output, $doc->find($selector)->html(), $selector);
+		}
+	}
+
+	public function testCanFindInDocumentOrder() : void {
+		$doc = new htmldoc();
+		$doc->load('<div class="a"><div><p>1</p><span>2</span></div><p>3</p><ul><li>4</li><li>5</li></ul></div><p>6</p>');
+		$tests = [
+			'li, p' => '1 3 4 5 6',
+			'p, li' => '1 3 4 5 6',
+			'div > p' => '1 3',
+			'div p' => '1 3',
+			'.a p, span, .a > p' => '1 2 3'
+		];
+		foreach ($tests AS $selector => $output) {
+			$this->assertEquals($output, \implode(' ', \array_map(fn ($item) => $item->text(), $doc->find($selector)->get())), $selector);
+		}
+
+		// ancestors outside a collection can be matched, as with querySelectorAll()
+		$this->assertEquals('<p>1</p>', $doc->find('span')->parent()->find('.a p')->html());
+	}
+
+	public function testCanReadTagNames() : void {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {
 			$this->assertEquals('div', $doc->find('.find')->tag());
@@ -113,7 +193,7 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanReadAttributes() {
+	public function testCanReadAttributes() : void {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {
 			$this->assertEquals('find', $doc->find('.find')->attr('class'));
@@ -123,7 +203,7 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanSetAttributes() {
+	public function testCanSetAttributes() : void {
 		$tests = [
 			[
 				'input' => '<div>Test</div><div>Test 2</div>',
@@ -169,7 +249,7 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 		}
 	}
 
-	public function testCanReadTextNodes() {
+	public function testCanReadTextNodes() : void {
 		$doc = new htmldoc();
 		if ($doc->open(__DIR__.'/templates/find.html')) {
 			$this->assertEquals('Heading', $doc->find('.find__heading')->text());

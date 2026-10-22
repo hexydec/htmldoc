@@ -13,7 +13,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @var array $tokens Regexp components keyed by their corresponding codename for tokenising HTML
 	 */
 	protected static array $tokens = [
-		'textnode' => '(?<=>|^)[^<]++(?=<|$)',
+		'textnode' => '(?<=>|^)(?:[^<]++|<(?![a-zA-Z\\/!?]))++', // a < that cannot start markup is text
 		'attributevalue' => '\\s*+=\\s*+(?:"[^"]*+"++|\'[^\']*+\'++|[^\\s>]*+)',
 		'attribute' => '\\s*+[^<>"\'\\/=\\s]++',
 		'tagopenend' => '\\s*+>',
@@ -28,28 +28,24 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	];
 
 	/**
-	 * @var array $selectors Regexp components keyed by their corresponding codename for tokenising CSS selectors
-	 */
-	protected static array $selectors = [
-		'quotes' => '(?<!\\\\)"(?:[^"\\\\]++|\\\\.)*+"',
-		'join' => '\\s*[>+~]\\s*',
-		'comparison' => '[\\^*$<>]?=', // comparison operators for media queries or attribute selectors
-		'squareopen' => '\\[',
-		'squareclose' => '\\]',
-		'bracketopen' => '\\(',
-		'bracketclose' => '\\)',
-		'comma' => ',',
-		'pseudo' => ':[A-Za-z-]++',
-		'id' => '#[^ +>\.#{\\[,]++',
-		'class' => '\.[^ +>\.#{\\[\\(\\),]++',
-		'string' => '\\*|[^\\[\\]{}\\(\\):;,>+=~\\^$!" #\\.*]++',
-		'whitespace' => '\s++',
-	];
-
-	/**
-	 * @var array $children Stores the regexp components keyed by their corresponding codename for tokenising CSS selectors
+	 * @var array $children The nodes of a collection, a loaded document holds its nodes in $document instead
 	 */
 	protected array $children = [];
+
+	/**
+	 * @var ?tag $document The root tag of a loaded document, which holds its top level nodes
+	 */
+	protected ?tag $document = null;
+
+	/**
+	 * @var array $lookup Lowercase tag name lists built from the config, keyed by list name
+	 */
+	protected array $lookup = [];
+
+	/**
+	 * @var ?array $currentUrl The parsed URL of the current page for minifying URLs, an empty array when it is not available, or null when not yet parsed
+	 */
+	protected ?array $currentUrl = null;
 
 	/**
 	 * @var int $pointer The current pointer position for the array iterator
@@ -62,18 +58,23 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	protected array $cache = [];
 
 	/**
+	 * @var array $minified Output options set by the last minification, which take precedence over the output config but not the options passed to html()
+	 */
+	protected array $minified = [];
+
+	/**
 	 * Calculates the length property
 	 *
-	 * @param string $var The name of the property to retrieve, currently 'length' and output
-	 * @return mixed The number of children in the object for length, the output config, or null if the parameter doesn't exist
+	 * @param string $var The name of the property to retrieve, 'config', 'length', or a property of the first tag
+	 * @return mixed The number of children in the object for length, the config, the property of the first tag, or null if there are no tags
 	 */
 	public function __get(string $var) : mixed {
 		if ($var === 'config') {
 			return $this->config;
 		} elseif ($var === 'length') {
-			return \count($this->children);
+			return \count($this->toArray());
 		} else {
-			return $this->children[0]->{$var};
+			return $this->get(0)?->{$var};
 		}
 	}
 
@@ -83,48 +84,83 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return array An array of child nodes
 	 */
 	public function toArray() : array {
-		return $this->children;
+		return $this->document === null ? $this->children : $this->document->toArray();
 	}
 
 	/**
-	 * Array access method allows you to set the object's configuration as properties
+	 * Array access method allows you to set a node at the specified position, or append it when no position is given
 	 *
-	 * @param mixed $i The key to be updated, can be a string or integer
-	 * @param mixed $value The value of the array key in the children array to be updated
+	 * @param mixed $i The integer position to set, or null to append
+	 * @param mixed $value The node object to set, which must implement \hexydec\html\token
+	 * @throws \TypeError When the position is not an integer or null, or the value is not a node
 	 */
 	public function offsetSet(mixed $i, mixed $value) : void {
-		$this->children[$i] = $value;
+		if ($i !== null && !\is_int($i)) {
+			throw new \TypeError('The position must be an integer, or null to append');
+		} elseif (!$value instanceof token) {
+			throw new \TypeError('The value must be a node that implements \\hexydec\\html\\token');
+		} else {
+
+			// nodes set on a document belong to its root
+			if ($this->document !== null) {
+				$value->parent = $this->document;
+			}
+			$children = $this->toArray();
+			if ($i === null) {
+				$children[] = $value;
+			} else {
+				$children[$i] = $value;
+			}
+			$this->setNodes($children);
+		}
 	}
 
 	/**
-	 * Array access method allows you to check that a key exists in the configuration array
+	 * Array access method allows you to check that a node exists at the specified position
 	 *
-	 * @param mixed $i The key to be checked
-	 * @return bool Whether the key exists in the config array
+	 * @param mixed $i The position to be checked
+	 * @return bool Whether a node exists at the position
 	 */
 	public function offsetExists(mixed $i) : bool {
-		return isset($this->children[$i]);
+		$children = $this->toArray();
+		return isset($children[$i]);
 	}
 
 	/**
-	 * Removes a key from the configuration array
+	 * Array access method allows you to remove the node at the specified position
 	 *
-	 * @param mixed $i The key to be removed
+	 * @param mixed $i The position to be removed
 	 */
 	public function offsetUnset(mixed $i) : void {
-		unset($this->children[$i]);
+		$children = $this->toArray();
+		unset($children[$i]);
+		$this->setNodes($children);
 	}
 
 	/**
-	 * Retrieves a value from the configuration array with the specified key
+	 * Replaces the nodes of the collection, or of the root of a loaded document
+	 *
+	 * @param array $nodes An array of node objects
+	 * @return void
+	 */
+	protected function setNodes(array $nodes) : void {
+		if ($this->document === null) {
+			$this->children = $nodes;
+		} else {
+			$this->document->children = $nodes;
+		}
+	}
+
+	/**
+	 * Retrieves an htmldoc object containing the node at the specified position
 	 *
 	 * @param mixed $i The key to be accessed, can be a string or integer
 	 * @return mixed An HTMLdoc object containing the child node at the requested position or null if there is no child at the requested position
 	 */
 	public function offsetGet(mixed $i) : mixed { // return reference so you can set it like an array
-		if (isset($this->children[$i])) {
-			$obj = new htmldoc($this->config);
-			return $obj->collection([$this->children[$i]]);
+		$children = $this->toArray();
+		if (isset($children[$i])) {
+			return $this->collection([$children[$i]]);
 		}
 		return null;
 	}
@@ -135,9 +171,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return mixed An HTMLdoc object containing the child node at the current pointer position or null if there are no children
 	 */
 	public function current() : mixed {
-		if (isset($this->children[$this->pointer])) {
-			$obj = new htmldoc($this->config);
-			return $obj->collection([$this->children[$this->pointer]]);
+		$children = $this->toArray();
+		if (isset($children[$this->pointer])) {
+			return $this->collection([$children[$this->pointer]]);
 		}
 		return null;
 	}
@@ -161,7 +197,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	/**
-	 * Decrements the pointer position
+	 * Resets the pointer position to the start
 	 *
 	 * @return void
 	 */
@@ -175,7 +211,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return bool Whether there is a node at the current pointer position
 	 */
 	public function valid() : bool {
-		return isset($this->children[$this->pointer]);
+		$children = $this->toArray();
+		return isset($children[$this->pointer]);
 	}
 
 	/**
@@ -196,29 +233,62 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		} elseif (($handle = @\fopen($url, 'rb', false, $context)) === false) {
 			$error = 'Could not open file "'.$url.'"';
 
-		// retrieve the stream contents
-		} elseif (($html = \stream_get_contents($handle)) === false) {
-			$error = 'Could not read file "'.$url.'"';
-
-		// success
+		// retrieve the stream contents and headers, then close the stream
 		} else {
-
-			// find charset in headers
-			$charset = null;
+			$html = \stream_get_contents($handle);
 			$meta = \stream_get_meta_data($handle);
-			foreach ($meta['wrapper_data'] ?? [] AS $item) {
-				if (\mb_stripos($item, 'Content-Type:') === 0 && ($value = \mb_stristr($item, 'charset=')) !== false) {
-					$charset = \mb_substr($value, 8);
-					break;
-				}
-			}
+			\fclose($handle);
 
-			// load html
-			if ($this->load($html, $charset, $error)) {
-				return $html;
+			// check the contents were read
+			if ($html === false) {
+				$error = 'Could not read file "'.$url.'"';
+
+			// load the html using the charset of the final response, if it is valid
+			} else {
+				$charset = $this->getHeaderValue($meta['wrapper_data'] ?? [], 'Content-Type', 'charset');
+				if ($this->load($html, $charset !== null && $this->isEncodingValid($charset) ? $charset : null, $error)) {
+					return $html;
+				}
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Retrieves the value of a header from the last response in a list of headers, such as the wrapper data of an HTTP stream
+	 *
+	 * @param array $headers A list of header lines, where each response starts with its HTTP status line
+	 * @param string $name The name of the header to retrieve
+	 * @param ?string $parameter The name of a parameter to retrieve from the header value, such as charset, or null for the whole value
+	 * @return ?string The header or parameter value, or null if it is not present in the last response
+	 */
+	protected function getHeaderValue(array $headers, string $name, ?string $parameter = null) : ?string {
+
+		// find the header, resetting at each status line so only the last response is used
+		$value = null;
+		$len = \strlen($name) + 1;
+		foreach ($headers AS $item) {
+			if (\strncasecmp($item, 'HTTP/', 5) === 0) {
+				$value = null;
+			} elseif (\strncasecmp($item, $name.':', $len) === 0) {
+				$value = \trim(\substr($item, $len));
+			}
+		}
+
+		// extract the parameter from the header value, unquoting it
+		if ($parameter !== null && $value !== null) {
+			$found = null;
+			$len = \strlen($parameter) + 1;
+			foreach (\explode(';', $value) AS $item) {
+				$item = \trim($item);
+				if (\strncasecmp($item, $parameter.'=', $len) === 0) {
+					$found = \trim(\substr($item, $len), " \t\"");
+					break;
+				}
+			}
+			$value = $found;
+		}
+		return $value;
 	}
 
 	/**
@@ -236,19 +306,11 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 			$html = \mb_convert_encoding($html, \mb_internal_encoding(), $charset);
 		}
 
-		// reset the document
+		// parse the document, replacing any collection and the attribute counts of any previous document
 		$this->children = [];
-
-		// parse the document
-		if (($nodes = $this->parse($html)) === false) {
-			$error = 'Input is not valid';
-
-		// success
-		} else {
-			$this->children = $nodes;
-			return true;
-		}
-		return false;
+		$this->cache = [];
+		$this->document = $this->parseDocument($html);
+		return true;
 	}
 
 	/**
@@ -290,27 +352,83 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * Parses an array of tokens into an HTML document
 	 *
 	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
-	 * @return array|false An array of node objects or false on error
+	 * @return array|false An array of node objects, or false if there are no nodes, such as from an empty string
 	 */
 	protected function parse(string|htmldoc $html) : array|false {
 
-		// convert string to nodes
-		if (\is_string($html)) {
+		// convert a string to nodes, or extract the nodes from an htmldoc object
+		$nodes = \is_string($html) ? $this->parseDocument($html)->toArray() : $html->toArray();
+		return $nodes ?: false;
+	}
 
-			// tokenise the input HTML
-			$tokens = new tokenise(self::$tokens, $html);
-			// while (($token = $tokens->next()) !== null) {
-			// 	var_dump($token);
-			// }
-			// exit();
-			$tag = new tag($this);
-			return $tag->parseChildren($tokens);
+	/**
+	 * Parses an HTML string into a root tag object that holds the top level nodes
+	 *
+	 * @param string $html A string of HTML
+	 * @return tag A tag object with no tag name, whose children are the parsed nodes
+	 */
+	protected function parseDocument(string $html) : tag {
+		$tokens = new tokenise(self::$tokens, $html);
+		$tag = new tag($this);
+		$tag->children = $tag->parseChildren($tokens);
+		return $tag;
+	}
 
-		// extract nodes from HTMLdoc
-		} elseif (\get_class($html) === 'hexydec\\html\\htmldoc') {
-			return $html->toArray();
+	/**
+	 * Retrieves the value stored against a tag name in a lookup list, building the list on first use
+	 *
+	 * @param string $list The list to search: singleton, closeoptional, inline, inlineblock or custom
+	 * @param string $name The lowercase tag name to look up
+	 * @return mixed The stored value, or null if the name is not in the list
+	 */
+	public function lookup(string $list, string $name) : mixed {
+		if (!isset($this->lookup[$list])) {
+
+			// custom handlers store their config
+			if ($list === 'custom') {
+				$this->lookup[$list] = \array_change_key_case($this->config['custom']);
+
+			// element lists store true
+			} elseif (\array_is_list($items = $this->config['elements'][$list])) {
+				$this->lookup[$list] = \array_fill_keys(\array_map('\\strtolower', $items), true);
+
+			// element maps store their lowercase list of tag names
+			} else {
+				$this->lookup[$list] = [];
+				foreach ($items AS $key => $item) {
+					$this->lookup[$list][\strtolower($key)] = \array_map('\\strtolower', $item);
+				}
+			}
 		}
-		return false;
+		return $this->lookup[$list][$name] ?? null;
+	}
+
+	/**
+	 * Retrieves the parsed URL of the current page, parsing it from the request on first use
+	 *
+	 * @return ?array The scheme, host, path, query, request URI, folder, and folder segments of the page, or null if the URL is not available or a <base> tag changes how URLs resolve
+	 */
+	public function getCurrentUrl() : ?array {
+		if ($this->currentUrl === null) {
+			$this->currentUrl = [];
+			$uri = $_SERVER['REQUEST_URI'] ?? '';
+
+			// parse the request, as long as there is no base URL to resolve against instead
+			if (isset($_SERVER['HTTP_HOST']) && \str_starts_with($uri, '/') && !$this->find('base[href]')->length) {
+				$path = \substr($uri, 0, \strcspn($uri, '?#'));
+				$folder = \substr($path, 0, \strrpos($path, '/') + 1);
+				$this->currentUrl = [
+					'scheme' => 'http'.(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 's' : '').'://',
+					'host' => $_SERVER['HTTP_HOST'],
+					'path' => $path,
+					'query' => \str_contains($uri, '?') ? \substr(\strstr($uri, '?'), 1) : null,
+					'uri' => $uri,
+					'folder' => $folder,
+					'dirs' => $folder === '/' ? [] : \explode('/', \trim($folder, '/'))
+				];
+			}
+		}
+		return $this->currentUrl ?: null;
 	}
 
 	/**
@@ -347,8 +465,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// build children that are tags
 		$children = [];
-		foreach ($this->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag') {
+		foreach ($this->toArray() AS $item) {
+			if ($item instanceof tag) {
 				$children[] = $item;
 			}
 		}
@@ -378,26 +496,33 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return htmldoc A new htmldoc object containing the found tag items
 	 */
 	public function find(string $selector) : htmldoc {
+
+		// a document searches from its top level nodes, a collection searches inside its nodes
+		$nodes = $this->document === null ? $this->childTags() : $this->toArray();
+		return $this->search($selector, $nodes);
+	}
+
+	/**
+	 * Finds the tags matching a CSS selector within the specified nodes, including the nodes themselves
+	 *
+	 * @param string $selector A CSS selector specifying the tags to find
+	 * @param array $nodes The nodes to search from
+	 * @return htmldoc A new htmldoc object containing the found tag items
+	 */
+	protected function search(string $selector, array $nodes) : htmldoc {
 		$obj = new selector();
 
-		// parse selector and find tags
+		// parse selector and find tags in document order
 		$found = [];
-		if (($tokens = $obj->get($selector)) !== false) {
-			foreach ($this->children AS $item) {
-				if (\get_class($item) === 'hexydec\\html\\tag') {
-					foreach ($tokens AS $value) {
-						$found = \array_merge($found, $item->find($value));
-					}
+		if (($groups = $obj->get($selector)) !== false) {
+			foreach ($nodes AS $item) {
+				if ($item instanceof tag) {
+					$item->find($groups, $found);
 				}
 			}
 		}
 
-		// create new document and return
-		$doc = new htmldoc($this->config);
-		if ($found) {
-			$doc->collection($found);
-		}
-		return $doc;
+		return $this->collection($found);
 	}
 
 	/**
@@ -425,39 +550,49 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return htmldoc A new htmldoc object
 	 */
 	public function eq(int $index) : htmldoc {
-		$doc = new htmldoc($this->config);
-		if ($index < 0) {
-			$index = \count($this->children) + $index;
-		}
-		if (isset($this->children[$index])) {
-			$doc->collection([$this->children[$index]]);
-		}
-		return $doc;
+		$tag = $this->get($index);
+		return $this->collection($tag === null ? [] : [$tag]);
 	}
 
 	/**
-	 * Generate a new htmldoc object containing all the child tags of the parents
+	 * Generate a new htmldoc object containing the direct child tags of each tag in the collection
 	 *
 	 * @return htmldoc A new htmldoc object
 	 */
 	public function children() : htmldoc {
-		return $this->find('*>*');
+		return $this->collection($this->childTags());
 	}
 
 	/**
-	 * Generate a new htmldoc object containing all the child tags of the parents
+	 * Retrieves the child tags of each tag in the collection
+	 *
+	 * @return array An array of tag objects
+	 */
+	protected function childTags() : array {
+		$nodes = [];
+		foreach ($this->toArray() AS $item) {
+			if ($item instanceof tag) {
+				$nodes = \array_merge($nodes, $item->children());
+			}
+		}
+		return $nodes;
+	}
+
+	/**
+	 * Generate a new htmldoc object containing the parent tag of each tag in the collection
 	 *
 	 * @return htmldoc A new htmldoc object
 	 */
 	public function parent() : htmldoc {
-		$doc = new htmldoc($this->config);
 		$nodes = [];
-		foreach ($this->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag' && ($parent = $this->children[0]->parent) !== null) {
+
+		// collect the parent tag of each tag, the document root is not a tag so is skipped
+		foreach ($this->toArray() AS $item) {
+			if ($item instanceof tag && ($parent = $item->parent) !== null && $parent->tagName !== null) {
 				$nodes[] = $parent;
 			}
 		}
-		return $doc->collection($nodes);
+		return $this->collection($nodes);
 	}
 
 	/**
@@ -466,8 +601,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return ?string The name of the tag, or null if there are no tags in the collection
 	 */
 	public function tag() : ?string {
-		foreach ($this->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag') {
+		foreach ($this->toArray() AS $item) {
+			if ($item instanceof tag) {
 				return $item->tagName;
 			}
 		}
@@ -482,8 +617,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return ?string The value of the attribute or null if the attribute doesn't exist
 	 */
 	public function attr(string $key, ?string $value = null) : ?string {
-		foreach ($this->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag') {
+		foreach ($this->toArray() AS $item) {
+			if ($item instanceof tag) {
 				if ($value === null) {
 					return $item->attr($key);
 				} else {
@@ -501,10 +636,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function text() : string {
 		$text = [];
-		foreach ($this->children AS $item) {
+		foreach ($this->toArray() AS $item) {
 
 			// only get text from these objects
-			if (\in_array(\get_class($item), ['hexydec\\html\\tag', 'hexydec\\html\\text'], true)) {
+			if ($item instanceof tag || $item instanceof text || $item instanceof cdata) {
 				$text[] = $item->text();
 			}
 		}
@@ -512,22 +647,22 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	/**
-	 * Adds the specified nodes to the htmldoc object
+	 * Creates a new htmldoc collection containing the specified nodes, with the same config and minified output settings as this object
 	 *
 	 * @param array $nodes An array of nodes to add to the collection
-	 * @return htmldoc The current instance of this object
+	 * @return htmldoc A new htmldoc object containing the nodes
 	 */
 	protected function collection(array $nodes) : htmldoc {
+		$doc = new htmldoc($this->config);
+		$doc->minified = $this->minified;
 
-		// only store unique nodes as some find operations can produce the same node multiple times
+		// only store unique nodes in their first position, keyed by object so this stays linear
 		$unique = [];
 		foreach ($nodes AS $item) {
-			if (!\in_array($item, $unique, true)) {
-				$unique[] = $item;
-			}
+			$unique[\spl_object_id($item)] = $item;
 		}
-		$this->children = $unique;
-		return $this;
+		$doc->children = \array_values($unique);
+		return $doc;
 	}
 
 	/**
@@ -538,13 +673,12 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function minify(array $minify = []) : void {
 
-		// merge config
+		// merge config, and parse the page URL afresh as the request may have changed
 		$minify = $this->getMinifyOptions($minify);
+		$this->currentUrl = null;
 
-		// set minify output parameters
-		if ($minify['quotes']) {
-			$this->config['output']['quotestyle'] = 'minimal';
-		}
+		// set the output options implied by this minification, replacing those of any previous one
+		$this->minified = $minify['quotes'] ? ['quotestyle' => 'minimal'] : [];
 
 		// sort classes by occurence, then by string
 		if (!empty($minify['attributes']['sort']) && !empty($this->cache['attr'])) {
@@ -552,7 +686,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		}
 
 		// minify children
-		foreach ($this->children AS $item) {
+		foreach ($this->toArray() AS $item) {
 			$item->minify($minify);
 		}
 	}
@@ -616,7 +750,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return string The compiled HTML
 	 */
 	public function html(array $options = []) : string {
-		$options = $options ? \array_merge($this->config['output'], $options) : $this->config['output'];
+		$options = \array_merge($this->config['output'], $this->minified, $options);
 
 		// presets
 		if (!empty($options['xml'])) {
@@ -627,7 +761,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 
 		// output HTML
 		$html = '';
-		foreach ($this->children AS $item) {
+		foreach ($this->toArray() AS $item) {
 			$html .= $item->html($options);
 		}
 		return $html;
@@ -641,8 +775,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function append(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
-			foreach ($this->children AS $item) {
-				if (\get_class($item) === 'hexydec\\html\\tag') {
+			foreach ($this->toArray() AS $item) {
+				if ($item instanceof tag) {
 					$item->append($nodes);
 				}
 			}
@@ -658,8 +792,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function prepend(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
-			foreach ($this->children AS $item) {
-				if (\get_class($item) === 'hexydec\\html\\tag') {
+			foreach ($this->toArray() AS $item) {
+				if ($item instanceof tag) {
 					$item->prepend($nodes);
 				}
 			}
@@ -675,8 +809,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function before(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
-			foreach ($this->children AS $item) {
-				if (\get_class($item) === 'hexydec\\html\\tag') {
+			foreach ($this->toArray() AS $item) {
+				if ($item instanceof tag) {
 					$item->before($nodes);
 				}
 			}
@@ -692,8 +826,8 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 */
 	public function after(string|htmldoc $html) : htmldoc {
 		if (($nodes = $this->parse($html)) !== false) {
-			foreach ($this->children AS $item) {
-				if (\get_class($item) === 'hexydec\\html\\tag') {
+			foreach ($this->toArray() AS $item) {
+				if ($item instanceof tag) {
 					$item->after($nodes);
 				}
 			}
@@ -708,9 +842,9 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return htmldoc The current htmldoc object with the requested nodes deleted
 	 */
 	public function remove(?string $selector = null) : htmldoc {
-		$obj = $selector ? $this->find($selector) : $this;
-		foreach ($obj->children AS $item) {
-			if (\get_class($item) === 'hexydec\\html\\tag') {
+		$obj = $selector ? $this->search($selector, $this->toArray()) : $this;
+		foreach ($obj->toArray() AS $item) {
+			if ($item instanceof tag) {
 				$item->parent()->remove($item);
 			}
 		}
@@ -729,9 +863,10 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 		// compile html
 		$html = $this->html($options);
 
-		// if not UTF-8, convert all applicable HTML entities
-		if (!empty($options['charset']) && $options['charset'] !== \mb_internal_encoding()) {
-			$html = $this->convertCharset($html, $options['charset']);
+		// convert to the output charset if it differs from the internal encoding
+		$charset = $options['charset'] ?? $this->config['output']['charset'];
+		if (!empty($charset) && \strcasecmp($charset, \mb_internal_encoding()) !== 0) {
+			$html = $this->convertCharset($html, $charset);
 		}
 
 		// save file
@@ -750,24 +885,15 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	 * @return string The input HTML with the out of range characters in the selected charset converted to HTML entities
 	 */
 	protected function convertCharset(string $html, string $charset) : string {
-		$encoding = \mb_internal_encoding();
 
-		// check whole string first
-		if (\mb_strlen(\iconv($encoding, $charset.'//IGNORE', $html)) !== \mb_strlen($html)) {
-
-			// check for out of range characters
-			$map = [];
-			$replace = [];
-			foreach (\mb_str_split($html) AS $chr) {
-				if (!\in_array($chr, $map)) {
-					$map[] = $chr;
-					if (\iconv($encoding, $charset.'//IGNORE', $chr) === '') {
-						$replace[$chr] = '&#'.\mb_ord($chr).';';
-					}
-				}
-			}
-			$html = \str_replace(\array_keys($replace), \array_values($replace), $html);
+		// convert, writing characters the charset cannot represent as numeric entities, then restore the global substitute setting
+		$substitute = \mb_substitute_character();
+		\mb_substitute_character('entity');
+		try {
+			$html = \mb_convert_encoding($html, $charset, \mb_internal_encoding());
+		} finally {
+			\mb_substitute_character($substitute);
 		}
-		return \mb_convert_encoding($html, $charset);
+		return $html;
 	}
 }

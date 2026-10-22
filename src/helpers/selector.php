@@ -18,8 +18,8 @@ class selector {
 		'bracketclose' => '\\)',
 		'comma' => ',',
 		'pseudo' => ':[A-Za-z-]++',
-		'id' => '#[^ +>\.#{\\[,]++',
-		'class' => '\.[^ +>\.#{\\[\\(\\),]++',
+		'id' => '#(?:[a-zA-Z0-9_-]|[^\\x00-\\x7F]|\\\\.)++', // identifier characters, non-ASCII, or an escaped character
+		'class' => '\\.(?:[a-zA-Z0-9_-]|[^\\x00-\\x7F]|\\\\.)++',
 		'string' => '\\*|[^\\[\\]{}\\(\\):;,>+=~|\\^$!" #\\.*]++',
 		'whitespace' => '\s++',
 	];
@@ -30,7 +30,7 @@ class selector {
 	 * @param string $selector The CSS selector string to parse
 	 * @return array|false An array of selector components or false if the selector was not parsable
 	 */
-	public function get(string $selector) {
+	public function get(string $selector) : array|false {
 		$tokens = new tokenise(self::$tokens, \trim($selector));
 		return $this->parse($tokens);
 	}
@@ -39,25 +39,18 @@ class selector {
 	 * Parses a CSS selector string
 	 *
 	 * @param tokenise $tokens A tokenise object loaded with the selector to parse
-	 * @return array|bool An array of selector components
+	 * @return array|false An array of selector components or false if there were no tokens
 	 */
-	public function parse(tokenise $tokens) {
+	public function parse(tokenise $tokens) : array|false {
 		if (($token = $tokens->next()) !== null) {
 			$selectors = $parts = [];
 			$join = null;
 			do {
 				switch ($token['type']) {
 					case 'id':
-						$parts[] = [
-							'id' => \mb_substr($token['value'], 1),
-							'join' => $join
-						];
-						$join = null;
-						break;
-
 					case 'class':
 						$parts[] = [
-							'class' => \mb_substr($token['value'], 1),
+							$token['type'] => \stripslashes(\str_replace('\\0', '0', \substr($token['value'], 1))),
 							'join' => $join
 						];
 						$join = null;
@@ -65,7 +58,7 @@ class selector {
 
 					case 'string':
 						$parts[] = [
-							'tag' => $token['value'],
+							'tag' => \strtolower($token['value']),
 							'join' => $join
 						];
 						$join = null;
@@ -115,9 +108,35 @@ class selector {
 			if ($parts) {
 				$selectors[] = $parts;
 			}
-			return $selectors;
+			return $this->compile($selectors);
 		}
 		return false;
+	}
+
+	/**
+	 * Groups the components of each selector into compounds, each with the combinator that precedes it
+	 *
+	 * @param array $selectors An array of selectors, each an array of components with the combinator that precedes them
+	 * @return array An array of selectors, each an array of compounds containing the combinator and the components that must all match the same tag
+	 */
+	protected function compile(array $selectors) : array {
+		$groups = [];
+		foreach ($selectors AS $parts) {
+			$compounds = [];
+			foreach ($parts AS $item) {
+
+				// start a new compound with the first component and at each combinator
+				if (!$compounds || $item['join'] !== null) {
+					$compounds[] = ['join' => $item['join'], 'selectors' => []];
+				}
+				unset($item['join']);
+				$compounds[\count($compounds) - 1]['selectors'][] = $item;
+			}
+			if ($compounds) {
+				$groups[] = $compounds;
+			}
+		}
+		return $groups;
 	}
 
 	/**
