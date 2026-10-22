@@ -157,6 +157,8 @@ final class findHtmldocTest extends \PHPUnit\Framework\TestCase {
 			'[disabled=""]' => '<input id="d" disabled="">',
 			'[data-x^=""]' => '',
 			'[data-x*=""]' => '',
+			'[data-x>="0"]' => '',
+			'p[]' => '<p id="a" data-x="0"></p><p id="b" data-x=""></p>',
 			'#0' => '<li class="md:flex'."\n".'0" id="0">3</li>',
 			'.0' => '<li class="md:flex'."\n".'0" id="0">3</li>'
 		];

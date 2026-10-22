@@ -50,6 +50,12 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			}
 		}
 
+		// positions past the end return null
+		$doc->load('<p>Paragraph</p>');
+		$this->assertNull($doc[1]);
+		$doc->next();
+		$this->assertNull($doc->current());
+
 		// the attribute counts used to sort attributes are reset for each document
 		$cache = new \ReflectionProperty(htmldoc::class, 'cache');
 		$doc->load('<p class="a" id="b"></p>');
@@ -106,6 +112,7 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			'<section><div><h1>Wrong closing tag order</div></h1></section>' => '<section><div><h1>Wrong closing tag order</h1></div></section>',
 			'<section><div><h1>Wrong closing tag order</div></h1></section><p>after</p>' => '<section><div><h1>Wrong closing tag order</h1></div></section><p>after</p>',
 			'<p class=test data-test=tester>Unquoted attributes</p>' => '<p class="test" data-test="tester">Unquoted attributes</p>',
+			'<div>Stray</span> closing tag</div>' => '<div>Stray closing tag</div>',
 			// '<script>let test = "</script><div>Test</div>";</script>' => '<script>let test = "</script><div>Test</div>";</script>',
 			'<li>Something with a &nbsp; or one at the end like this &nbsp;</li>' => '<li>Something with a '.mb_convert_encoding('&nbsp;', 'UTF-8', 'HTML-ENTITIES').' or one at the end like this '.mb_convert_encoding('&nbsp;', 'UTF-8', 'HTML-ENTITIES').'</li>',
 			'<a
@@ -280,6 +287,14 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 				'minify' => [],
 				'html' => '<svg><script><![CDATA[if(a<b){}]]></script><style>a{color:red}</style></svg>',
 				'xml' => '<svg><script><![CDATA[if(a<b){}]]></script><style>a{color:red}</style></svg>'
+			],
+
+			// CDATA sections outside custom content are output as they are
+			[
+				'input' => '<svg><text><![CDATA[x<y]]></text></svg>',
+				'minify' => [],
+				'html' => '<svg><text><![CDATA[x<y]]></text></svg>',
+				'xml' => '<svg><text><![CDATA[x<y]]></text></svg>'
 			],
 
 			// the source wrappers are kept when the option is off

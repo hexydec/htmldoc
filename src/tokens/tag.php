@@ -782,7 +782,7 @@ class tag implements token {
 		} elseif (isset($item['pseudo'])) {
 			$match = $this->matchesPseudo($item);
 
-		// a selector with nothing to compare matches anything
+		// a selector with nothing to compare, such as [], matches anything
 		} else {
 			$match = true;
 		}

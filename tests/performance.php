@@ -3,7 +3,7 @@
 $file = \dirname(__DIR__).'/vendor/autoload.php';
 require (\file_exists($file) ? $file : \dirname(__DIR__).'/src/autoload.php');
 
-function fetch($url) {
+function fetch(string $url) : string|false {
 	$cache = __DIR__.'/cache/'.\preg_replace('/[^0-9a-z]++/i', '-', $url).'.cache';
 	if (file_exists($cache)) {
 		$url = $cache;
