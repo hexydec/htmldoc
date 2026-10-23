@@ -16,6 +16,8 @@ This document describes how to configure and use the HTMLdoc object.
 | [`append()`](append.md)			| Append HTML to the selected nodes	 		|
 | [`prepend()`](prepend.md)			| Prepend HTML to the selected nodes 		|
 | [`remove()`](remove.md)			| Remove nodes from a document		 		|
+| [`wrap()`](wrap.md)				| Wrap the selected nodes in a tag			|
+| [`unwrap()`](unwrap.md)			| Remove the parents of the selected nodes	|
 | [`minify()`](minify.md)			| Minify the HTMLdoc						|
 | [`html()`](html.md)				| Render the document as HTML		 		|
 | [`save()`](save.md)				| Save as a file or output as a string 		|

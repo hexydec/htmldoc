@@ -852,6 +852,62 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	}
 
 	/**
+	 * Wraps each tag in the collection in a copy of the first tag in the specified HTML, placing the tag inside the wrapper's innermost first tag
+	 *
+	 * @param string|htmldoc $html A string of HTML, or an htmldoc object
+	 * @return htmldoc The current htmldoc object
+	 */
+	public function wrap(string|htmldoc $html) : htmldoc {
+		if (($nodes = $this->parse($html)) !== false) {
+
+			// the wrapper is the first tag, as text or comments around it have nowhere to go
+			$wrapper = null;
+			foreach ($nodes AS $item) {
+				if ($wrapper === null && $item instanceof tag) {
+					$wrapper = $item;
+				}
+			}
+
+			// wrap each tag
+			if ($wrapper !== null) {
+				foreach ($this->toArray() AS $item) {
+					if ($item instanceof tag) {
+						$item->wrap($wrapper);
+					}
+				}
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * Removes the parent of each tag in the collection, leaving the parent's children in its place
+	 *
+	 * @param ?string $selector A CSS selector the parent must match to be removed, or null to remove any parent
+	 * @return htmldoc The current htmldoc object
+	 */
+	public function unwrap(?string $selector = null) : htmldoc {
+		$groups = $selector === null ? [] : (new selector())->get($selector);
+
+		// collect each parent once before any are removed, as unwrapping changes the parents of the remaining tags
+		$parents = $groups === false ? [] : $this->parent()->toArray();
+
+		// replace each parent that matches the selector with its children
+		foreach ($parents AS $parent) {
+			$match = $selector === null;
+			foreach ($groups AS $compounds) {
+				if (!$match && $parent->matches($compounds)) {
+					$match = true;
+				}
+			}
+			if ($match) {
+				$parent->unwrap();
+			}
+		}
+		return $this;
+	}
+
+	/**
 	 * Compile the document as an HTML string and save it to the specified location
 	 *
 	 * @param string|null $file The file location to save the document to, or null to just return the compiled code
