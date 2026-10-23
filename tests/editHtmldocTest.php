@@ -270,4 +270,116 @@ final class editHtmldocTest extends \PHPUnit\Framework\TestCase {
 		$doc->find('div')->remove('.a');
 		$this->assertEquals('<div class="b"></div><div class="c"></div>', $doc->html());
 	}
+
+	public function testCanWrapNodes() : void {
+		$tests = [
+			[ // each tag gets its own copy of the wrapper
+				'input' => '<ul><li>1</li><li>2</li></ul>',
+				'find' => 'li',
+				'wrap' => '<b class="a"></b>',
+				'output' => '<ul><b class="a"><li>1</li></b><b class="a"><li>2</li></b></ul>'
+			],
+			[ // the tag goes inside the innermost first tag, after its contents
+				'input' => '<p>a</p>',
+				'find' => 'p',
+				'wrap' => '<div><section><span>b</span></section><i></i></div>',
+				'output' => '<div><section><span>b<p>a</p></span></section><i></i></div>'
+			],
+			[ // only the first tag is used as the wrapper
+				'input' => '<p>a</p>',
+				'find' => 'p',
+				'wrap' => 'text <div></div><section></section>',
+				'output' => '<div><p>a</p></div>'
+			],
+			[ // there is nothing to wrap with
+				'input' => '<p>a</p>',
+				'find' => 'p',
+				'wrap' => 'text',
+				'output' => '<p>a</p>'
+			],
+			[
+				'input' => '<p>a</p>',
+				'find' => 'p',
+				'wrap' => '',
+				'output' => '<p>a</p>'
+			]
+		];
+		$doc = new htmldoc();
+		foreach ($tests AS $item) {
+			$doc->load($item['input']);
+			$doc->find($item['find'])->wrap($item['wrap']);
+			$this->assertEquals($item['output'], $doc->html());
+		}
+
+		// a document can be the wrapper, which is copied, and the wrapped tags can still be edited
+		$wrapper = new htmldoc();
+		$wrapper->load('<div></div>');
+		$doc->load('<p>a</p>');
+		$doc->find('p')->wrap($wrapper)->attr('class', 'b');
+		$this->assertEquals('<div><p class="b">a</p></div>', $doc->html());
+		$this->assertEquals('<div></div>', $wrapper->html());
+
+		// unwrapping reverses it
+		$doc->find('p')->unwrap();
+		$this->assertEquals('<p class="b">a</p>', $doc->html());
+	}
+
+	public function testCanUnwrapNodes() : void {
+		$tests = [
+			[ // the parent's other children are kept too
+				'input' => '<p><span>a</span> b <i>c</i></p>',
+				'find' => 'span',
+				'selector' => null,
+				'output' => '<span>a</span> b <i>c</i>'
+			],
+			[ // siblings share a parent, which is only removed once
+				'input' => '<div><p><b>a</b><b>b</b></p></div>',
+				'find' => 'b',
+				'selector' => null,
+				'output' => '<div><b>a</b><b>b</b></div>'
+			],
+			[ // nested parents are each removed
+				'input' => '<div><p><span>a</span></p></div>',
+				'find' => 'p, span',
+				'selector' => null,
+				'output' => '<span>a</span>'
+			],
+			[ // the parent must match the selector
+				'input' => '<section><p><b>a</b></p></section><div><b>b</b></div>',
+				'find' => 'b',
+				'selector' => 'div',
+				'output' => '<section><p><b>a</b></p></section><b>b</b>'
+			],
+			[
+				'input' => '<section><p><b>a</b></p></section><div><b>b</b></div>',
+				'find' => 'b',
+				'selector' => 'p, div',
+				'output' => '<section><b>a</b></section><b>b</b>'
+			],
+			[
+				'input' => '<p><b>a</b></p>',
+				'find' => 'b',
+				'selector' => '#none',
+				'output' => '<p><b>a</b></p>'
+			],
+			[ // top level tags have no parent tag to remove
+				'input' => '<p>a</p>',
+				'find' => 'p',
+				'selector' => null,
+				'output' => '<p>a</p>'
+			]
+		];
+		$doc = new htmldoc();
+		foreach ($tests AS $item) {
+			$doc->load($item['input']);
+			$doc->find($item['find'])->unwrap($item['selector']);
+			$this->assertEquals($item['output'], $doc->html());
+		}
+
+		// the unwrapped tags are moved rather than copied, so can still be edited
+		$doc->load('<div><span>a</span></div>');
+		$doc->find('span')->unwrap()->attr('class', 'b');
+		$this->assertEquals('<span class="b">a</span>', $doc->html());
+		$this->assertEquals(0, $doc->find('span')->parent()->length);
+	}
 }

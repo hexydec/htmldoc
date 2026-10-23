@@ -413,6 +413,46 @@ class tag implements token {
 	}
 
 	/**
+	 * Replaces this tag with its children, moving them into the parent so they keep their identity
+	 *
+	 * @return void
+	 */
+	public function unwrap() : void {
+		if (($parent = $this->parent) !== null && ($index = $this->getIndex()) !== null) {
+			foreach ($this->children AS $item) {
+				$item->parent = $parent;
+			}
+			\array_splice($parent->children, $index, 1, $this->children);
+			$this->children = [];
+			$this->parent = null;
+		}
+	}
+
+	/**
+	 * Wraps this tag in a copy of the specified tag, placing it inside the wrapper's innermost first tag
+	 *
+	 * @param tag $wrapper The tag to wrap this tag in, which is copied so the same wrapper can be used for multiple tags
+	 * @return void
+	 */
+	public function wrap(tag $wrapper) : void {
+		if (($parent = $this->parent) !== null && ($index = $this->getIndex()) !== null) {
+
+			// put a copy of the wrapper in this tag's place
+			$wrapper = clone $wrapper;
+			$wrapper->parent = $parent;
+			$parent->children[$index] = $wrapper;
+
+			// move this tag into the innermost first tag of the wrapper
+			$inner = $wrapper;
+			while (($child = $inner->children()[0] ?? null) !== null) {
+				$inner = $child;
+			}
+			$inner->children[] = $this;
+			$this->parent = $inner;
+		}
+	}
+
+	/**
 	 * Minifies the internal representation of the tag
 	 *
 	 * @param array $minify An array of minification options controlling which operations are performed
