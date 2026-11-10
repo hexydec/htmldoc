@@ -15,7 +15,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	protected static array $tokens = [
 		'textnode' => '(?<=>|^)(?:[^<]++|<(?![a-zA-Z\\/!?]))++', // a < that cannot start markup is text
 		'attributevalue' => '\\s*+=\\s*+(?:"[^"]*+"++|\'[^\']*+\'++|[^\\s>]*+)',
-		'attribute' => '\\s*+[^<>"\'\\/=\\s]++',
+		'attribute' => '\\s*+[^<>"\'\\/=\\s][^<>\\/=\\s]*+', // quotes after the first character are part of the name
 		'tagopenend' => '\\s*+>',
 		'tagselfclose' => '\\s*+\\/>',
 		'tagopenstart' => '<[a-zA-Z][a-zA-Z0-9_:.-]*+',
