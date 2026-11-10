@@ -153,7 +153,9 @@ final class htmldocTest extends \PHPUnit\Framework\TestCase {
 			'<i data-x==abc>Leading equals</i>' => '<i data-x="=abc">Leading equals</i>',
 			'<img src=data:image/png;base64,QUJD=>' => '<img src="data:image/png;base64,QUJD=">',
 			'<p class = "test" title =  \'spaced\'>Spaced separator</p>' => '<p class="test" title="spaced">Spaced separator</p>',
-			'<p class="first" class="second" title title="second">Duplicate attributes</p>' => '<p class="first" title>Duplicate attributes</p>'
+			'<p class="first" class="second" title title="second">Duplicate attributes</p>' => '<p class="first" title>Duplicate attributes</p>',
+			'<a onclick="go(1) class="nav">Odd</a><p class="after">After</p>' => '<a onclick="go(1) class=" nav">Odd</a><p class="after">After</p>',
+			'<a onclick="go(1) class="nav">One</a><a onclick="go(2) class="nav">Two</a><p class="after">After</p>' => '<a onclick="go(1) class=" nav">One</a><a onclick="go(2) class=" nav">Two</a><p class="after">After</p>'
 		);
 		$doc = new htmldoc();
 		foreach ($tests AS $input => $output) {
