@@ -6,6 +6,7 @@ use \hexydec\tokens\tokenise;
 /**
  * @property array $config
  * @property-read int $length
+ * @implements \Iterator<int, htmldoc>
  */
 class htmldoc extends config implements \ArrayAccess, \Iterator {
 
@@ -168,7 +169,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieve the document node in the current position
 	 *
-	 * @return mixed An HTMLdoc object containing the child node at the current pointer position or null if there are no children
+	 * @return ?htmldoc An HTMLdoc object containing the child node at the current pointer position or null if there are no children
 	 */
 	public function current() : mixed {
 		$children = $this->toArray();
@@ -181,7 +182,7 @@ class htmldoc extends config implements \ArrayAccess, \Iterator {
 	/**
 	 * Retrieve the the current pointer position for the object
 	 *
-	 * @return mixed The current pointer position
+	 * @return int The current pointer position
 	 */
 	public function key() : mixed {
 		return $this->pointer;
